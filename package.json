@@ -30,5 +30,8 @@
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.6.3"
-  }
+  },
+  "files": [
+    "build/**/*"
+  ]
 }
