@@ -18,9 +18,10 @@ interface IconProps {
   name: string;
   size?: number;
   color?: string;
+  style?: any;
 }
-export default ({ source, name, size, color }: IconProps) => {
+export default ({ source, name, size, color, style }: IconProps) => {
   const Icon: any = (IconSource as any)[source];
 
-  return <Icon name={name} size={size} color={color} />;
+  return <Icon name={name} size={size} color={color} style={style} />;
 };

@@ -4,6 +4,7 @@ interface IconProps {
     name: string;
     size?: number;
     color?: string;
+    style?: any;
 }
-declare const _default: ({ source, name, size, color }: IconProps) => JSX.Element;
+declare const _default: ({ source, name, size, color, style }: IconProps) => JSX.Element;
 export default _default;

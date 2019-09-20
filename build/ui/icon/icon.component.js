@@ -12,7 +12,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const react_1 = __importDefault(require("react"));
 const IconSource = __importStar(require("@expo/vector-icons"));
-exports.default = ({ source, name, size, color }) => {
+exports.default = ({ source, name, size, color, style }) => {
     const Icon = IconSource[source];
-    return react_1.default.createElement(Icon, { name: name, size: size, color: color });
+    return react_1.default.createElement(Icon, { name: name, size: size, color: color, style: style });
 };
