@@ -1,5 +1,5 @@
 {
-  "name": "cactiva-utils",
+  "name": "cactiva-libs",
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cactiva/cactiva-utils.git"
+    "url": "git+https://github.com/cactiva/cactiva-libs.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/cactiva/cactiva-utils/issues"
+    "url": "https://github.com/cactiva/cactiva-libs/issues"
   },
-  "homepage": "https://github.com/cactiva/cactiva-utils#readme",
+  "homepage": "https://github.com/cactiva/cactiva-libs#readme",
   "dependencies": {
     "@expo/vector-icons": "^10.0.5"
   },
