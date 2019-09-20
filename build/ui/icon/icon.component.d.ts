@@ -1,6 +1,6 @@
 /// <reference types="react" />
 interface IconProps {
-    source: any;
+    source: 'AntDesign' | 'Entypo' | 'EvilIcons' | 'Feather' | 'FontAwesome' | 'Foundation' | 'Ionicons' | 'MaterialCommunityIcons' | 'MaterialIcons' | 'Octicons' | 'SimpleLineIcons' | 'Zocial';
     name: string;
     size?: number;
     color?: string;
