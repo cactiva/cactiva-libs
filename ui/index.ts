@@ -1,1 +1,2 @@
-export { default as Icon } from './icon/icon.component';
+export { default as Icon } from './icon';
+export { default as Select } from './select';
