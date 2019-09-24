@@ -74,7 +74,7 @@ export default observer((props: SelectProps) => {
                   onSearch(text);
                 }}
                 style={{
-                  minHeight: 42,
+                  minHeight: 38,
                   padding: 5
                 }}
                 value={state.search}
