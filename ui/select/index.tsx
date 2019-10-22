@@ -1,13 +1,13 @@
-import { observer, useObservable } from 'mobx-react-lite';
-import React from 'react';
-import { TextInput } from 'react-native';
+import { observer, useObservable } from "mobx-react-lite";
+import React from "react";
+import { TextInput } from "react-native";
 import {
   Button,
   Select,
   SelectProps as BaseSelectProps
-} from 'react-native-ui-kitten';
+} from "react-native-ui-kitten";
 
-interface SelectProps extends BaseSelectProps {
+export interface SelectProps extends BaseSelectProps {
   searchable?: boolean;
   onSerch?: (text) => void;
 }
@@ -16,7 +16,7 @@ export default observer((props: SelectProps) => {
   const state = useObservable({
     ref: null,
     items: props.data,
-    search: '',
+    search: "",
     value: props.selectedOption as any
   });
   const onSearch = text => {
@@ -29,7 +29,7 @@ export default observer((props: SelectProps) => {
       });
       if (filter.length === 0) {
         filter.push({
-          text: 'No item to display.',
+          text: "No item to display.",
           disabled: true
         });
       }
@@ -45,10 +45,10 @@ export default observer((props: SelectProps) => {
   };
 
   if (props.searchable === undefined || !!props.searchable) {
-    if (state.items.findIndex(x => x.text === 'search') < 0) {
+    if (state.items.findIndex(x => x.text === "search") < 0) {
       state.items = [
         {
-          text: 'search',
+          text: "search",
           disabled: true
         },
         ...state.items
@@ -67,7 +67,7 @@ export default observer((props: SelectProps) => {
       renderItem={item => {
         return (
           <>
-            {item.item.text === 'search' ? (
+            {item.item.text === "search" ? (
               <TextInput
                 autoFocus
                 onChangeText={text => {
@@ -85,18 +85,18 @@ export default observer((props: SelectProps) => {
               <Button
                 status={
                   state.value && item.item.text === state.value.text
-                    ? 'primary'
-                    : 'white'
+                    ? "primary"
+                    : "white"
                 }
                 style={{
                   borderRadius: 0,
-                  justifyContent: 'flex-start'
+                  justifyContent: "flex-start"
                 }}
                 textStyle={{
                   color:
                     state.value && item.item.text === state.value.text
-                      ? 'white'
-                      : '#2a344f'
+                      ? "white"
+                      : "#2a344f"
                 }}
                 onPress={() => {
                   onChange(item);

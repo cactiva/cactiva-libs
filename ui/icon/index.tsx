@@ -1,20 +1,20 @@
-import React from 'react';
-import * as IconSource from '@expo/vector-icons';
+import React from "react";
+import * as IconSource from "@expo/vector-icons";
 
-interface IconProps {
+export interface IconProps {
   source:
-    | 'AntDesign'
-    | 'Entypo'
-    | 'EvilIcons'
-    | 'Feather'
-    | 'FontAwesome'
-    | 'Foundation'
-    | 'Ionicons'
-    | 'MaterialCommunityIcons'
-    | 'MaterialIcons'
-    | 'Octicons'
-    | 'SimpleLineIcons'
-    | 'Zocial';
+    | "AntDesign"
+    | "Entypo"
+    | "EvilIcons"
+    | "Feather"
+    | "FontAwesome"
+    | "Foundation"
+    | "Ionicons"
+    | "MaterialCommunityIcons"
+    | "MaterialIcons"
+    | "Octicons"
+    | "SimpleLineIcons"
+    | "Zocial";
   name: string;
   size?: number;
   color?: string;
