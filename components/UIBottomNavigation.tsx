@@ -1,10 +1,11 @@
-import { Icon, scale, uuid } from "@src/libs";
+import { Icon } from "../ui";
+import { scale, uuid } from "../utils";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { useNavigation } from "react-navigation-hooks";
-import { IconProps } from "@src/libs/ui/icon";
+import { IconProps } from "../ui/icon";
 
 export interface UIBottomNavProps {
   menus: {

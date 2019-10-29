@@ -1,26 +1,16 @@
-import { uuid } from "@src/libs";
+import { uuid } from "../utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { View } from "react-native";
-import { UIFieldProps } from "./UIField";
-import UITextInput, { UITextInputProps } from "./UITextInput";
-
-interface UIFields {
-  [key: string]: UIFieldProps | UITextInputProps | any;
-}
+import UIField from "./UIField";
+import { UITextInputProps } from "./UITextInput";
 
 export interface UIJsonFieldsProps {
   items: any;
-  fields: UIFields[];
+  fields: UITextInputProps | any[];
   setValue?: (value: any, key: any) => void;
   style?: object;
-  theme?: {
-    primary: string;
-    secondary: string;
-    light: string;
-    dark: string;
-    accent: string;
-  };
+  theme?: any;
 }
 
 export default observer((props: UIJsonFieldsProps) => {
@@ -30,7 +20,7 @@ export default observer((props: UIJsonFieldsProps) => {
     <View style={style}>
       {fields.map((field: any) => {
         return (
-          <GenerateField
+          <UIField
             key={uuid()}
             setValue={setValue}
             field={field}
@@ -41,32 +31,4 @@ export default observer((props: UIJsonFieldsProps) => {
       })}
     </View>
   );
-});
-
-const GenerateField = observer((props: any) => {
-  const { field, items, setValue, theme } = props;
-  const onChange = value => {
-    switch (field.field.type) {
-      case "number":
-        value = !!value ? parseInt(value) : value;
-        break;
-    }
-    setValue(value, field.key);
-  };
-
-  let Component;
-  switch (field.type) {
-    default:
-      Component = (
-        <UITextInput
-          value={items[field.key]}
-          onChange={onChange}
-          label={field.label}
-          theme={theme}
-          {...field.field}
-        />
-      );
-      break;
-  }
-  return Component;
 });

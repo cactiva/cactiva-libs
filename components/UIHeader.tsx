@@ -1,28 +1,24 @@
-import { Icon, scale } from "@src/libs";
+import { Icon } from "../ui";
+import { scale } from "../utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
+import { Theme, UIThemeProps } from "../themes";
 
 export interface UIHeaderProps {
   leftAction?: "Default" | object;
   title: string | object;
   rightAction?: object;
-  theme?: {
-    primary: string;
-    secondary: string;
-    light: string;
-    dark: string;
-    accent: string;
-    background: string;
-  };
+  theme?: UIThemeProps;
   styles?: {
     root?: any;
   };
 }
 
 export default observer((props: UIHeaderProps) => {
-  const { leftAction, title, rightAction, theme, styles } = props;
+  const { leftAction, title, rightAction, styles } = props;
+  const theme = props.theme || Theme;
   const nav = useNavigation();
 
   const onGoBack = () => {
