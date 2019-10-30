@@ -1,39 +1,35 @@
-import { Icon, scale, uuid } from "@src/libs";
 import { observer, useObservable } from "mobx-react-lite";
-import React, { useEffect } from "react";
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useDimensions } from "react-native-hooks";
 import { useNavigation } from "react-navigation-hooks";
-import { IconProps } from "@src/libs/ui/icon";
+import { Icon } from "../";
+import { DefaultTheme, ThemeProps } from "../../theme";
+import { scale, uuid } from "../../utils";
+import { IconProps } from "../icon";
 
 export interface UIBottomNavProps {
   menus: {
     label: string;
+    sublabel?: string;
     icon: IconProps | any;
     path: string;
     role?: string[];
   }[];
-  theme?: {
-    primary: string;
-    secondary: string;
-    light: string;
-    dark: string;
-    accent: string;
-  };
+  renderMenu?: (item, meta) => any;
+  activePath?: string;
+  theme?: ThemeProps;
+  style?: any;
 }
 
 export default observer((props: UIBottomNavProps) => {
-  const { menus, theme } = props;
-  const dim = useDimensions().window;
-  const nav = useNavigation();
+  const { menus, activePath, style, renderMenu } = props;
+  const theme = {
+    ...DefaultTheme,
+    ...props.theme
+  };
   const meta = useObservable({
-    activePath: "",
-    menus: menus
+    activePath: activePath || ""
   });
-  useEffect(() => {
-    meta.activePath = nav.state.routeName;
-    console.log(nav);
-  }, [nav]);
 
   return (
     <View
@@ -45,24 +41,36 @@ export default observer((props: UIBottomNavProps) => {
         backgroundColor: "#fff",
         padding: 5,
         borderStyle: "solid",
-        borderColor: "#FCFDFD"
+        borderColor: "#FCFDFD",
+        ...style
       }}
     >
-      {meta.menus.map((item: any) => {
-        return <Menu key={uuid()} meta={meta} item={item} theme={theme} />;
+      {menus.map(item => {
+        return (
+          <Menu
+            key={uuid(item.path)}
+            meta={meta}
+            item={item}
+            CustomComponent={renderMenu}
+            theme={theme}
+          />
+        );
       })}
     </View>
   );
 });
 
 const Menu = observer((props: any) => {
-  const { meta, item, theme } = props;
+  const { meta, item, theme, CustomComponent } = props;
   const nav = useNavigation();
   const onPress = () => {
     meta.activePath = item.path;
     nav.navigate(item.path);
   };
   const active = meta.activePath === item.path;
+  if (!!CustomComponent) {
+    return <CustomComponent {...item} meta={meta} />;
+  }
   return (
     <TouchableOpacity
       style={{
@@ -72,8 +80,9 @@ const Menu = observer((props: any) => {
         alignItems: "center",
         paddingLeft: 5,
         paddingRight: 5,
-        paddingTop: 10,
-        paddingBottom: 10,
+        minHeight: 54,
+        // paddingTop: 10,
+        // paddingBottom: 10,
         flexGrow: 1,
         ...(!active
           ? {
@@ -85,13 +94,13 @@ const Menu = observer((props: any) => {
     >
       <Icon
         size={scale(24)}
-        color={theme ? theme.primary : "#3a3a3a"}
+        color={theme.primary}
         style={{
           marginLeft: 5,
-          marginRight: active ? 10 : 5
+          marginRight: active ? 15 : 5
         }}
         {...item.icon}
-      ></Icon>
+      />
       {active && (
         <View
           style={{
@@ -99,17 +108,19 @@ const Menu = observer((props: any) => {
             flexDirection: "column"
           }}
         >
+          {item.sublabel && (
+            <Text
+              style={{
+                color: theme.medium,
+                fontSize: scale(11)
+              }}
+            >
+              {item.sublabel}
+            </Text>
+          )}
           <Text
             style={{
-              color: theme ? theme.primary : "#3a3a3a",
-              fontSize: scale(11)
-            }}
-          >
-            Your
-          </Text>
-          <Text
-            style={{
-              color: theme ? theme.primary : "#3a3a3a",
+              color: theme.dark,
               fontSize: scale(14),
               fontWeight: "600"
             }}

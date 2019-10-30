@@ -3,26 +3,26 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
+import { ThemeProps, DefaultTheme } from "../../theme";
 
 export interface UIHeaderProps {
   leftAction?: "Default" | object;
   title: string | object;
   rightAction?: object;
-  theme?: {
-    primary: string;
-    secondary: string;
-    light: string;
-    dark: string;
-    accent: string;
-    background: string;
-  };
+  theme?: ThemeProps;
+  style?: any;
   styles?: {
     root?: any;
+    title?: any;
   };
 }
 
 export default observer((props: UIHeaderProps) => {
-  const { leftAction, title, rightAction, theme, styles } = props;
+  const { leftAction, title, rightAction, style, styles } = props;
+  const theme = {
+    ...DefaultTheme,
+    ...props.theme
+  };
   const nav = useNavigation();
 
   const onGoBack = () => {
@@ -36,11 +36,11 @@ export default observer((props: UIHeaderProps) => {
         flexDirection: "row",
         alignItems: "stretch",
         justifyContent: "flex-start",
-        backgroundColor: theme.background,
         padding: 5,
         paddingLeft: 10,
         paddingRight: 10,
         borderStyle: "solid",
+        ...style,
         ...(styles ? styles.root : {})
       }}
     >
@@ -56,7 +56,7 @@ export default observer((props: UIHeaderProps) => {
             <Icon
               source={"AntDesign"}
               name={"arrowleft"}
-              color={theme ? theme.primary : "#3a3a3a"}
+              color={theme.primary}
               size={24}
               style={{
                 margin: 5
@@ -89,9 +89,10 @@ export default observer((props: UIHeaderProps) => {
           {typeof title === "string" ? (
             <Text
               style={{
-                color: theme ? theme.primary : "#3a3a3a",
+                color: theme.primary,
                 fontSize: scale(14),
-                fontWeight: "bold"
+                fontWeight: "bold",
+                ...(styles ? styles.title : {})
               }}
             >
               {title}
