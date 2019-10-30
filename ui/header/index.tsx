@@ -1,9 +1,9 @@
-import { Icon, scale } from "@src/libs";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
-import { ThemeProps, DefaultTheme } from "../../theme";
+import { DefaultTheme, ThemeProps } from "../../theme";
+import { Icon } from "../";
 
 export interface UIHeaderProps {
   leftAction?: "Default" | object;
@@ -90,7 +90,7 @@ export default observer((props: UIHeaderProps) => {
             <Text
               style={{
                 color: theme.primary,
-                fontSize: scale(14),
+                fontSize: 16,
                 fontWeight: "bold",
                 ...(styles ? styles.title : {})
               }}

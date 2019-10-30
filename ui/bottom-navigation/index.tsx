@@ -81,8 +81,6 @@ const Menu = observer((props: any) => {
         paddingLeft: 5,
         paddingRight: 5,
         minHeight: 54,
-        // paddingTop: 10,
-        // paddingBottom: 10,
         flexGrow: 1,
         ...(!active
           ? {
@@ -112,7 +110,7 @@ const Menu = observer((props: any) => {
             <Text
               style={{
                 color: theme.medium,
-                fontSize: scale(11)
+                fontSize: 11
               }}
             >
               {item.sublabel}
@@ -121,7 +119,7 @@ const Menu = observer((props: any) => {
           <Text
             style={{
               color: theme.dark,
-              fontSize: scale(14),
+              fontSize: 14,
               fontWeight: "600"
             }}
           >
