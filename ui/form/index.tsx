@@ -17,7 +17,6 @@ export interface FormProps {
 
 export default observer((props: FormProps) => {
   const { data, fields, setValue, style } = props;
-
   return (
     <View style={style}>
       <FlatList
@@ -33,8 +32,19 @@ export default observer((props: FormProps) => {
             />
           );
         }}
-        keyExtractor={item => uuid(item.key)}
+        keyExtractor={item => item.key}
       />
+      {/* {fields.map(item => {
+        return (
+          <Field
+            {...item}
+            value={data[item.key]}
+            setValue={v => {
+              setValue(v, item.key);
+            }}
+          />
+        );
+      })} */}
     </View>
   );
 });

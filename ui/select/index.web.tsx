@@ -1,4 +1,5 @@
 import { observer, useObservable } from "mobx-react-lite";
+import Modal from "modal-react-native-web";
 import React, { useEffect } from "react";
 import {
   FlatList,
@@ -43,8 +44,13 @@ export default observer((props: SelectProps) => {
   useEffect(() => {
     if (value) meta.value = items.find(x => x.value === value);
   }, []);
+
   return (
-    <>
+    <View
+      style={{
+        flex: 1
+      }}
+    >
       <TouchableOpacity
         style={{
           flex: 1,
@@ -93,45 +99,47 @@ export default observer((props: SelectProps) => {
         </View>
       </TouchableOpacity>
       <ModalItems meta={meta} {...props} />
-    </>
+    </View>
   );
 });
 
 const ModalItems = observer((props: any) => {
-  const { meta, placeholder, items, value, onSelect, ref } = props;
+  const { meta, placeholder, items, value, onSelect } = props;
   const theme = DefaultTheme;
   const dim = useDimensions().window;
-  const onSearch = value => {
-    meta.filter = value;
-  };
-  console.log(meta.position.ready);
 
   return (
     <>
+      {/* <Modal
+      animationType="slide"
+      transparent={true}
+      visible={meta.isShown}
+      ariaHideApp={false}
+    > */}
       {meta.isShown && (
         <>
           <View
             onLayout={layout => {
-              console.log("asd");
               meta.position.dH = layout.nativeEvent.layout.height;
               let y = meta.position.pH - meta.position.y;
-              if (y > meta.position.dH) {
-                meta.position.top = meta.position.y + 65;
-                meta.position.bottom = null;
-              } else {
+              if (y < meta.position.dH) {
                 meta.position.top = null;
                 meta.position.bottom = y;
+              } else {
+                meta.position.top = meta.position.y + 65;
+                meta.position.bottom = null;
               }
               meta.position.ready = true;
             }}
             style={{
-              position: "absolute",
-              bottom: meta.position.bottom,
-              top: meta.position.top,
+              // position: "absolute",
+              // bottom: meta.position.bottom,
+              // top: meta.position.top,
+              top: 30,
               left: 0,
               right: 0,
               minHeight: 150,
-              maxHeight: 300,
+              maxHeight: 250,
               backgroundColor: "#fff",
               zIndex: 9,
               borderRadius: 4,
@@ -145,84 +153,7 @@ const ModalItems = observer((props: any) => {
               opacity: meta.position.ready ? 1 : 0
             }}
           >
-            <Text
-              style={{
-                padding: 5,
-                fontSize: 16,
-                marginTop: 5,
-                marginBottom: 5,
-                color: theme.primary
-              }}
-            >
-              {placeholder}
-            </Text>
-            {items.length > 5 && (
-              <Input
-                value={meta.filter}
-                onChangeText={onSearch}
-                placeholder="Search"
-                style={{
-                  backgroundColor: theme.light,
-                  minHeight: 40,
-                  maxHeight: 40,
-                  paddingLeft: 5,
-                  paddingRight: 5,
-                  marginTop: 0
-                }}
-              />
-            )}
-            <ScrollView keyboardShouldPersistTaps="handled">
-              <FlatList
-                data={items.filter((item: any) => {
-                  if (meta.filter.length > 0)
-                    return fuzzyMatch(
-                      meta.filter.toLowerCase(),
-                      item.text.toLowerCase()
-                    );
-                  return true;
-                })}
-                keyExtractor={(item: any) => uuid(`select${item.value}`)}
-                ItemSeparatorComponent={() => (
-                  <View
-                    style={{
-                      borderBottomWidth: 1,
-                      borderStyle: "solid",
-                      borderColor: theme.light,
-                      borderWidth: 0
-                    }}
-                  />
-                )}
-                renderItem={({ item }) => {
-                  const active = value === item.value;
-                  return (
-                    <TouchableOpacity
-                      onPress={() => {
-                        onSelect(item);
-                        meta.isShown = false;
-                        meta.value = item;
-                        meta.position.ready = true;
-                      }}
-                      style={{
-                        paddingRight: 5,
-                        paddingLeft: 5,
-                        minHeight: 40,
-                        display: "flex",
-                        justifyContent: "center",
-                        backgroundColor: active ? theme.primary : "#fff"
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: active ? "#fff" : theme.dark
-                        }}
-                      >
-                        {item.text}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </ScrollView>
+            <RenderItem {...props} meta={meta} theme={theme} />
           </View>
           <TouchableWithoutFeedback onPress={() => (meta.isShown = false)}>
             <View
@@ -238,6 +169,99 @@ const ModalItems = observer((props: any) => {
           </TouchableWithoutFeedback>
         </>
       )}
+      {/* </Modal> */}
+    </>
+  );
+});
+
+const RenderItem = observer((props: any) => {
+  const { meta, placeholder, items, value, onSelect, theme } = props;
+
+  const onSearch = value => {
+    meta.filter = value;
+  };
+  return (
+    <>
+      <Text
+        style={{
+          padding: 5,
+          fontSize: 16,
+          marginTop: 5,
+          marginBottom: 5,
+          color: theme.primary
+        }}
+      >
+        {placeholder}
+      </Text>
+      {items.length > 5 && (
+        <Input
+          value={meta.filter}
+          onChangeText={onSearch}
+          placeholder="Search"
+          style={{
+            backgroundColor: theme.light,
+            minHeight: 40,
+            maxHeight: 40,
+            paddingLeft: 5,
+            paddingRight: 5,
+            marginTop: 0
+          }}
+        />
+      )}
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <FlatList
+          data={items.filter((item: any) => {
+            if (meta.filter.length > 0)
+              return fuzzyMatch(
+                meta.filter.toLowerCase(),
+                item.text.toLowerCase()
+              );
+            return true;
+          })}
+          keyExtractor={(item: any) => {
+            return `select-${item.value}`;
+          }}
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                borderBottomWidth: 1,
+                borderStyle: "solid",
+                borderColor: theme.light,
+                borderWidth: 0
+              }}
+            />
+          )}
+          renderItem={({ item }) => {
+            const active = value === item.value;
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  onSelect(item);
+                  meta.isShown = false;
+                  meta.value = item;
+                  meta.position.ready = true;
+                }}
+                style={{
+                  paddingRight: 5,
+                  paddingLeft: 5,
+                  minHeight: 40,
+                  display: "flex",
+                  justifyContent: "center",
+                  backgroundColor: active ? theme.primary : "#fff"
+                }}
+              >
+                <Text
+                  style={{
+                    color: active ? "#fff" : theme.dark
+                  }}
+                >
+                  {item.text}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </ScrollView>
     </>
   );
 });
