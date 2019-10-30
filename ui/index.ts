@@ -3,4 +3,5 @@ export { default as Input } from "./input";
 export { default as Form } from "./form";
 export { default as Field } from "./field";
 export { default as Header } from "./header";
+export { default as View } from "./view";
 export { default as BottomNavigation } from "./bottom-navigation";

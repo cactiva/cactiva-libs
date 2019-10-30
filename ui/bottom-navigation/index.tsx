@@ -80,7 +80,7 @@ const Menu = observer((props: any) => {
         alignItems: "center",
         paddingLeft: 5,
         paddingRight: 5,
-        minHeight: 54,
+        minHeight: 45,
         flexGrow: 1,
         ...(!active
           ? {
