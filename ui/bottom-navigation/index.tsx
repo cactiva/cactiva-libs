@@ -2,7 +2,7 @@ import { observer, useObservable } from "mobx-react-lite";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
-import { Icon } from "../";
+import Icon from "../icon";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { scale, uuid } from "../../utils";
 import { IconProps } from "../icon";

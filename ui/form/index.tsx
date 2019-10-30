@@ -1,4 +1,4 @@
-import { uuid } from "@src/libs";
+import { uuid } from "../../utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { FlatList, View } from "react-native";

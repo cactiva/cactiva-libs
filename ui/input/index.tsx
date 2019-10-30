@@ -66,10 +66,7 @@ export default observer((props: InputProps) => {
 
 const styleInput = {
   borderWidth: 0,
-  marginTop: 5,
-  marginRight: 0,
-  marginBottom: 5,
-  marginLeft: 0,
+  margin: 0,
   color: "#3a3a3a",
   flexGrow: 1
 };

@@ -1,10 +1,10 @@
 import { observer, useObservable } from "mobx-react-lite";
 import React from "react";
 import { Text, View } from "react-native";
-import { Icon, Input } from "../";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { IconProps } from "../icon";
-import { InputProps, InputType } from "../input";
+import Icon, { IconProps } from "../icon";
+import Input, { InputProps, InputType } from "../input";
+import Select, { SelectItemProps } from "../select";
 
 interface StylesFieldProps {
   root?: any;
@@ -20,6 +20,11 @@ export interface FieldProps {
   value?: any;
   setValue?: (value: any) => void;
   type?: InputType | "select" | "date";
+  option?: {
+    select?: {
+      items: SelectItemProps[];
+    };
+  };
   iconStart?: IconProps;
   iconEnd?: IconProps;
   theme?: ThemeProps;
@@ -36,7 +41,8 @@ export default observer((props: FieldProps) => {
     iconEnd,
     type,
     style,
-    styles
+    styles,
+    option
   } = props;
   let field = props.field;
   const meta = useObservable({
@@ -86,16 +92,17 @@ export default observer((props: FieldProps) => {
         />
       );
       break;
-    // case "select":
-    //   Component = (
-    //     <Select
-    //       items={option.items}
-    //       value={items[key]}
-    //       onChange={onChange}
-    //       label={field.label}
-    //     />
-    //   );
-    //   break;
+    case "select":
+      Component = (
+        <Select
+          {...field}
+          items={option.select.items}
+          value={meta.value}
+          placeholder={placeholder}
+          onSelect={item => onChange(item.value)}
+        />
+      );
+      break;
   }
   return (
     <View
@@ -104,7 +111,6 @@ export default observer((props: FieldProps) => {
         marginBottom: 10,
         marginLeft: 0,
         marginRight: 0,
-        zIndex: 1,
         ...style,
         ...((styles && styles.root) || {})
       }}
@@ -130,8 +136,6 @@ export default observer((props: FieldProps) => {
           paddingRight: 2,
           paddingLeft: 2,
           padding: 5,
-          paddingTop: 0,
-          paddingBottom: 0,
           justifyContent: "flex-start",
           display: "flex",
           ...((styles && styles.field) || {})

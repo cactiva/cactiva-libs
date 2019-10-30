@@ -3,7 +3,7 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { Icon } from "../";
+import Icon from "../icon";
 
 export interface UIHeaderProps {
   leftAction?: "Default" | object;

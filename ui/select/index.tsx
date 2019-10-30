@@ -1,144 +1,220 @@
-import { UIThemeProps } from "../../themes";
+import React, { useEffect } from "react";
 import { observer, useObservable } from "mobx-react-lite";
-import React from "react";
-import { Text, TextInput, TouchableOpacity } from "react-native";
-import { Select, SelectProps as BaseSelectProps } from "react-native-ui-kitten";
-import { SelectOptionType } from "react-native-ui-kitten/ui/select/selectOption.component";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  TouchableWithoutFeedback,
+  FlatList,
+  ScrollView,
+  Modal
+} from "react-native";
+import Icon from "../icon";
+import Input, { InputProps } from "../input";
+import { useDimensions } from "react-native-hooks";
+import { uuid, fuzzyMatch } from "../../utils";
+import { DefaultTheme, ThemeProps } from "../../theme";
 
-interface DataProps extends SelectOptionType {
+export interface SelectItemProps {
+  text: any;
   value: any;
 }
 
-export interface SelectProps extends BaseSelectProps {
-  searchable?: boolean;
-  onSerch?: (text) => void;
-  theme?: UIThemeProps;
-  data: DataProps[];
-  meta?: any;
+export interface SelectProps extends InputProps {
+  items: SelectItemProps[];
+  onSelect: (item: any) => void;
+  theme?: ThemeProps;
 }
 
 export default observer((props: SelectProps) => {
-  const { data, selectedOption, onSerch, onSelect, searchable } = props;
-  const state = useObservable({
-    ref: null,
-    items: data,
-    search: "",
-    value: selectedOption as any
+  const { value, placeholder, items, style } = props;
+  const meta = useObservable({
+    isShown: false,
+    value: null,
+    filter: ""
   });
-  const onSearchInput = text => {
-    state.search = text;
-    onSerch && onSerch(text);
-    let filter = data;
-    if (!!text) {
-      filter = data.filter(x => {
-        return x.text.toLowerCase().includes(text.toLowerCase());
-      });
-      if (filter.length === 0) {
-        filter.push({
-          text: "No item to display.",
-          value: "",
-          disabled: true
-        });
-      }
-    }
-    state.items = filter;
-  };
-  const onChange = value => {
-    let selected = data.find(x => x.text === value.item.text);
-    state.value = selected;
-    state.ref.strategy.selectedOption = selected;
-    onSelect(selected);
-    state.ref.setVisibility();
-  };
+  useEffect(() => {
+    if (value) meta.value = items.find(x => x.value === value);
+  }, []);
 
-  if (searchable === undefined || !!searchable) {
-    if (state.items.findIndex(x => x.text === "search") < 0) {
-      state.items = [
-        {
-          text: "search",
-          value: "",
-          disabled: true
-        },
-        ...state.items
-      ];
-    }
-  }
   return (
-    <Select
-      data={state.items}
-      ref={ref => {
-        !state.ref && (state.ref = ref);
-      }}
-      selectedOption={state.value}
-      style={{
-        flex: 1,
-        padding: 0
-      }}
-      labelStyle={{
-        margin: 0,
-        padding: 0
-      }}
-      themedStyle={{
-        padding: 0
-      }}
-      controlStyle={{
-        paddingTop: 0,
-        paddingBottom: 0,
-        paddingLeft: 0,
-        paddingRight: 0,
-        backgroundColor: "transparent",
-        borderWidth: 0,
-        margin: -4,
-        minHeight: 25
-      }}
-      textStyle={{
-        marginLeft: 0,
-        color: !state.value ? "#757575" : "#3a3a3a",
-        fontWeight: "400"
-      }}
-      activeOpacity={1}
-      {...props}
-      renderItem={item => {
-        return (
-          <>
-            {item.item.text === "search" ? (
-              <TextInput
-                autoFocus
-                onChangeText={text => {
-                  onSearchInput(text);
-                }}
-                style={{
-                  minHeight: 38,
-                  padding: 5
-                }}
-                value={state.search}
-              />
-            ) : !!props.renderItem ? (
-              props.renderItem
-            ) : (
-              <TouchableOpacity
-                onPress={() => {
-                  onChange(item);
-                }}
-                style={{
-                  padding: 5,
-                  paddingTop: 12,
-                  paddingBottom: 12,
-                  // borderBottomWidth: 1,
-                  borderStyle: "solid",
-                  borderColor: "#ebebeb"
-                }}
-              >
-                <Text>{item.item.text}</Text>
-              </TouchableOpacity>
-            )}
-          </>
-        );
-      }}
-    />
+    <>
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "stretch",
+          justifyContent: "space-between",
+          ...style
+        }}
+        onPress={() => (meta.isShown = true)}
+      >
+        <View
+          style={{
+            flex: 1
+          }}
+        >
+          <Text
+            style={{
+              flex: 1,
+              marginTop: 5,
+              marginBottom: 5,
+              color: value ? "#3a3a3a" : "#757575"
+            }}
+          >
+            {meta.value ? meta.value.text : placeholder}
+          </Text>
+        </View>
+        <View
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingLeft: 5,
+            paddingRight: 5
+          }}
+        >
+          <Icon
+            source="Entypo"
+            name={meta.isShown ? "chevron-down" : "chevron-up"}
+            color="#3a3a3a"
+            size={20}
+          />
+        </View>
+      </TouchableOpacity>
+      <ModalItems meta={meta} {...props} />
+    </>
   );
 });
 
-const Styles = {
-  root: {}
-};
+const ModalItems = observer((props: any) => {
+  const { meta, placeholder, items, value, onSelect } = props;
+  const theme = DefaultTheme;
+  const dim = useDimensions().window;
+  const onSearch = value => {
+    meta.filter = value;
+  };
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={meta.isShown}
+      onRequestClose={() => {
+        Alert.alert("Modal has been closed.");
+      }}
+    >
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          minHeight: 150,
+          maxHeight: 400,
+          backgroundColor: "#fff",
+          zIndex: 9,
+          borderTopLeftRadius: 18,
+          borderTopRightRadius: 18,
+          display: "flex",
+          alignItems: "stretch",
+          justifyContent: "flex-start",
+          padding: 10
+        }}
+      >
+        <Text
+          style={{
+            padding: 5,
+            fontSize: 16,
+            marginTop: 5,
+            marginBottom: 5,
+            color: theme.primary
+          }}
+        >
+          {placeholder}
+        </Text>
+        {items.length > 5 && (
+          <Input
+            value={meta.filter}
+            onChangeText={onSearch}
+            placeholder="Search"
+            style={{
+              backgroundColor: theme.light,
+              minHeight: 40,
+              maxHeight: 40,
+              paddingLeft: 5,
+              paddingRight: 5,
+              marginTop: 0
+            }}
+          />
+        )}
+        <ScrollView keyboardShouldPersistTaps="handled">
+          <FlatList
+            data={items.filter((item: any) => {
+              if (meta.filter.length > 0)
+                return fuzzyMatch(
+                  meta.filter.toLowerCase(),
+                  item.text.toLowerCase()
+                );
+              return true;
+            })}
+            keyExtractor={(item: any) => uuid(`select${item.value}`)}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{
+                  borderBottomWidth: 1,
+                  borderStyle: "solid",
+                  borderColor: theme.light,
+                  borderWidth: 0
+                }}
+              />
+            )}
+            renderItem={({ item }) => {
+              const active = value === item.value;
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    onSelect(item);
+                    meta.isShown = false;
+                    meta.value = item;
+                  }}
+                  style={{
+                    paddingRight: 5,
+                    paddingLeft: 5,
+                    minHeight: 40,
+                    display: "flex",
+                    justifyContent: "center",
+                    backgroundColor: active ? theme.primary : "#fff"
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: active ? "#fff" : theme.dark
+                    }}
+                  >
+                    {item.text}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </ScrollView>
+      </View>
+      <TouchableWithoutFeedback onPress={() => (meta.isShown = false)}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: "rgba(0,0,0,.3)",
+            zIndex: 1,
+            height: dim.height
+          }}
+        />
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+});
