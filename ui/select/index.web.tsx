@@ -1,21 +1,18 @@
-import React, { useEffect, useRef } from "react";
 import { observer, useObservable } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  TouchableWithoutFeedback,
   FlatList,
   ScrollView,
-  Modal
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from "react-native";
+import { useDimensions } from "react-native-hooks";
+import { DefaultTheme, ThemeProps } from "../../theme";
+import { fuzzyMatch, uuid } from "../../utils";
 import Icon from "../icon";
 import Input, { InputProps } from "../input";
-import { useDimensions } from "react-native-hooks";
-import { uuid, fuzzyMatch } from "../../utils";
-import { DefaultTheme, ThemeProps } from "../../theme";
-import Dropdown from "react-dropdown";
 
 export interface SelectItemProps {
   text: any;
