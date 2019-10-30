@@ -10,6 +10,8 @@ interface StylesFieldProps {
   root?: any;
   label?: any;
   field?: any;
+  iconStart?: any;
+  iconEnd?: any;
 }
 
 export interface FieldProps {
@@ -98,7 +100,7 @@ export default observer((props: FieldProps) => {
   return (
     <View
       style={{
-        marginTop: 10,
+        marginTop: 5,
         marginBottom: 10,
         marginLeft: 0,
         marginRight: 0,
@@ -111,8 +113,7 @@ export default observer((props: FieldProps) => {
         style={{
           fontSize: 14,
           fontWeight: "600",
-          paddingLeft: 5,
-          paddingRight: 5,
+          marginBottom: 5,
           color: theme.primary,
           ...((styles && styles.label) || {})
         }}
@@ -126,8 +127,8 @@ export default observer((props: FieldProps) => {
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",
-          paddingRight: 5,
-          paddingLeft: 5,
+          paddingRight: 2,
+          paddingLeft: 2,
           padding: 5,
           paddingTop: 0,
           paddingBottom: 0,
@@ -137,25 +138,39 @@ export default observer((props: FieldProps) => {
         }}
       >
         {!!isIconStart && (
-          <Icon
-            source={iconStart.source}
-            name={iconStart.name}
-            size={24}
-            color={theme.primary}
-            style={{ marginRight: 10 }}
-            {...Icon}
-          />
+          <View
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ...((styles && styles.iconStart) || {})
+            }}
+          >
+            <Icon
+              size={24}
+              color={theme.primary}
+              style={{ marginRight: 10 }}
+              {...iconStart}
+            />
+          </View>
         )}
         {Component}
         {!!isIconEnd && (
-          <Icon
-            source={iconEnd.source}
-            name={iconEnd.name}
-            size={24}
-            color={theme.primary}
-            style={{ marginLeft: 10 }}
-            {...Icon}
-          />
+          <View
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ...((styles && styles.iconEnd) || {})
+            }}
+          >
+            <Icon
+              size={24}
+              color={theme.primary}
+              style={{ marginLeft: 10 }}
+              {...iconEnd}
+            />
+          </View>
         )}
       </View>
     </View>
