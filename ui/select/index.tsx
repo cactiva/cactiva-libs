@@ -79,7 +79,7 @@ export default observer((props: SelectProps) => {
             source="Entypo"
             name={meta.isShown ? "chevron-down" : "chevron-up"}
             color="#3a3a3a"
-            size={20}
+            size={24}
           />
         </View>
       </TouchableOpacity>

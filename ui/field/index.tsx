@@ -5,6 +5,7 @@ import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon, { IconProps } from "../icon";
 import Input, { InputProps, InputType } from "../input";
 import Select, { SelectItemProps } from "../select";
+import DatePicker from "../date";
 
 interface StylesFieldProps {
   root?: any;
@@ -49,7 +50,7 @@ export default observer((props: FieldProps) => {
     focus: false,
     value: value
   });
-  const labelText = meta.focus || !!meta.value ? label : " ";
+  let labelText = meta.focus || !!meta.value ? label : " ";
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
   const isIconEnd =
@@ -100,6 +101,16 @@ export default observer((props: FieldProps) => {
           value={meta.value}
           placeholder={placeholder}
           onSelect={item => onChange(item.value)}
+        />
+      );
+      break;
+    case "date":
+      labelText = label;
+      Component = (
+        <DatePicker
+          {...field}
+          value={meta.value}
+          onChange={item => onChange(value)}
         />
       );
       break;

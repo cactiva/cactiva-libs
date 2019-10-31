@@ -5,4 +5,5 @@ export { default as Field } from "./field";
 export { default as Header } from "./header";
 export { default as View } from "./view";
 export { default as Select } from "./select/index";
+export { default as DatePicker } from "./date/index";
 export { default as BottomNavigation } from "./bottom-navigation";
