@@ -107,6 +107,7 @@ export default observer((props: FieldProps) => {
   return (
     <View
       style={{
+        zIndex: type === "select" ? 9 : 1,
         marginTop: 5,
         marginBottom: 10,
         marginLeft: 0,

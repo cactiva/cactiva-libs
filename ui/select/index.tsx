@@ -93,14 +93,19 @@ const ModalItems = observer((props: any) => {
   const theme = DefaultTheme;
   const dim = useDimensions().window;
   return (
-    <Modal animationType="slide" transparent={true} visible={meta.isShown}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={meta.isShown}
+      onRequestClose={() => (meta.isShown = false)}
+    >
       <View
         style={{
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          minHeight: 150,
+          minHeight: 40,
           maxHeight: 400,
           backgroundColor: "#fff",
           zIndex: 9,
@@ -146,6 +151,7 @@ const RenderItem = observer((props: any) => {
           fontSize: 16,
           marginTop: 5,
           marginBottom: 5,
+          fontWeight: "bold",
           color: theme.primary
         }}
       >
@@ -186,6 +192,16 @@ const RenderItem = observer((props: any) => {
                 borderWidth: 0
               }}
             />
+          )}
+          ListEmptyComponent={() => (
+            <Text
+              style={{
+                margin: 10,
+                textAlign: "center"
+              }}
+            >
+              No item to display.
+            </Text>
           )}
           renderItem={({ item }) => {
             const active = value === item.value;
