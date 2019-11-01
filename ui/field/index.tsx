@@ -101,6 +101,7 @@ export default observer((props: FieldProps) => {
           value={meta.value}
           placeholder={placeholder}
           onSelect={item => onChange(item.value)}
+          onFocus={(e: any) => (meta.focus = e)}
         />
       );
       break;
@@ -110,7 +111,8 @@ export default observer((props: FieldProps) => {
         <DatePicker
           {...field}
           value={meta.value}
-          onChange={item => onChange(value)}
+          onChange={value => onChange(value)}
+          onFocus={(e: any) => (meta.focus = e)}
         />
       );
       break;
@@ -118,7 +120,7 @@ export default observer((props: FieldProps) => {
   return (
     <View
       style={{
-        zIndex: type === "select" ? 9 : 1,
+        zIndex: ["select", "date"].indexOf(type) > -1 && meta.focus ? 9 : 1,
         marginTop: 5,
         marginBottom: 10,
         marginLeft: 0,

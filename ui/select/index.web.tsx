@@ -1,17 +1,14 @@
 import { observer, useObservable } from "mobx-react-lite";
-import Modal from "modal-react-native-web";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
   FlatList,
   ScrollView,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View
 } from "react-native";
-import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { fuzzyMatch, uuid } from "../../utils";
+import { fuzzyMatch } from "../../utils";
 import Icon from "../icon";
 import Input, { InputProps } from "../input";
 
@@ -24,10 +21,11 @@ export interface SelectProps extends InputProps {
   items: SelectItemProps[];
   onSelect: (item: any) => void;
   theme?: ThemeProps;
+  onFocus?: (e: any) => void;
 }
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style } = props;
+  const { value, placeholder, items, style, onFocus } = props;
   const theme = DefaultTheme;
   const meta = useObservable({
     isShown: false,
@@ -44,13 +42,17 @@ export default observer((props: SelectProps) => {
     if (value) meta.value = items.find(x => x.value === value);
   }, []);
 
+  useEffect(() => {
+    onFocus && onFocus(meta.isShown);
+  }, [meta.isShown]);
+
   return (
     <>
       <div
         style={{
           flex: 1,
           position: "initial",
-          zIndex: 9
+          zIndex: meta.isShown ? 9 : 0
         }}
         ref={(ref: any) => {
           if (ref) {
@@ -81,7 +83,9 @@ export default observer((props: SelectProps) => {
             <Input
               value={meta.filter}
               onChangeText={onSearch}
-              placeholder={meta.value ? meta.value.text : placeholder}
+              placeholder={
+                meta.value ? meta.value.text : placeholder || "Search"
+              }
               autoFocus={true}
               style={{
                 backgroundColor: theme.light,

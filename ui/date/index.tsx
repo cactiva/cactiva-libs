@@ -13,6 +13,7 @@ import {
 import { ThemeProps } from "../../theme";
 import Input, { InputProps } from "../input";
 import Icon from "../icon";
+import { dateToString } from "@src/libs/utils";
 
 export interface DateTimeProps extends InputProps {
   mode?: "date" | "time";
@@ -24,7 +25,15 @@ export interface DateTimeProps extends InputProps {
 }
 
 export default observer((props: DateTimeProps) => {
-  const { value, style, mode, display, minimumDate, maximumDate } = props;
+  const {
+    value,
+    style,
+    mode,
+    display,
+    minimumDate,
+    maximumDate,
+    onChangeText
+  } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -41,6 +50,7 @@ export default observer((props: DateTimeProps) => {
       meta.value = new Date(
         `${meta.dateString.yyyy}-${meta.dateString.mm}-${meta.dateString.dd}`
       );
+      onChangeText && onChangeText(dateToString(meta.value));
     }
   };
   const onChangePicker = date => {
@@ -48,6 +58,7 @@ export default observer((props: DateTimeProps) => {
     meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
     meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);
     meta.dateString.yyyy = `${meta.value.getFullYear()}`;
+    onChangeText && onChangeText(dateToString(date));
   };
   useEffect(() => {
     if (value) {
@@ -163,12 +174,7 @@ const DatePickerModal = observer((props: any) => {
           mode: mode || "calendar"
         });
         if (action !== DatePickerAndroid.dismissedAction) {
-          meta.dateString.dd = ("0" + day).slice(-2);
-          meta.dateString.mm = ("0" + (month + 1)).slice(-2);
-          meta.dateString.yyyy = year;
-          meta.value = new Date(
-            `${meta.dateString.yyyy}-${meta.dateString.mm}-${meta.dateString.dd}`
-          );
+          onChangePicker(new Date(`${year}-${month}-${day}`));
         }
       } catch ({ code, message }) {
         console.warn("Cannot open date picker", message);
