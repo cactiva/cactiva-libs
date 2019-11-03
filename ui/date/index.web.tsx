@@ -26,9 +26,20 @@ export default observer((props: DateTimeProps) => {
     ...props.theme
   };
   const onChangeDateString = (v, p) => {
-    if (p === "dd" || p === "mm") meta.dateString[p] = ("0" + v).slice(-2);
-    else meta.dateString[p] = v;
+    if (p === "dd") {
+      v = v > 31 ? 31 : v < 0 ? 0 : v;
+      meta.dateString[p] = v == 0 ? "" : ("0" + v).slice(-2);
+    } else if (p === "mm") {
+      v = v > 12 ? 12 : v < 0 ? 0 : v;
+      meta.dateString[p] = v == 0 ? "" : ("0" + v).slice(-2);
+    } else meta.dateString[p] = v;
     if (meta.dateString.dd && meta.dateString.mm && meta.dateString.yyyy) {
+      let day = new Date(
+        parseInt(meta.dateString.yyyy),
+        parseInt(meta.dateString.mm),
+        0
+      ).getDate();
+      if (parseInt(meta.dateString.dd) > day) meta.dateString.dd = `${day}`;
       meta.value = new Date(
         `${meta.dateString.yyyy}-${meta.dateString.mm}-${meta.dateString.dd}`
       );
@@ -98,6 +109,8 @@ export default observer((props: DateTimeProps) => {
               type="number"
               value={meta.dateString.dd}
               onChangeText={v => onChangeDateString(v, "dd")}
+              onFocus={() => (meta.isShown = false)}
+              returnKeyType="next"
             />
             <Text
               style={{
@@ -117,6 +130,8 @@ export default observer((props: DateTimeProps) => {
               type="number"
               value={meta.dateString.mm}
               onChangeText={v => onChangeDateString(v, "mm")}
+              onFocus={() => (meta.isShown = false)}
+              returnKeyType="next"
             />
             <Text
               style={{
@@ -136,6 +151,8 @@ export default observer((props: DateTimeProps) => {
               type="number"
               value={meta.dateString.yyyy}
               onChangeText={v => onChangeDateString(v, "yyyy")}
+              onFocus={() => (meta.isShown = false)}
+              returnKeyType="next"
             />
           </View>
           <TouchableOpacity
@@ -224,10 +241,12 @@ const CalendarDropdown = observer((props: any) => {
             boxShadow:
               meta.position === "top"
                 ? "0px -9px 10px #d4d4d4"
-                : "0px 9px 10px #d4d4d4"
+                : "0px 9px 10px #d4d4d4",
+            maxWidth: 400
           }}
         >
           <Calendar
+            current={dateToString(meta.value)}
             onDayPress={day => {
               onDayPress(day.dateString);
               meta.isShown = false;
@@ -236,12 +255,19 @@ const CalendarDropdown = observer((props: any) => {
             markedDates={{
               [dateToString(meta.value)]: {
                 selected: true,
-                disableTouchEvent: true,
-                selectedDotColor: "orange"
+                selectedColor: theme.primary
               }
             }}
-            minDate={dateToString(minDate)}
-            maxDate={dateToString(maxDate)}
+            minDate={minDate && dateToString(minDate)}
+            maxDate={minDate && dateToString(maxDate)}
+            renderArrow={direction => (
+              <Icon
+                source="Entypo"
+                name={`chevron-${direction}`}
+                color={theme.primary}
+                size={24}
+              />
+            )}
           />
         </div>
       )}
@@ -251,7 +277,7 @@ const CalendarDropdown = observer((props: any) => {
 
 const styles = StyleSheet.create({
   calendar: {
-    height: 305,
+    height: 310,
     flex: 1
   },
   text: {

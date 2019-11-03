@@ -42,9 +42,20 @@ export default observer((props: DateTimeProps) => {
     ..._.get(props, "theme", {})
   };
   const onChangeDateString = (v, p) => {
-    if (p === "dd" || p === "mm") meta.dateString[p] = ("0" + v).slice(-2);
-    else meta.dateString[p] = v;
+    if (p === "dd") {
+      v = v > 31 ? 31 : v < 0 ? 0 : v;
+      meta.dateString[p] = v == 0 ? "" : ("0" + v).slice(-2);
+    } else if (p === "mm") {
+      v = v > 12 ? 12 : v < 0 ? 0 : v;
+      meta.dateString[p] = v == 0 ? "" : ("0" + v).slice(-2);
+    } else meta.dateString[p] = v;
     if (meta.dateString.dd && meta.dateString.mm && meta.dateString.yyyy) {
+      let day = new Date(
+        parseInt(meta.dateString.yyyy),
+        parseInt(meta.dateString.mm),
+        0
+      ).getDate();
+      if (parseInt(meta.dateString.dd) > day) meta.dateString.dd = `${day}`;
       meta.value = new Date(
         `${meta.dateString.yyyy}-${meta.dateString.mm}-${meta.dateString.dd}`
       );
@@ -170,8 +181,8 @@ const DatePickerModal = observer((props: any) => {
         const { action, year, month, day }: any = await DatePickerAndroid.open({
           date: new Date(meta.value),
           mode: mode || "calendar",
-          minDate: minDate,
-          maxDate: maxDate
+          minDate: minDate && minDate,
+          maxDate: maxDate && maxDate
         });
         if (action !== DatePickerAndroid.dismissedAction) {
           onChangePicker(new Date(`${year}-${month}-${day}`));
@@ -208,8 +219,8 @@ const DatePickerModal = observer((props: any) => {
           date={meta.value}
           onDateChange={onChangePicker}
           mode={mode || "date"}
-          minimumDate={minDate}
-          maximumDate={maxDate}
+          minimumDate={minDate && minDate}
+          maximumDate={maxDate && maxDate}
         />
       </View>
       <TouchableWithoutFeedback onPress={() => (meta.isShown = false)}>

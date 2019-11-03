@@ -35,8 +35,7 @@ export default observer((props: InputProps) => {
     ...props,
     style,
     value: value || "",
-    onChangeText: setValue,
-    onChange: e => e.stopPropagation()
+    onChangeText: setValue
   };
   switch (type) {
     case "password":
