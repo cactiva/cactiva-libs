@@ -10,30 +10,23 @@ import {
   Modal,
   TouchableWithoutFeedback
 } from "react-native";
-import { ThemeProps } from "../../theme";
+import { ThemeProps, DefaultTheme } from "../../theme";
 import Input, { InputProps } from "../input";
 import Icon from "../icon";
-import { dateToString } from "@src/libs/utils";
+import { dateToString } from "../../utils";
+import _ from "lodash";
 
 export interface DateTimeProps extends InputProps {
   mode?: "date" | "time";
-  display?: "default" | "spinner";
-  maximumDate?: Date;
-  minimumDate?: Date;
+  // display?: "default" | "spinner";
+  maxDate?: Date;
+  minDate?: Date;
   theme?: ThemeProps;
   value: any;
 }
 
 export default observer((props: DateTimeProps) => {
-  const {
-    value,
-    style,
-    mode,
-    display,
-    minimumDate,
-    maximumDate,
-    onChangeText
-  } = props;
+  const { value, style, mode, onChangeText } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -43,6 +36,11 @@ export default observer((props: DateTimeProps) => {
       yyyy: ""
     }
   });
+
+  const theme = {
+    ...DefaultTheme,
+    ..._.get(props, "theme", {})
+  };
   const onChangeDateString = (v, p) => {
     if (p === "dd" || p === "mm") meta.dateString[p] = ("0" + v).slice(-2);
     else meta.dateString[p] = v;
@@ -154,7 +152,7 @@ export default observer((props: DateTimeProps) => {
           <Icon
             source="Ionicons"
             name={mode === "time" ? "md-time" : "md-calendar"}
-            color="#3a3a3a"
+            color={theme.dark}
             size={24}
           />
         </TouchableOpacity>
@@ -165,13 +163,15 @@ export default observer((props: DateTimeProps) => {
 });
 
 const DatePickerModal = observer((props: any) => {
-  const { meta, mode, onChangePicker } = props;
+  const { meta, mode, onChangePicker, minDate, maxDate } = props;
   if (meta.isShown && Platform.OS === "android") {
     const loadPicker = async () => {
       try {
         const { action, year, month, day }: any = await DatePickerAndroid.open({
           date: new Date(meta.value),
-          mode: mode || "calendar"
+          mode: mode || "calendar",
+          minDate: minDate,
+          maxDate: maxDate
         });
         if (action !== DatePickerAndroid.dismissedAction) {
           onChangePicker(new Date(`${year}-${month}-${day}`));
@@ -208,6 +208,8 @@ const DatePickerModal = observer((props: any) => {
           date={meta.value}
           onDateChange={onChangePicker}
           mode={mode || "date"}
+          minimumDate={minDate}
+          maximumDate={maxDate}
         />
       </View>
       <TouchableWithoutFeedback onPress={() => (meta.isShown = false)}>

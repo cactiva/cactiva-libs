@@ -1,11 +1,13 @@
 import { observer, useObservable } from "mobx-react-lite";
-import React from "react";
-import { Text, View } from "react-native";
+import React, { useEffect } from "react";
+import { Text, View, Platform } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon, { IconProps } from "../icon";
 import Input, { InputProps, InputType } from "../input";
 import Select, { SelectItemProps } from "../select";
 import DatePicker from "../date";
+import { useDimensions } from "react-native-hooks";
+import _ from "lodash";
 
 interface StylesFieldProps {
   root?: any;
@@ -46,18 +48,21 @@ export default observer((props: FieldProps) => {
     option
   } = props;
   let field = props.field;
+  const dim = useDimensions().window;
+  const platform =
+    dim.width > 780 && Platform.OS === "web" ? "desktop" : "mobile";
   const meta = useObservable({
-    focus: false,
-    value: value
+    focus: false
   });
-  let labelText = meta.focus || !!meta.value ? label : " ";
+  let labelText = meta.focus || !!value ? label : " ";
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
   const isIconEnd =
     !!iconEnd && !!iconEnd.source && !!iconEnd.name ? true : false;
   const theme = {
     ...DefaultTheme,
-    ...props.theme
+    ..._.get(props, "theme", {}),
+    ..._.get(field, "theme", {})
   };
   const placeholder = meta.focus
     ? field && field.placeholder
@@ -70,7 +75,6 @@ export default observer((props: FieldProps) => {
         value = !!value ? parseInt(value) : value;
         break;
     }
-    meta.value = value;
     setValue(value);
   };
   let Component;
@@ -85,7 +89,7 @@ export default observer((props: FieldProps) => {
       Component = (
         <Input
           {...field}
-          value={meta.value}
+          value={value}
           onChangeText={onChange}
           placeholder={placeholder}
           onFocus={() => (meta.focus = true)}
@@ -98,7 +102,7 @@ export default observer((props: FieldProps) => {
         <Select
           {...field}
           items={option.select.items}
-          value={meta.value}
+          value={value}
           placeholder={placeholder}
           onSelect={item => onChange(item.value)}
           onFocus={(e: any) => (meta.focus = e)}
@@ -110,7 +114,7 @@ export default observer((props: FieldProps) => {
       Component = (
         <DatePicker
           {...field}
-          value={meta.value}
+          value={value}
           onChange={value => onChange(value)}
           onFocus={(e: any) => (meta.focus = e)}
         />
@@ -125,8 +129,16 @@ export default observer((props: FieldProps) => {
         marginBottom: 10,
         marginLeft: 0,
         marginRight: 0,
+        ...(platform === "desktop"
+          ? {
+              flexBasis: (dim.width - 90) / 3
+            }
+          : {
+              flexGrow: 1,
+              flexShrink: 1
+            }),
         ...style,
-        ...((styles && styles.root) || {})
+        ..._.get(styles, "root", {})
       }}
     >
       <Text

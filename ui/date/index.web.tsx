@@ -1,33 +1,15 @@
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { ThemeProps, DefaultTheme } from "../../theme";
-import Icon from "../icon";
-import Input, { InputProps } from "../input";
+import { DateTimeProps } from ".";
+import { DefaultTheme } from "../../theme";
 import { dateToString } from "../../utils";
-
-export interface DateTimeProps extends InputProps {
-  mode?: "date" | "time";
-  display?: "default" | "spinner";
-  maximumDate?: Date;
-  minimumDate?: Date;
-  theme?: ThemeProps;
-  value: any;
-  onFocus?: (e: any) => void;
-}
+import Icon from "../icon";
+import Input from "../input";
 
 export default observer((props: DateTimeProps) => {
-  const {
-    value,
-    style,
-    mode,
-    display,
-    minimumDate,
-    maximumDate,
-    onFocus,
-    onChangeText
-  } = props;
+  const { value, style, mode, onFocus, onChangeText } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -67,7 +49,7 @@ export default observer((props: DateTimeProps) => {
     }
   }, []);
   useEffect(() => {
-    onFocus && onFocus(meta.isShown);
+    onFocus && onFocus(meta.isShown as any);
   }, [meta.isShown]);
 
   return (
@@ -82,12 +64,10 @@ export default observer((props: DateTimeProps) => {
           if (ref) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            const scrollH =
-              ref.parentElement.parentElement.parentElement.scrollHeight;
-            if (dimensions.y + dimensions.height + 350 > scrollH) {
-              meta.position = "bottom";
-            } else {
+            if (dimensions.top - 250 > 0) {
               meta.position = "top";
+            } else {
+              meta.position = "bottom";
             }
             meta.scrollH = parentDimension.bottom;
           }
@@ -176,7 +156,7 @@ export default observer((props: DateTimeProps) => {
             <Icon
               source="Ionicons"
               name={mode === "time" ? "md-time" : "md-calendar"}
-              color="#3a3a3a"
+              color={theme.dark}
               size={20}
             />
           </TouchableOpacity>
@@ -212,39 +192,46 @@ export default observer((props: DateTimeProps) => {
 });
 
 const CalendarDropdown = observer((props: any) => {
-  const { meta, theme, onDayPress } = props;
+  const { meta, theme, onDayPress, minDate, maxDate } = props;
 
   return (
     <>
       {meta.isShown && (
-        <View
+        <div
           style={{
             position: "absolute",
-            bottom: meta.position === "bottom" ? 35 : null,
-            top: meta.position === "top" ? 35 : null,
+            bottom: meta.position === "top" ? 35 : null,
+            top: meta.position === "bottom" ? 35 : null,
             left: 0,
             right: 0,
             minHeight: 40,
             maxHeight: 350,
             backgroundColor: "#fff",
             zIndex: 9,
-            borderTopLeftRadius: meta.position === "bottom" ? 5 : 0,
-            borderTopRightRadius: meta.position === "bottom" ? 5 : 0,
-            borderBottomLeftRadius: meta.position === "top" ? 5 : 0,
-            borderBottomRightRadius: meta.position === "top" ? 5 : 0,
+            borderTopLeftRadius: meta.position === "top" ? 8 : 0,
+            borderTopRightRadius: meta.position === "top" ? 8 : 0,
+            borderBottomLeftRadius: meta.position === "bottom" ? 8 : 0,
+            borderBottomRightRadius: meta.position === "bottom" ? 8 : 0,
             display: "flex",
             alignItems: "stretch",
             justifyContent: "flex-start",
             borderWidth: 1,
             borderColor: theme.light,
             borderStyle: "solid",
-            borderTopWidth: meta.position === "bottom" ? 1 : 0,
-            borderBottomWidth: meta.position === "top" ? 1 : 0,
-            padding: 5
+            borderTopWidth: meta.position === "top" ? 1 : 0,
+            borderBottomWidth: meta.position === "bottom" ? 1 : 0,
+            padding: 5,
+            boxShadow:
+              meta.position === "top"
+                ? "0px -9px 10px #d4d4d4"
+                : "0px 9px 10px #d4d4d4"
           }}
         >
           <Calendar
-            onDayPress={day => onDayPress(day.dateString)}
+            onDayPress={day => {
+              onDayPress(day.dateString);
+              meta.isShown = false;
+            }}
             style={styles.calendar}
             markedDates={{
               [dateToString(meta.value)]: {
@@ -253,8 +240,10 @@ const CalendarDropdown = observer((props: any) => {
                 selectedDotColor: "orange"
               }
             }}
+            minDate={dateToString(minDate)}
+            maxDate={dateToString(maxDate)}
           />
-        </View>
+        </div>
       )}
     </>
   );
@@ -262,7 +251,8 @@ const CalendarDropdown = observer((props: any) => {
 
 const styles = StyleSheet.create({
   calendar: {
-    height: 305
+    height: 305,
+    flex: 1
   },
   text: {
     textAlign: "center",

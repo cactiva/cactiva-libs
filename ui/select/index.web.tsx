@@ -11,18 +11,7 @@ import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch } from "../../utils";
 import Icon from "../icon";
 import Input, { InputProps } from "../input";
-
-export interface SelectItemProps {
-  text: any;
-  value: any;
-}
-
-export interface SelectProps extends InputProps {
-  items: SelectItemProps[];
-  onSelect: (item: any) => void;
-  theme?: ThemeProps;
-  onFocus?: (e: any) => void;
-}
+import { SelectProps } from ".";
 
 export default observer((props: SelectProps) => {
   const { value, placeholder, items, style, onFocus } = props;
@@ -43,7 +32,7 @@ export default observer((props: SelectProps) => {
   }, []);
 
   useEffect(() => {
-    onFocus && onFocus(meta.isShown);
+    onFocus && onFocus(meta.isShown as any);
   }, [meta.isShown]);
 
   return (
@@ -58,12 +47,10 @@ export default observer((props: SelectProps) => {
           if (ref) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            const scrollH =
-              ref.parentElement.parentElement.parentElement.scrollHeight;
-            if (dimensions.y + dimensions.height + 250 > scrollH) {
-              meta.position = "bottom";
-            } else {
+            if (dimensions.top - 250 > 0) {
               meta.position = "top";
+            } else {
+              meta.position = "bottom";
             }
             meta.scrollH = parentDimension.bottom;
           }
@@ -113,7 +100,7 @@ export default observer((props: SelectProps) => {
               <Icon
                 source="Entypo"
                 name={meta.isShown ? "chevron-down" : "chevron-up"}
-                color="#3a3a3a"
+                color={theme.dark}
                 size={20}
               />
             </TouchableOpacity>
@@ -200,34 +187,35 @@ const ModalItems = observer((props: any) => {
   return (
     <>
       {meta.isShown && (
-        <View
+        <div
           style={{
             position: "absolute",
-            bottom: meta.position === "bottom" ? 35 : null,
-            top: meta.position === "top" ? 35 : null,
+            bottom: meta.position === "top" ? 35 : null,
+            top: meta.position === "bottom" ? 35 : null,
             left: 0,
             right: 0,
             minHeight: 40,
             maxHeight: 250,
             backgroundColor: "#fff",
             zIndex: 9,
-            borderTopLeftRadius: meta.position === "bottom" ? 5 : 0,
-            borderTopRightRadius: meta.position === "bottom" ? 5 : 0,
-            borderBottomLeftRadius: meta.position === "top" ? 5 : 0,
-            borderBottomRightRadius: meta.position === "top" ? 5 : 0,
+            borderTopLeftRadius: meta.position === "top" ? 8 : 0,
+            borderTopRightRadius: meta.position === "top" ? 8 : 0,
+            borderBottomLeftRadius: meta.position === "bottom" ? 8 : 0,
+            borderBottomRightRadius: meta.position === "bottom" ? 8 : 0,
             display: "flex",
             alignItems: "stretch",
             justifyContent: "flex-start",
             borderWidth: 1,
             borderColor: theme.light,
             borderStyle: "solid",
-            borderTopWidth: meta.position === "bottom" ? 1 : 0,
-            borderBottomWidth: meta.position === "top" ? 1 : 0,
-            padding: 5
+            borderTopWidth: meta.position === "top" ? 1 : 0,
+            borderBottomWidth: meta.position === "bottom" ? 1 : 0,
+            padding: 5,
+            boxShadow: "0px 9px 10px #d4d4d4"
           }}
         >
           <RenderItem {...props} meta={meta} theme={theme} />
-        </View>
+        </div>
       )}
     </>
   );

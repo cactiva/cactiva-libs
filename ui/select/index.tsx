@@ -11,9 +11,10 @@ import {
 } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { fuzzyMatch, uuid } from "../../utils";
+import { fuzzyMatch } from "../../utils";
 import Icon from "../icon";
 import Input, { InputProps } from "../input";
+import _ from "lodash";
 
 export interface SelectItemProps {
   text: any;
@@ -33,6 +34,10 @@ export default observer((props: SelectProps) => {
     value: null,
     filter: ""
   });
+  const theme = {
+    ...DefaultTheme,
+    ..._.get(props, "theme", {})
+  };
   useEffect(() => {
     if (value) meta.value = items.find(x => x.value === value);
   }, []);
@@ -78,19 +83,18 @@ export default observer((props: SelectProps) => {
           <Icon
             source="Entypo"
             name={meta.isShown ? "chevron-down" : "chevron-up"}
-            color="#3a3a3a"
+            color={theme.dark}
             size={24}
           />
         </View>
       </TouchableOpacity>
-      <ModalItems meta={meta} {...props} />
+      <ModalItems meta={meta} {...props} theme={theme} />
     </>
   );
 });
 
 const ModalItems = observer((props: any) => {
-  const { meta, placeholder, items, value, onSelect } = props;
-  const theme = DefaultTheme;
+  const { meta, theme } = props;
   const dim = useDimensions().window;
   return (
     <Modal

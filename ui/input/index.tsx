@@ -35,7 +35,8 @@ export default observer((props: InputProps) => {
     ...props,
     style,
     value: value || "",
-    onChangeText: setValue
+    onChangeText: setValue,
+    onChange: e => e.stopPropagation()
   };
   switch (type) {
     case "password":
@@ -68,5 +69,6 @@ const styleInput = {
   borderWidth: 0,
   margin: 0,
   color: "#3a3a3a",
-  flexGrow: 1
+  flexGrow: 1,
+  minHeight: 27
 };
