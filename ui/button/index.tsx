@@ -43,6 +43,7 @@ export default observer((props: ButtonProps) => {
         display: "flex",
         alignItems: "stretch",
         opacity: disabled ? 0.8 : 1,
+        minWidth: 60,
         ...(_.get(props, "style", {}) as any)
       }}
     >
@@ -67,8 +68,8 @@ export default observer((props: ButtonProps) => {
               color: "#fff",
               padding: 10,
               textAlign: "center",
-              paddingTop: 15,
-              paddingBottom: 15,
+              fontWeight: "bold",
+              fontSize: 18,
               ..._.get(styles, "label", {})
             }}
           >

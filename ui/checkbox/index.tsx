@@ -43,7 +43,6 @@ export default observer((props: CheckboxProps) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: 5,
             backgroundColor: checked ? theme.primary : theme.light,
             borderWidth: 1,
             borderStyle: "solid",
@@ -59,6 +58,9 @@ export default observer((props: CheckboxProps) => {
             name="check"
             size={16}
             color={checked ? "white" : theme.light}
+            style={{
+              padding: 0
+            }}
           />
         </View>
         <Text
