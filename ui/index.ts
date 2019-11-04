@@ -10,4 +10,6 @@ export { default as Checkbox } from "./checkbox";
 export { default as CheckboxGroup } from "./checkbox-group";
 export { default as Radio } from "./radio";
 export { default as RadioGroup } from "./radio-group";
+export { default as Spinner } from "./spinner";
+export { default as Button } from "./button";
 export { default as BottomNavigation } from "./bottom-navigation";
