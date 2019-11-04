@@ -7,7 +7,7 @@ import {
   View
 } from "react-native";
 import { ThemeProps, DefaultTheme } from "../../theme";
-import Icon, { IconProps } from "../icon";
+import Icon, { IconProps } from "../Icon";
 import _ from "lodash";
 
 interface ButtonStyles {

@@ -5,8 +5,8 @@ import { Calendar } from "react-native-calendars";
 import { DateTimeProps } from ".";
 import { DefaultTheme } from "../../theme";
 import { dateToString } from "../../utils";
-import Icon from "../icon";
-import Input from "../input";
+import Icon from "../Icon";
+import Input from "../Input";
 
 export default observer((props: DateTimeProps) => {
   const { value, style, mode, onFocus, onChangeText } = props;

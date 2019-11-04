@@ -1,9 +1,9 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { View } from "react-native";
-import Checkbox from "../checkbox";
+import Checkbox from "../Checkbox";
 import { uuid } from "../../utils";
-import { RadioProps } from "../radio";
+import { RadioProps } from "../Radio";
 
 export interface CheckboxGroupProps {
   value?: string[];

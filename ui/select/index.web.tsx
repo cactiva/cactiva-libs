@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { DefaultTheme, ThemeProps } from "../../theme";
-import { fuzzyMatch } from "../../utils";
-import Icon from "../icon";
-import Input, { InputProps } from "../input";
 import { SelectProps } from ".";
+import { DefaultTheme } from "../../theme";
+import { fuzzyMatch } from "../../utils";
+import Icon from "../Icon";
+import Input from "../Input";
 
 export default observer((props: SelectProps) => {
   const { value, placeholder, items, style, onFocus } = props;

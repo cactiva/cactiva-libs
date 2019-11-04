@@ -2,10 +2,10 @@ import { observer, useObservable } from "mobx-react-lite";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
-import Icon from "../icon";
+import Icon from "../Icon";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { scale, uuid } from "../../utils";
-import { IconProps } from "../icon";
+import { IconProps } from "../Icon";
 
 export interface UIBottomNavProps {
   menus: {

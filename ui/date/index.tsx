@@ -11,8 +11,8 @@ import {
   TouchableWithoutFeedback
 } from "react-native";
 import { ThemeProps, DefaultTheme } from "../../theme";
-import Input, { InputProps } from "../input";
-import Icon from "../icon";
+import Input, { InputProps } from "../Input";
+import Icon from "../Icon";
 import { dateToString } from "../../utils";
 import _ from "lodash";
 

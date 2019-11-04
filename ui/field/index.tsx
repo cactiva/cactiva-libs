@@ -4,13 +4,14 @@ import React from "react";
 import { Platform, Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import DatePicker from "../date";
-import Icon, { IconProps } from "../icon";
-import Input, { InputProps, InputType } from "../input";
-import { RadioProps, RadioModeType } from "../radio";
-import RadioGroup from "../radio-group";
-import Select, { SelectItemProps } from "../select";
-import CheckboxGroup from "../checkbox-group";
+import DatePicker from "../Date";
+import Icon, { IconProps } from "../Icon";
+import Input, { InputProps, InputType } from "../Input";
+import { RadioProps, RadioModeType } from "../Radio";
+import RadioGroup from "../RadioGroup";
+import Select, { SelectItemProps } from "../Select";
+import CheckboxGroup from "../CheckboxGroup";
+import Camera, { CameraProps } from "../Camera";
 
 interface StylesFieldProps {
   root?: any;
@@ -25,7 +26,13 @@ export interface FieldProps {
   field?: InputProps;
   value?: any;
   setValue?: (value: any) => void;
-  type?: InputType | "select" | "date" | "radio-group" | "checkbox-group";
+  type?:
+    | InputType
+    | "select"
+    | "date"
+    | "radio-group"
+    | "checkbox-group"
+    | "camera";
   option?: {
     select?: {
       items: SelectItemProps[];
@@ -40,6 +47,7 @@ export interface FieldProps {
       style?: any;
       mode?: RadioModeType;
     };
+    camera?: CameraProps;
   };
   iconStart?: IconProps;
   iconEnd?: IconProps;
@@ -143,6 +151,16 @@ export default observer((props: FieldProps) => {
       labelText = label;
       Component = (
         <CheckboxGroup {...option.checkbox} onChange={onChange} value={value} />
+      );
+      break;
+    case "camera":
+      labelText = label;
+      Component = (
+        <Camera
+          {..._.get(option, "camera", {})}
+          onCapture={onChange}
+          value={value}
+        />
       );
       break;
   }

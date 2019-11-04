@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import Icon from "../icon";
+import Icon from "../Icon";
 
 export interface CheckboxProps {
   text?: string;

@@ -12,8 +12,8 @@ import {
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch } from "../../utils";
-import Icon from "../icon";
-import Input, { InputProps } from "../input";
+import Icon from "../Icon";
+import Input, { InputProps } from "../Input";
 import _ from "lodash";
 
 export interface SelectItemProps {

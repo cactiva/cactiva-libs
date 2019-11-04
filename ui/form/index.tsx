@@ -5,7 +5,7 @@ import { Platform, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { uuid } from "../../utils";
-import Field, { FieldProps } from "../field";
+import Field, { FieldProps } from "../Field";
 
 export interface FormFieldProps extends FieldProps {
   key: string;
