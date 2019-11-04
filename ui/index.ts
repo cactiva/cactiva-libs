@@ -13,4 +13,5 @@ export { default as RadioGroup } from "./RadioGroup";
 export { default as Spinner } from "./Spinner";
 export { default as Button } from "./Button";
 export { default as Camera } from "./Camera";
+export { default as Location } from "./Location";
 export { default as BottomNavigation } from "./BottomNavigation";

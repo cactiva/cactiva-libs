@@ -12,6 +12,7 @@ import RadioGroup from "../RadioGroup";
 import Select, { SelectItemProps } from "../Select";
 import CheckboxGroup from "../CheckboxGroup";
 import Camera, { CameraProps } from "../Camera";
+import Location from "../Location";
 
 interface StylesFieldProps {
   root?: any;
@@ -32,7 +33,8 @@ export interface FieldProps {
     | "date"
     | "radio-group"
     | "checkbox-group"
-    | "camera";
+    | "camera"
+    | "location";
   option?: {
     select?: {
       items: SelectItemProps[];
@@ -158,6 +160,16 @@ export default observer((props: FieldProps) => {
       Component = (
         <Camera
           {..._.get(option, "camera", {})}
+          onCapture={onChange}
+          value={value}
+        />
+      );
+      break;
+    case "location":
+      labelText = label;
+      Component = (
+        <Location
+          // {..._.get(option, "camera", {})}
           onCapture={onChange}
           value={value}
         />
