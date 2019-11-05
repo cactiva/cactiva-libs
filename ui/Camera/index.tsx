@@ -146,6 +146,8 @@ const ModalCamera = observer((props: any) => {
       });
     }
   };
+  const capture = !meta.photo || meta.resnap;
+
   return (
     <Modal
       animationType="slide"
@@ -243,63 +245,62 @@ const ModalCamera = observer((props: any) => {
             paddingRight: 5
           }}
         >
-          {!meta.photo ||
-            (meta.resnap && (
-              <View
+          {capture && (
+            <View
+              style={{
+                flex: 1,
+                display: "flex",
+                justifyContent: "flex-start",
+                flexDirection: "row",
+                alignItems: "center"
+              }}
+            >
+              <TouchableOpacity
                 style={{
-                  flex: 1,
+                  padding: 10,
                   display: "flex",
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  alignItems: "center"
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: 60
+                }}
+                onPress={() => {
+                  if (meta.cameraProps.flashMode === "auto") {
+                    meta.cameraProps.flashMode = "on";
+                  } else if (meta.cameraProps.flashMode === "on") {
+                    meta.cameraProps.flashMode = "off";
+                  } else {
+                    meta.cameraProps.flashMode = "auto";
+                  }
                 }}
               >
-                <TouchableOpacity
-                  style={{
-                    padding: 10,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: 60
-                  }}
-                  onPress={() => {
-                    if (meta.cameraProps.flashMode === "auto") {
-                      meta.cameraProps.flashMode = "on";
-                    } else if (meta.cameraProps.flashMode === "on") {
-                      meta.cameraProps.flashMode = "off";
-                    } else {
-                      meta.cameraProps.flashMode = "auto";
-                    }
-                  }}
-                >
-                  {meta.cameraProps.flashMode === "auto" ? (
-                    <Text
-                      style={{
-                        color: "white",
-                        fontSize: 16,
-                        fontWeight: "bold"
-                      }}
-                    >
-                      Auto
-                    </Text>
-                  ) : meta.cameraProps.flashMode === "on" ? (
-                    <Icon
-                      source="Ionicons"
-                      name="ios-flash"
-                      color="white"
-                      size={40}
-                    />
-                  ) : (
-                    <Icon
-                      source="Ionicons"
-                      name="ios-flash-off"
-                      color="white"
-                      size={40}
-                    />
-                  )}
-                </TouchableOpacity>
-              </View>
-            ))}
+                {meta.cameraProps.flashMode === "auto" ? (
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 16,
+                      fontWeight: "bold"
+                    }}
+                  >
+                    Auto
+                  </Text>
+                ) : meta.cameraProps.flashMode === "on" ? (
+                  <Icon
+                    source="Ionicons"
+                    name="ios-flash"
+                    color="white"
+                    size={40}
+                  />
+                ) : (
+                  <Icon
+                    source="Ionicons"
+                    name="ios-flash-off"
+                    color="white"
+                    size={40}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View
             style={{
@@ -344,41 +345,40 @@ const ModalCamera = observer((props: any) => {
               </View>
             </TouchableOpacity>
           </View>
-          {!meta.photo ||
-            (meta.resnap && (
-              <View
+          {capture && (
+            <View
+              style={{
+                flex: 1,
+                display: "flex",
+                justifyContent: "flex-end",
+                flexDirection: "row",
+                alignItems: "center"
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  meta.cameraProps.type =
+                    meta.cameraProps.type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back;
+                }}
                 style={{
-                  flex: 1,
+                  padding: 10,
                   display: "flex",
-                  justifyContent: "flex-end",
-                  flexDirection: "row",
-                  alignItems: "center"
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: 60
                 }}
               >
-                <TouchableOpacity
-                  onPress={() => {
-                    meta.cameraProps.type =
-                      meta.cameraProps.type === Camera.Constants.Type.back
-                        ? Camera.Constants.Type.front
-                        : Camera.Constants.Type.back;
-                  }}
-                  style={{
-                    padding: 10,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: 60
-                  }}
-                >
-                  <Icon
-                    source="Ionicons"
-                    name="ios-reverse-camera"
-                    color="white"
-                    size={40}
-                  />
-                </TouchableOpacity>
-              </View>
-            ))}
+                <Icon
+                  source="Ionicons"
+                  name="ios-reverse-camera"
+                  color="white"
+                  size={40}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </Modal>

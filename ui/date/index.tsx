@@ -179,13 +179,13 @@ const DatePickerModal = observer((props: any) => {
     const loadPicker = async () => {
       try {
         const { action, year, month, day }: any = await DatePickerAndroid.open({
-          date: new Date(meta.value),
+          date: meta.value,
           mode: mode || "calendar",
           minDate: minDate && minDate,
           maxDate: maxDate && maxDate
         });
         if (action !== DatePickerAndroid.dismissedAction) {
-          onChangePicker(new Date(`${year}-${month}-${day}`));
+          onChangePicker(new Date(year, month, day));
         }
       } catch ({ code, message }) {
         console.warn("Cannot open date picker", message);
