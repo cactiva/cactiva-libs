@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
 import {
@@ -13,18 +14,22 @@ import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch } from "../../utils";
 import Icon from "../Icon";
-import Input, { InputProps } from "../Input";
-import _ from "lodash";
+import Input from "../Input";
 
 export interface SelectItemProps {
   text: any;
   value: any;
 }
 
-export interface SelectProps extends InputProps {
+export interface SelectProps {
+  value?: any;
+  placeholder?: string;
   items: SelectItemProps[];
-  onSelect: (item: any) => void;
+  onSelect?: (item: any) => void;
+  fieldType?: "select";
+  style?: any;
   theme?: ThemeProps;
+  onFocus?: (e: any) => void;
 }
 
 export default observer((props: SelectProps) => {

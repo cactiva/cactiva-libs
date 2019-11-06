@@ -4,8 +4,7 @@ import React from "react";
 import { Platform, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { uuid } from "../../utils";
-import Field, { FieldProps } from "../Field";
+import { FieldProps } from "../Field";
 
 export interface FormFieldProps extends FieldProps {
   key: string;
@@ -13,56 +12,34 @@ export interface FormFieldProps extends FieldProps {
 
 export interface FormProps {
   data: any;
-  fields: FormFieldProps[];
-  setValue?: (value: any, key: any) => void;
+  setValue?: (value: any, path: any) => void;
   children?: any;
   style?: any;
   theme?: ThemeProps;
 }
 
 export default observer((props: FormProps) => {
-  const { data, fields, setValue, children } = props;
+  const { data, setValue, children } = props;
   const dim = useDimensions().window;
   const platform =
     dim.width > 780 && Platform.OS === "web" ? "desktop" : "mobile";
-  const theme = {
-    ...DefaultTheme,
-    ..._.get(props, "theme", {})
-  };
   const style = {
+    zIndex: Platform.OS === "web" ? 9 : 1,
     ...(platform === "desktop" ? styleFormDesktop : styleFormMobile),
     ..._.get(props, "style", {})
   };
-  return (
-    <View style={style}>
-      {fields.map(item => {
-        return (
-          <RenderField
-            item={item}
-            setValue={setValue}
-            data={data}
-            theme={theme}
-            key={uuid()}
-          />
-        );
-      })}
-      {children}
-    </View>
+  const defaultSetValue = (value: any, path: any) => {
+    data[path] = value;
+    setValue && setValue(value, path);
+  };
+  const childrenWithProps = React.Children.map(children, child =>
+    React.cloneElement(child, {
+      value: data[child.props.path],
+      setValue: (value: any) => defaultSetValue(value, child.props.path),
+      ...child.props
+    })
   );
-});
-
-const RenderField = observer((props: any) => {
-  const { theme, item, setValue, data } = props;
-  return (
-    <Field
-      theme={theme}
-      {...item}
-      value={data[item.key]}
-      setValue={v => {
-        setValue(v, item.key);
-      }}
-    />
-  );
+  return <View style={style}>{childrenWithProps}</View>;
 });
 
 const styleFormDesktop = {

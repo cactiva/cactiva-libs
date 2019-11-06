@@ -13,6 +13,7 @@ export interface LocationProps {
   onCapture?: (value: { latitude: number; longitude: number }) => void;
   theme?: ThemeProps;
   style?: any;
+  fieldType?: "location";
 }
 
 export default observer((props: LocationProps) => {

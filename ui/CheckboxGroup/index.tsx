@@ -10,6 +10,7 @@ export interface CheckboxGroupProps {
   items?: RadioProps[];
   onChange?: (value: any) => void;
   style?: any;
+  fieldType?: "checkbox-group";
 }
 
 export default observer((props: CheckboxGroupProps) => {

@@ -10,6 +10,7 @@ export interface RadioGroupProps {
   items?: RadioProps[];
   onChange?: (value: any) => void;
   style?: any;
+  fieldType?: "radio-group";
 }
 
 export default observer((props: RadioGroupProps) => {

@@ -75,7 +75,7 @@ export default observer((props: DateTimeProps) => {
           if (ref) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            if (dimensions.top - 250 > 0) {
+            if (dimensions.top - 350 > 0) {
               meta.position = "top";
             } else {
               meta.position = "bottom";
@@ -238,6 +238,8 @@ const CalendarDropdown = observer((props: any) => {
             borderTopWidth: meta.position === "top" ? 1 : 0,
             borderBottomWidth: meta.position === "bottom" ? 1 : 0,
             padding: 5,
+            marginTop: meta.position === "top" ? 10 : 0,
+            marginBottom: meta.position === "bottom" ? 10 : 0,
             boxShadow:
               meta.position === "top"
                 ? "0px -9px 10px #d4d4d4"
@@ -268,6 +270,14 @@ const CalendarDropdown = observer((props: any) => {
                 size={24}
               />
             )}
+            theme={{
+              textDayFontWeight: "300",
+              textMonthFontWeight: "bold",
+              textDayHeaderFontWeight: "300",
+              textDayFontSize: 14,
+              textMonthFontSize: 14,
+              textDayHeaderFontSize: 14
+            }}
           />
         </div>
       )}

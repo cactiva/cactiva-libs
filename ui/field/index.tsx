@@ -4,15 +4,11 @@ import React from "react";
 import { Platform, Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import DatePicker from "../Date";
+import { CameraProps } from "../Camera";
 import Icon, { IconProps } from "../Icon";
-import Input, { InputProps, InputType } from "../Input";
-import { RadioProps, RadioModeType } from "../Radio";
-import RadioGroup from "../RadioGroup";
-import Select, { SelectItemProps } from "../Select";
-import CheckboxGroup from "../CheckboxGroup";
-import Camera, { CameraProps } from "../Camera";
-import Location from "../Location";
+import { InputProps, InputType } from "../Input";
+import { RadioModeType, RadioProps } from "../Radio";
+import { SelectItemProps } from "../Select";
 
 interface StylesFieldProps {
   root?: any;
@@ -24,6 +20,7 @@ interface StylesFieldProps {
 
 export interface FieldProps {
   label: string;
+  path: string;
   field?: InputProps;
   value?: any;
   setValue?: (value: any) => void;
@@ -56,6 +53,7 @@ export interface FieldProps {
   theme?: ThemeProps;
   style?: any;
   styles?: StylesFieldProps;
+  children?: any;
 }
 
 export default observer((props: FieldProps) => {
@@ -68,6 +66,7 @@ export default observer((props: FieldProps) => {
     type,
     style,
     styles,
+    children,
     option
   } = props;
   let field = props.field;
@@ -98,88 +97,87 @@ export default observer((props: FieldProps) => {
         value = !!value ? parseInt(value) : value;
         break;
     }
-    setValue(value);
+    setValue && setValue(value);
   };
-  let Component;
-  switch (type) {
+  const fieldType = _.get(children, "props.fieldType", "input");
+  let childProps;
+  switch (fieldType) {
     default:
       if (!field)
         field = {
           type: type as any,
-          style: {}
+          style: {},
+          fieldType: "input"
         };
       field.type = type as any;
-      Component = (
-        <Input
-          {...field}
-          value={value}
-          onChangeText={onChange}
-          placeholder={placeholder}
-          onFocus={() => (meta.focus = true)}
-          onBlur={() => (meta.focus = false)}
-        />
-      );
+      field.fieldType = "input";
+      childProps = {
+        ...field,
+        value: value,
+        onChangeText: onChange,
+        placeholder: placeholder,
+        onFocus: () => (meta.focus = true),
+        onBlur: () => (meta.focus = false)
+      };
       break;
     case "select":
-      Component = (
-        <Select
-          {...field}
-          items={option.select.items}
-          value={value}
-          placeholder={placeholder}
-          onSelect={item => onChange(item.value)}
-          onFocus={(e: any) => (meta.focus = e)}
-        />
-      );
+      childProps = {
+        ...field,
+        value: value,
+        placeholder: placeholder,
+        onSelect: value => onChange(value),
+        onFocus: (e: any) => (meta.focus = e)
+      };
       break;
     case "date":
       labelText = label;
-      Component = (
-        <DatePicker
-          {...field}
-          value={value}
-          onChange={value => onChange(value)}
-          onFocus={(e: any) => (meta.focus = e)}
-        />
-      );
+      childProps = {
+        ...field,
+        value: value,
+        onChange: value => onChange(value),
+        onFocus: (e: any) => (meta.focus = e)
+      };
       break;
     case "radio-group":
       labelText = label;
-      Component = (
-        <RadioGroup {...option.radio} onChange={onChange} value={value} />
-      );
+      childProps = {
+        onChange: onChange,
+        value: value
+      };
       break;
     case "checkbox-group":
       labelText = label;
-      Component = (
-        <CheckboxGroup {...option.checkbox} onChange={onChange} value={value} />
-      );
+      childProps = {
+        onChange: onChange,
+        value: value
+      };
       break;
     case "camera":
       labelText = label;
-      Component = (
-        <Camera
-          {..._.get(option, "camera", {})}
-          onCapture={onChange}
-          value={value}
-        />
-      );
+      childProps = {
+        onCapture: onChange,
+        value: value
+      };
       break;
     case "location":
       labelText = label;
-      Component = (
-        <Location
-          // {..._.get(option, "camera", {})}
-          onCapture={onChange}
-          value={value}
-        />
-      );
+      childProps = {
+        onCapture: onChange,
+        value: value
+      };
       break;
   }
+  const childrenWithProps = React.Children.map(children, child =>
+    React.cloneElement(child, {
+      ...child.props,
+      ...childProps
+    })
+  );
   return (
     <View
       style={{
-        zIndex: ["select", "date"].indexOf(type) > -1 && meta.focus ? 9 : 1,
+        zIndex:
+          ["select", "date"].indexOf(fieldType) > -1 && meta.focus ? 9 : 1,
         marginTop: 5,
         marginBottom: 10,
         marginLeft: 0,
@@ -239,7 +237,7 @@ export default observer((props: FieldProps) => {
             />
           </View>
         )}
-        {Component}
+        {childrenWithProps}
         {!!isIconEnd && (
           <View
             style={{

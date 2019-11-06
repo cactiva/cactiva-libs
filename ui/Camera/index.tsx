@@ -14,6 +14,7 @@ export interface CameraProps {
   onCapture?: (value: any) => void;
   style?: any;
   theme?: ThemeProps;
+  fieldType?: "camera";
 }
 
 export default observer((props: CameraProps) => {

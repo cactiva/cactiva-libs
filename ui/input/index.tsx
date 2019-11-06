@@ -10,6 +10,7 @@ export type InputType =
   | "decimal"
   | "multiline";
 export interface InputProps extends TextInputProps {
+  fieldType?: "input";
   type?: InputType;
   style?: any;
 }
@@ -30,9 +31,11 @@ export default observer((props: InputProps) => {
   };
   let style = { ...styleInput, ...props.style };
 
+  const cprops = { ...props };
+  delete cprops.fieldType;
   let ComponentProps: TextInputProps = {
     returnKeyType: "next",
-    ...props,
+    ...cprops,
     style,
     value: value || "",
     onChangeText: setValue
@@ -60,7 +63,6 @@ export default observer((props: InputProps) => {
       };
       break;
   }
-
   return <TextInput {...ComponentProps} />;
 });
 

@@ -16,13 +16,16 @@ import Icon from "../Icon";
 import { dateToString } from "../../utils";
 import _ from "lodash";
 
-export interface DateTimeProps extends InputProps {
+export interface DateTimeProps {
   mode?: "date" | "time";
-  // display?: "default" | "spinner";
+  onChangeText?: (value: any) => void;
+  fieldType?: "date";
   maxDate?: Date;
   minDate?: Date;
   theme?: ThemeProps;
-  value: any;
+  style?: any;
+  value?: any;
+  onFocus?: (e: any) => void;
 }
 
 export default observer((props: DateTimeProps) => {
