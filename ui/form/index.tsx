@@ -5,13 +5,14 @@ import { Platform, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import { FieldProps } from "../Field";
+import { uuid } from "../../utils";
 
 export interface FormFieldProps extends FieldProps {
   key: string;
 }
 
 export interface FormProps {
-  data: any;
+  data?: any;
   setValue?: (value: any, path: any) => void;
   children?: any;
   style?: any;
@@ -19,7 +20,7 @@ export interface FormProps {
 }
 
 export default observer((props: FormProps) => {
-  const { data, setValue, children } = props;
+  const { children, data, setValue } = props;
   const dim = useDimensions().window;
   const platform =
     dim.width > 780 && Platform.OS === "web" ? "desktop" : "mobile";
@@ -28,18 +29,34 @@ export default observer((props: FormProps) => {
     ...(platform === "desktop" ? styleFormDesktop : styleFormMobile),
     ..._.get(props, "style", {})
   };
-  const defaultSetValue = (value: any, path: any) => {
-    data[path] = value;
-    setValue && setValue(value, path);
-  };
-  const childrenWithProps = React.Children.map(children, child =>
-    React.cloneElement(child, {
-      value: data[child.props.path],
-      setValue: (value: any) => defaultSetValue(value, child.props.path),
-      ...child.props
-    })
+
+  return (
+    <View style={style}>
+      {children.map((el: any) => {
+        return (
+          <RenderChild
+            data={data}
+            setValue={setValue}
+            children={el}
+            key={uuid()}
+          />
+        );
+      })}
+    </View>
   );
-  return <View style={style}>{childrenWithProps}</View>;
+});
+
+const RenderChild = observer((props: any) => {
+  const { data, children, setValue } = props;
+  const defaultSetValue = (value: any, path: any) => {
+    if (setValue) setValue(value, path);
+    else data[path] = value;
+  };
+  return React.cloneElement(children, {
+    value: data[children.props.path],
+    setValue: (value: any) => defaultSetValue(value, children.props.path),
+    ...children.props
+  });
 });
 
 const styleFormDesktop = {

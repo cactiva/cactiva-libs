@@ -1,11 +1,12 @@
 import React from "react";
 import {
-  View,
-  ViewProps,
   Animated,
   Platform,
+  SafeAreaView,
+  StatusBar,
   StyleSheet,
-  SafeAreaView
+  View,
+  ViewProps
 } from "react-native";
 
 interface CustomViewProps extends ViewProps {
@@ -16,9 +17,10 @@ interface CustomViewProps extends ViewProps {
 
 export default (props: CustomViewProps) => {
   const { safeAreaView, animatedView } = props;
+  const statusbar = StatusBar.currentHeight || 0;
   const safeAreaStyle = StyleSheet.flatten([
     {
-      paddingTop: Platform.OS === "android" ? 35 : 0
+      paddingTop: Platform.OS === "android" ? statusbar : 0
     },
     props.style
   ]);

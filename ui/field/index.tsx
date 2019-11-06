@@ -6,6 +6,7 @@ import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon, { IconProps } from "../Icon";
 import { InputProps, InputType } from "../Input";
+import { uuid } from "../../utils";
 
 interface StylesFieldProps {
   root?: any;
@@ -36,7 +37,7 @@ export interface FieldProps {
   styles?: StylesFieldProps;
   children?: any;
   isRequired?: boolean;
-  isValidate?: (e: boolean) => void;
+  validate?: (value: any) => void;
 }
 
 export default observer((props: FieldProps) => {
@@ -51,7 +52,7 @@ export default observer((props: FieldProps) => {
     styles,
     children,
     isRequired,
-    isValidate
+    validate
   } = props;
   let field = props.field;
   const dim = useDimensions().window;
@@ -60,7 +61,8 @@ export default observer((props: FieldProps) => {
   const meta = useObservable({
     focus: false,
     validate: false,
-    error: false
+    error: false,
+    errorMessage: []
   });
   let labelText =
     meta.focus || !!value || meta.error
@@ -90,13 +92,23 @@ export default observer((props: FieldProps) => {
     }
     if (isRequired && !value) {
       meta.error = true;
-      isValidate && isValidate(false);
+      meta.errorMessage = [`${label} is required.`];
     }
     if (meta.error && !!value) {
       meta.error = false;
-      isValidate && isValidate(true);
+      meta.errorMessage = [];
     }
     if (!meta.validate) meta.validate = true;
+    if (validate) {
+      let res: any = validate(value);
+      if (res !== false && res !== undefined) {
+        meta.error = true;
+        meta.errorMessage = res;
+      } else {
+        meta.error = false;
+        meta.errorMessage = [];
+      }
+    }
     setValue && setValue(value);
   };
   const fieldType = _.get(children, "props.fieldType", "input");
@@ -260,18 +272,20 @@ export default observer((props: FieldProps) => {
           </View>
         )}
       </View>
-      {meta.error && (
-        <Text
-          style={{
-            paddingTop: 5,
-            paddingBottom: 5,
-            fontSize: 12,
-            color: theme.danger
-          }}
-        >
-          {label} is required.
-        </Text>
-      )}
+      {meta.error &&
+        meta.errorMessage.length > 0 &&
+        meta.errorMessage.map(message => (
+          <Text
+            key={uuid()}
+            style={{
+              paddingTop: 5,
+              fontSize: 12,
+              color: theme.danger
+            }}
+          >
+            *{message}
+          </Text>
+        ))}
     </View>
   );
 });

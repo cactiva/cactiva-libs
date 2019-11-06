@@ -15,3 +15,4 @@ export { default as Button } from "./Button";
 export { default as Camera } from "./Camera";
 export { default as Location } from "./Location";
 export { default as BottomNavigation } from "./BottomNavigation";
+export { default as Carousel } from "./Carousel";

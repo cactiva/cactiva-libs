@@ -1,12 +1,13 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View, StatusBar } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon from "../Icon";
 
 export interface UIHeaderProps {
   leftAction?: "Default" | object;
+  safeAreaView?: boolean;
   title: string | object;
   rightAction?: object;
   theme?: ThemeProps;
@@ -18,7 +19,8 @@ export interface UIHeaderProps {
 }
 
 export default observer((props: UIHeaderProps) => {
-  const { leftAction, title, rightAction, style, styles } = props;
+  const { leftAction, title, rightAction, style, styles, safeAreaView } = props;
+  const statusbar = StatusBar.currentHeight || 0;
   const theme = {
     ...DefaultTheme,
     ...props.theme
@@ -40,6 +42,7 @@ export default observer((props: UIHeaderProps) => {
         paddingLeft: 10,
         paddingRight: 10,
         borderStyle: "solid",
+        paddingTop: safeAreaView ? statusbar : 5,
         ...style,
         ...(styles ? styles.root : {})
       }}
