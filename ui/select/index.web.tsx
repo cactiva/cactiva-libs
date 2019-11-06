@@ -47,7 +47,7 @@ export default observer((props: SelectProps) => {
           if (ref) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            if (dimensions.top - 250 > 0) {
+            if (dimensions.top - 280 > 0) {
               meta.position = "top";
             } else {
               meta.position = "bottom";

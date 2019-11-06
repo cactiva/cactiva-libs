@@ -75,7 +75,7 @@ export default observer((props: DateTimeProps) => {
           if (ref) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            if (dimensions.top - 350 > 0) {
+            if (dimensions.top - 380 > 0) {
               meta.position = "top";
             } else {
               meta.position = "bottom";
