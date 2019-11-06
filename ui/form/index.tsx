@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { Platform, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
-import { DefaultTheme, ThemeProps } from "../../theme";
+import { ThemeProps } from "../../theme";
 import { FieldProps } from "../Field";
 
 export interface FormFieldProps extends FieldProps {

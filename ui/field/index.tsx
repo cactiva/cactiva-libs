@@ -4,11 +4,8 @@ import React from "react";
 import { Platform, Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { CameraProps } from "../Camera";
 import Icon, { IconProps } from "../Icon";
 import { InputProps, InputType } from "../Input";
-import { RadioModeType, RadioProps } from "../Radio";
-import { SelectItemProps } from "../Select";
 
 interface StylesFieldProps {
   root?: any;
@@ -32,28 +29,14 @@ export interface FieldProps {
     | "checkbox-group"
     | "camera"
     | "location";
-  option?: {
-    select?: {
-      items: SelectItemProps[];
-    };
-    radio?: {
-      items?: RadioProps[];
-      style?: any;
-      mode?: RadioModeType;
-    };
-    checkbox?: {
-      items?: RadioProps[];
-      style?: any;
-      mode?: RadioModeType;
-    };
-    camera?: CameraProps;
-  };
   iconStart?: IconProps;
   iconEnd?: IconProps;
   theme?: ThemeProps;
   style?: any;
   styles?: StylesFieldProps;
   children?: any;
+  isRequired?: boolean;
+  isValidate?: (e: boolean) => void;
 }
 
 export default observer((props: FieldProps) => {
@@ -67,16 +50,22 @@ export default observer((props: FieldProps) => {
     style,
     styles,
     children,
-    option
+    isRequired,
+    isValidate
   } = props;
   let field = props.field;
   const dim = useDimensions().window;
   const platform =
     dim.width > 780 && Platform.OS === "web" ? "desktop" : "mobile";
   const meta = useObservable({
-    focus: false
+    focus: false,
+    validate: false,
+    error: false
   });
-  let labelText = meta.focus || !!value ? label : " ";
+  let labelText =
+    meta.focus || !!value || meta.error
+      ? label + (isRequired === true ? " *" : "")
+      : " ";
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
   const isIconEnd =
@@ -90,13 +79,24 @@ export default observer((props: FieldProps) => {
     ? field && field.placeholder
       ? field.placeholder
       : ""
-    : label;
+    : !meta.error
+    ? label + (isRequired === true ? " *" : "")
+    : "";
   const onChange = value => {
     switch (type) {
       case "number":
         value = !!value ? parseInt(value) : value;
         break;
     }
+    if (isRequired && !value) {
+      meta.error = true;
+      isValidate && isValidate(false);
+    }
+    if (meta.error && !!value) {
+      meta.error = false;
+      isValidate && isValidate(true);
+    }
+    if (!meta.validate) meta.validate = true;
     setValue && setValue(value);
   };
   const fieldType = _.get(children, "props.fieldType", "input");
@@ -199,7 +199,7 @@ export default observer((props: FieldProps) => {
           fontSize: 14,
           fontWeight: "600",
           marginBottom: 5,
-          color: theme.primary,
+          color: meta.error ? theme.danger : theme.primary,
           ...((styles && styles.label) || {})
         }}
       >
@@ -208,7 +208,11 @@ export default observer((props: FieldProps) => {
       <View
         style={{
           borderStyle: "solid",
-          borderColor: meta.focus ? theme.primary : theme.light,
+          borderColor: meta.error
+            ? theme.danger
+            : meta.focus
+            ? theme.primary
+            : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",
@@ -256,6 +260,18 @@ export default observer((props: FieldProps) => {
           </View>
         )}
       </View>
+      {meta.error && (
+        <Text
+          style={{
+            paddingTop: 5,
+            paddingBottom: 5,
+            fontSize: 12,
+            color: theme.danger
+          }}
+        >
+          {label} is required.
+        </Text>
+      )}
     </View>
   );
 });
