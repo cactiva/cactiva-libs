@@ -1,44 +1,56 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { View } from "react-native";
-import Checkbox from "../Checkbox";
 import { uuid } from "../../utils";
-import { RadioProps } from "../Radio";
 
 export interface CheckboxGroupProps {
   value?: string[];
-  items?: RadioProps[];
   onChange?: (value: any) => void;
   style?: any;
   fieldType?: "checkbox-group";
+  children?: any;
 }
 
 export default observer((props: CheckboxGroupProps) => {
-  const { items, onChange, value, style } = props;
+  const { onChange, value, style, children } = props;
 
   return (
     <View style={style}>
-      {items.map(item => {
+      {children.map((el: any) => {
         return (
-          <Checkbox
-            text={item.text}
-            style={{ marginRight: 15 }}
+          <RenderChild
             onPress={v => {
               if (v) {
-                value.push(item.value);
+                value.push(el.props.value || el.props.text);
               } else {
-                let i = value.findIndex(v => v == item.value);
+                let i = value.findIndex(
+                  v => v == el.props.value || v == el.props.text
+                );
                 value.splice(i, 1);
               }
               onChange && onChange(getUnique(value));
             }}
-            checked={value.findIndex(v => v == item.value) > -1}
+            checked={
+              value.findIndex(v => v == (el.props.value || el.props.text)) > -1
+            }
+            children={el}
             key={uuid()}
           />
         );
       })}
     </View>
   );
+});
+
+const RenderChild = observer((props: any) => {
+  const { children, onPress, checked, mode } = props;
+
+  return React.cloneElement(children, {
+    checked,
+    mode,
+    onPress,
+    ...children.props
+  });
 });
 
 function getUnique(array) {

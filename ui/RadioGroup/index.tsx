@@ -2,35 +2,46 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { View } from "react-native";
 import { uuid } from "../../utils";
-import Radio, { RadioProps, RadioModeType } from "../Radio";
+import { RadioModeType } from "../Radio";
 
 export interface RadioGroupProps {
   mode?: RadioModeType;
   value?: any;
-  items?: RadioProps[];
   onChange?: (value: any) => void;
   style?: any;
   fieldType?: "radio-group";
+  children?: any;
 }
 
 export default observer((props: RadioGroupProps) => {
-  const { items, onChange, value, style, mode } = props;
+  const { onChange, value, style, mode, children } = props;
+
   return (
     <View style={style}>
-      {items.map(item => {
+      {children.map((el: any) => {
         return (
-          <Radio
-            text={item.text}
-            style={{ marginRight: 15 }}
+          <RenderChild
             onPress={v => {
-              onChange && onChange(item.value);
+              onChange && onChange(el.props.value || el.props.text);
             }}
-            checked={item.value == value}
+            checked={el.props.value == value || el.props.text == value}
             mode={mode}
+            children={el}
             key={uuid()}
           />
         );
       })}
     </View>
   );
+});
+
+const RenderChild = observer((props: any) => {
+  const { children, onPress, checked, mode } = props;
+
+  return React.cloneElement(children, {
+    checked,
+    mode,
+    onPress,
+    ...children.props
+  });
 });

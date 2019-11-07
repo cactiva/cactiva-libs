@@ -154,14 +154,16 @@ export default observer((props: FieldProps) => {
       labelText = label;
       childProps = {
         onChange: onChange,
-        value: value
+        value: value,
+        children: children.props.children
       };
       break;
     case "checkbox-group":
       labelText = label;
       childProps = {
         onChange: onChange,
-        value: value
+        value: value,
+        children: children.props.children
       };
       break;
     case "camera":

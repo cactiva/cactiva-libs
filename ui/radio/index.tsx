@@ -18,7 +18,7 @@ export interface RadioProps {
 
 export default observer((props: RadioProps) => {
   const { text, onPress, style, value, mode } = props;
-  const checked = props.checked === true || !!value ? true : false;
+  const checked = props.checked === true ? true : false;
   const theme = {
     ...DefaultTheme,
     ...props.theme
