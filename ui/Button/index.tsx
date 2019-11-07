@@ -21,10 +21,11 @@ export interface ButtonProps extends TouchableOpacityProps {
   iconEnd?: IconProps | any;
   theme?: ThemeProps;
   styles?: ButtonStyles;
+  children?: any;
 }
 
 export default observer((props: ButtonProps) => {
-  const { label, iconStart, iconEnd, styles, disabled } = props;
+  const { label, iconStart, iconEnd, styles, disabled, children } = props;
   const theme = {
     ...DefaultTheme,
     ...props.theme
@@ -76,6 +77,7 @@ export default observer((props: ButtonProps) => {
             {label}
           </Text>
         )}
+        {children}
         {isIconEnd && typeof iconEnd === "object" ? (
           <Icon {...iconEnd} />
         ) : React.isValidElement(iconEnd) ? (
