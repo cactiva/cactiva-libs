@@ -1,5 +1,5 @@
-import React from "react";
 import * as IconSource from "@expo/vector-icons";
+import React from "react";
 
 export interface IconProps {
   source:

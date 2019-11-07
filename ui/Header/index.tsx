@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { Text, TouchableOpacity, View, StatusBar } from "react-native";
+import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon from "../Icon";
