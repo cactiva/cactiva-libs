@@ -18,8 +18,9 @@ export default observer((props: DateTimeProps) => {
       mm: "",
       yyyy: ""
     },
-    position: "",
-    scrollH: 0
+    scrollH: 0,
+    dimensions: null,
+    contentHeight: 0
   });
   const theme = {
     ...DefaultTheme,
@@ -67,19 +68,16 @@ export default observer((props: DateTimeProps) => {
     <>
       <div
         style={{
-          flex: 1,
           position: "initial",
-          zIndex: meta.isShown ? 9 : 0
+          zIndex: meta.isShown ? 9 : 0,
+          minWidth: 147,
+          ...style
         }}
         ref={(ref: any) => {
-          if (ref) {
+          if (ref && !meta.dimensions) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            if (dimensions.top - 380 > 0) {
-              meta.position = "top";
-            } else {
-              meta.position = "bottom";
-            }
+            meta.dimensions = dimensions;
             meta.scrollH = parentDimension.bottom;
           }
         }}
@@ -90,8 +88,7 @@ export default observer((props: DateTimeProps) => {
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "stretch",
-            ...style
+            alignItems: "stretch"
           }}
         >
           <View
@@ -210,41 +207,72 @@ export default observer((props: DateTimeProps) => {
 
 const CalendarDropdown = observer((props: any) => {
   const { meta, theme, onDayPress, minDate, maxDate } = props;
-
+  const getPosition = () => {
+    if (meta.dimensions && meta.contentHeight > 0) {
+      if (
+        meta.dimensions.bottom + meta.contentHeight <= meta.scrollH ||
+        (meta.scrollH - (meta.dimensions.top + meta.contentHeight) < 0 &&
+          meta.dimensions.bottom < meta.scrollH / 2)
+      ) {
+        return "bottom";
+      } else {
+        return "top";
+      }
+    }
+    return null;
+  };
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        bottom: getPosition() === "top" ? meta.dimensions.height : null,
+        top: getPosition() === "bottom" ? 0 : null,
+        left: 0,
+        right: 0
+      }}
+    >
       {meta.isShown && (
         <div
+          ref={(ref: any) => {
+            if (ref && meta.contentHeight === 0) {
+              const dimensions = ref.getBoundingClientRect();
+              meta.contentHeight = dimensions.height;
+            }
+          }}
           style={{
             position: "absolute",
-            bottom: meta.position === "top" ? 35 : null,
-            top: meta.position === "bottom" ? 35 : null,
-            left: 0,
-            right: 0,
+            bottom: getPosition() === "top" ? 0 : null,
+            top: getPosition() === "bottom" ? 0 : null,
+            // left: 0,
+            // right: 0,
             minHeight: 40,
             maxHeight: 350,
             backgroundColor: "#fff",
             zIndex: 9,
-            borderTopLeftRadius: meta.position === "top" ? 8 : 0,
-            borderTopRightRadius: meta.position === "top" ? 8 : 0,
-            borderBottomLeftRadius: meta.position === "bottom" ? 8 : 0,
-            borderBottomRightRadius: meta.position === "bottom" ? 8 : 0,
+            borderTopLeftRadius: getPosition() === "top" ? 8 : 0,
+            borderTopRightRadius: getPosition() === "top" ? 8 : 0,
+            borderBottomLeftRadius: getPosition() === "bottom" ? 8 : 0,
+            borderBottomRightRadius: getPosition() === "bottom" ? 8 : 0,
             display: "flex",
             alignItems: "stretch",
             justifyContent: "flex-start",
             borderWidth: 1,
             borderColor: theme.light,
             borderStyle: "solid",
-            borderTopWidth: meta.position === "top" ? 1 : 0,
-            borderBottomWidth: meta.position === "bottom" ? 1 : 0,
+            borderTopWidth: getPosition() === "top" ? 1 : 0,
+            borderBottomWidth: getPosition() === "bottom" ? 1 : 0,
             padding: 5,
-            marginTop: meta.position === "top" ? 10 : 0,
-            marginBottom: meta.position === "bottom" ? 10 : 0,
+            marginTop: getPosition() === "top" ? 10 : 0,
+            marginBottom: getPosition() === "bottom" ? 10 : 0,
             boxShadow:
-              meta.position === "top"
-                ? "0px -9px 10px #d4d4d4"
-                : "0px 9px 10px #d4d4d4",
-            maxWidth: 400
+              getPosition() === "top"
+                ? "0px -4px 5px rgba(0, 0, 0, 0.16)"
+                : "0px 4px 5px rgba(0, 0, 0, 0.16)",
+            width: 260,
+            opacity: !!getPosition() && meta.isShown ? 1 : 0
           }}
         >
           <Calendar
@@ -281,7 +309,7 @@ const CalendarDropdown = observer((props: any) => {
           />
         </div>
       )}
-    </>
+    </div>
   );
 });
 

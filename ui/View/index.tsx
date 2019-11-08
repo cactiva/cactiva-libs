@@ -10,13 +10,12 @@ import {
 } from "react-native";
 
 interface CustomViewProps extends ViewProps {
-  safeAreaView?: boolean;
-  animatedView?: boolean;
+  type?: "View" | "SafeAreaView" | "AnimatedView";
   children?: any;
 }
 
 export default (props: CustomViewProps) => {
-  const { safeAreaView, animatedView } = props;
+  const { type } = props;
   const statusbar = StatusBar.currentHeight || 0;
   const safeAreaStyle = StyleSheet.flatten([
     {
@@ -24,7 +23,8 @@ export default (props: CustomViewProps) => {
     },
     props.style
   ]);
-  if (safeAreaView) return <SafeAreaView {...props} style={safeAreaStyle} />;
-  if (animatedView) return <Animated.View {...props} />;
+  if (type === "SafeAreaView")
+    return <SafeAreaView {...props} style={safeAreaStyle} />;
+  if (type === "AnimatedView") return <Animated.View {...props} />;
   return <View {...props} />;
 };

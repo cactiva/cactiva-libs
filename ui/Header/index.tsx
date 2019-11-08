@@ -6,7 +6,7 @@ import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon from "../Icon";
 
 export interface UIHeaderProps {
-  leftAction?: "Default" | object;
+  leftAction?: boolean;
   safeAreaView?: boolean;
   title: string | object;
   rightAction?: object;
@@ -54,7 +54,7 @@ export default observer((props: UIHeaderProps) => {
           alignItems: "center"
         }}
       >
-        {leftAction === "Default" ? (
+        {leftAction && (
           <TouchableOpacity onPress={onGoBack}>
             <Icon
               source={"AntDesign"}
@@ -66,10 +66,6 @@ export default observer((props: UIHeaderProps) => {
               }}
             ></Icon>
           </TouchableOpacity>
-        ) : (
-          typeof leftAction === "object" &&
-          React.isValidElement(leftAction) &&
-          leftAction
         )}
       </View>
 

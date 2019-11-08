@@ -58,7 +58,9 @@ export default observer((props: SelectProps) => {
           justifyContent: "space-between",
           ...style
         }}
-        onPress={() => (meta.isShown = true)}
+        onPress={() =>
+          (meta.isShown = items && items.length > 0 ? true : false)
+        }
       >
         <View
           style={{
@@ -177,7 +179,8 @@ const RenderItem = observer((props: any) => {
             maxHeight: 40,
             paddingLeft: 5,
             paddingRight: 5,
-            marginTop: 0
+            marginTop: 0,
+            flex: 1
           }}
         />
       )}

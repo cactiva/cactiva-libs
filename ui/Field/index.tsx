@@ -22,14 +22,6 @@ export interface FieldProps {
   field?: InputProps;
   value?: any;
   setValue?: (value: any) => void;
-  type?:
-    | InputType
-    | "select"
-    | "date"
-    | "radio-group"
-    | "checkbox-group"
-    | "camera"
-    | "location";
   iconStart?: IconProps;
   iconEnd?: IconProps;
   theme?: ThemeProps;
@@ -47,7 +39,6 @@ export default observer((props: FieldProps) => {
     label,
     iconStart,
     iconEnd,
-    type,
     style,
     styles,
     children,
@@ -85,7 +76,7 @@ export default observer((props: FieldProps) => {
     ? label + (isRequired === true ? " *" : "")
     : "";
   const onChange = value => {
-    switch (type) {
+    switch (field.type) {
       case "number":
         value = !!value ? parseInt(value) : value;
         break;
@@ -117,11 +108,11 @@ export default observer((props: FieldProps) => {
     default:
       if (!field)
         field = {
-          type: type as any,
-          style: {},
+          style: {
+            flex: 1
+          },
           fieldType: "input"
         };
-      field.type = type as any;
       field.fieldType = "input";
       childProps = {
         ...field,
@@ -134,6 +125,7 @@ export default observer((props: FieldProps) => {
       break;
     case "select":
       childProps = {
+        style: { flex: 1 },
         ...field,
         value: value,
         placeholder: placeholder,
@@ -144,6 +136,7 @@ export default observer((props: FieldProps) => {
     case "date":
       labelText = label;
       childProps = {
+        style: { flex: 1 },
         ...field,
         value: value,
         onChange: value => onChange(value),
@@ -196,14 +189,6 @@ export default observer((props: FieldProps) => {
         marginBottom: 10,
         marginLeft: 0,
         marginRight: 0,
-        ...(platform === "desktop"
-          ? {
-              flexBasis: (dim.width - 90) / 3
-            }
-          : {
-              flexGrow: 1,
-              flexShrink: 1
-            }),
         ...style,
         ..._.get(styles, "root", {})
       }}

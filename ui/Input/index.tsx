@@ -70,6 +70,5 @@ const styleInput = {
   borderWidth: 0,
   margin: 0,
   color: "#3a3a3a",
-  flexGrow: 1,
   minHeight: 27
 };

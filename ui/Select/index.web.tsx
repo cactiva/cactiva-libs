@@ -20,8 +20,9 @@ export default observer((props: SelectProps) => {
     isShown: false,
     value: null,
     filter: "",
-    position: "",
-    scrollH: 0
+    scrollH: 0,
+    dimensions: null,
+    contentHeight: 0
   });
 
   const onSearch = value => {
@@ -39,32 +40,28 @@ export default observer((props: SelectProps) => {
     <>
       <div
         style={{
-          flex: 1,
           position: "initial",
-          zIndex: meta.isShown ? 9 : 0
+          zIndex: meta.isShown ? 9 : 0,
+          minWidth: 147,
+          ...style
         }}
         ref={(ref: any) => {
-          if (ref) {
+          if (ref && !meta.dimensions) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            if (dimensions.top - 280 > 0) {
-              meta.position = "top";
-            } else {
-              meta.position = "bottom";
-            }
+            meta.dimensions = dimensions;
             meta.scrollH = parentDimension.bottom;
           }
         }}
       >
-        {meta.isShown && items.length > 5 ? (
+        {meta.isShown && items && items.length > 5 ? (
           <View
             style={{
               flex: 1,
               display: "flex",
               flexDirection: "row",
               alignItems: "stretch",
-              justifyContent: "space-between",
-              ...style
+              justifyContent: "space-between"
             }}
           >
             <Input
@@ -78,9 +75,8 @@ export default observer((props: SelectProps) => {
                 backgroundColor: theme.light,
                 minHeight: 27,
                 maxHeight: 27,
-                paddingLeft: 5,
-                paddingRight: 5,
-                marginTop: 0
+                marginTop: 0,
+                flex: 1
               }}
             />
             <TouchableOpacity
@@ -94,7 +90,7 @@ export default observer((props: SelectProps) => {
               onPress={e => {
                 e.stopPropagation();
                 e.preventDefault();
-                meta.isShown = !meta.isShown;
+                if (items && items.length > 0) meta.isShown = !meta.isShown;
               }}
             >
               <Icon
@@ -131,8 +127,6 @@ export default observer((props: SelectProps) => {
                   flex: 1,
                   marginTop: 5,
                   marginBottom: 5,
-                  paddingLeft: 5,
-                  paddingRight: 5,
                   color: value ? "#3a3a3a" : "#757575"
                 }}
               >
@@ -184,40 +178,75 @@ export default observer((props: SelectProps) => {
 
 const ModalItems = observer((props: any) => {
   const { meta, theme } = props;
+  const getPosition = () => {
+    if (meta.dimensions && meta.contentHeight > 0) {
+      if (
+        meta.dimensions.bottom + meta.contentHeight <= meta.scrollH ||
+        (meta.scrollH - (meta.dimensions.top + meta.contentHeight) < 0 &&
+          meta.dimensions.bottom < meta.scrollH / 4)
+      ) {
+        return "bottom";
+      } else {
+        return "top";
+      }
+    }
+    return null;
+  };
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        bottom: getPosition() === "top" ? meta.dimensions.height : null,
+        top: getPosition() === "bottom" ? 0 : null,
+        left: 0,
+        right: 0
+      }}
+    >
       {meta.isShown && (
         <div
+          ref={(ref: any) => {
+            if (ref && meta.contentHeight === 0) {
+              const dimensions = ref.getBoundingClientRect();
+              meta.contentHeight = dimensions.height;
+            }
+          }}
           style={{
             position: "absolute",
-            bottom: meta.position === "top" ? 35 : null,
-            top: meta.position === "bottom" ? 35 : null,
+            bottom: getPosition() === "top" ? 0 : null,
+            top: getPosition() === "bottom" ? 0 : null,
             left: 0,
             right: 0,
             minHeight: 40,
             maxHeight: 250,
             backgroundColor: "#fff",
+            width: meta.dimensions.width,
             zIndex: 9,
-            borderTopLeftRadius: meta.position === "top" ? 8 : 0,
-            borderTopRightRadius: meta.position === "top" ? 8 : 0,
-            borderBottomLeftRadius: meta.position === "bottom" ? 8 : 0,
-            borderBottomRightRadius: meta.position === "bottom" ? 8 : 0,
+            borderTopLeftRadius: getPosition() === "top" ? 8 : 0,
+            borderTopRightRadius: getPosition() === "top" ? 8 : 0,
+            borderBottomLeftRadius: getPosition() === "bottom" ? 8 : 0,
+            borderBottomRightRadius: getPosition() === "bottom" ? 8 : 0,
             display: "flex",
             alignItems: "stretch",
             justifyContent: "flex-start",
             borderWidth: 1,
             borderColor: theme.light,
             borderStyle: "solid",
-            borderTopWidth: meta.position === "top" ? 1 : 0,
-            borderBottomWidth: meta.position === "bottom" ? 1 : 0,
-            padding: 5,
-            boxShadow: "0px 9px 10px #d4d4d4"
+            borderTopWidth: getPosition() === "top" ? 1 : 0,
+            borderBottomWidth: getPosition() === "bottom" ? 1 : 0,
+            boxShadow:
+              getPosition() === "top"
+                ? "0px -4px 5px rgba(0, 0, 0, 0.16)"
+                : "0px 4px 5px rgba(0, 0, 0, 0.16)",
+            opacity: !!getPosition() && meta.isShown ? 1 : 0
           }}
         >
           <RenderItem {...props} meta={meta} theme={theme} />
         </div>
       )}
-    </>
+    </div>
   );
 });
 
@@ -225,9 +254,12 @@ const RenderItem = observer((props: any) => {
   const { meta, items, value, onSelect, theme } = props;
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled">
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      style={{ margin: 5, width: meta.dimensions.width }}
+    >
       <FlatList
-        data={items.filter((item: any) => {
+        data={(items || []).filter((item: any) => {
           if (meta.filter.length > 0)
             return fuzzyMatch(
               meta.filter.toLowerCase(),
@@ -252,7 +284,8 @@ const RenderItem = observer((props: any) => {
           <Text
             style={{
               margin: 10,
-              textAlign: "center"
+              textAlign: "center",
+              fontSize: 12
             }}
           >
             No item to display.
