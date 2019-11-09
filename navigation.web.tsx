@@ -1,12 +1,19 @@
 import { createBrowserApp } from "@react-navigation/web";
 import { createStackNavigator } from "react-navigation-stack";
+import React from "react";
+
+const theme = require("../theme.json");
 
 export const AppContainer = () => {
-  return createBrowserApp(
+  const App = createBrowserApp(
     createStackNavigator(routes(), {
       headerMode: "none"
     })
   );
+
+  if (theme.device === "mobile")
+    return () => { return <div className="mobile-root"><App /></div > };
+  return App;
 };
 
 function importAllRoute(r, except) {
@@ -25,5 +32,5 @@ function importAllRoute(r, except) {
   });
   return routes;
 }
-export const routes = (except?: string[]) =>
+export const routes = (except: string[] = ['libs', 'assets']) =>
   importAllRoute(require.context("../", true, /\.(tsx)$/), except);
