@@ -6,11 +6,12 @@ import {
   StatusBar,
   StyleSheet,
   View,
-  ViewProps
+  ViewProps,
+  ScrollView
 } from "react-native";
 
 interface CustomViewProps extends ViewProps {
-  type?: "View" | "SafeAreaView" | "AnimatedView";
+  type?: "View" | "SafeAreaView" | "AnimatedView" | "ScrollView";
   children?: any;
 }
 
@@ -26,5 +27,6 @@ export default (props: CustomViewProps) => {
   if (type === "SafeAreaView")
     return <SafeAreaView {...props} style={safeAreaStyle} />;
   if (type === "AnimatedView") return <Animated.View {...props} />;
+  if (type === "ScrollView") return <ScrollView {...props} />;
   return <View {...props} />;
 };

@@ -1,24 +1,24 @@
-import React, { useEffect } from "react";
+import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Platform,
   DatePickerAndroid,
   DatePickerIOS,
   Modal,
-  TouchableWithoutFeedback
+  Platform,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from "react-native";
-import { ThemeProps, DefaultTheme } from "../../theme";
-import Input, { InputProps } from "../Input";
-import Icon from "../Icon";
+import { DefaultTheme, ThemeProps } from "../../theme";
 import { dateToString } from "../../utils";
-import _ from "lodash";
+import Icon from "../Icon";
+import Input from "../Input";
 
 export interface DateTimeProps {
   mode?: "date" | "time";
-  onChangeText?: (value: any) => void;
+  onChange?: (value: any) => void;
   fieldType?: "date";
   maxDate?: Date;
   minDate?: Date;
@@ -29,7 +29,7 @@ export interface DateTimeProps {
 }
 
 export default observer((props: DateTimeProps) => {
-  const { value, style, mode, onChangeText } = props;
+  const { value, style, mode, onChange } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -62,7 +62,7 @@ export default observer((props: DateTimeProps) => {
       meta.value = new Date(
         `${meta.dateString.yyyy}-${meta.dateString.mm}-${meta.dateString.dd}`
       );
-      onChangeText && onChangeText(dateToString(meta.value));
+      onChange && onChange(dateToString(meta.value));
     }
   };
   const onChangePicker = date => {
@@ -70,7 +70,7 @@ export default observer((props: DateTimeProps) => {
     meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
     meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);
     meta.dateString.yyyy = `${meta.value.getFullYear()}`;
-    onChangeText && onChangeText(dateToString(date));
+    onChange && onChange(dateToString(date));
   };
   useEffect(() => {
     if (value) {
@@ -105,7 +105,7 @@ export default observer((props: DateTimeProps) => {
             }}
             type="number"
             value={meta.dateString.dd}
-            onChangeText={v => onChangeDateString(v, "dd")}
+            onChange={v => onChangeDateString(v, "dd")}
           />
           <Text
             style={{
@@ -124,7 +124,7 @@ export default observer((props: DateTimeProps) => {
             }}
             type="number"
             value={meta.dateString.mm}
-            onChangeText={v => onChangeDateString(v, "mm")}
+            onChange={v => onChangeDateString(v, "mm")}
           />
           <Text
             style={{
@@ -143,7 +143,7 @@ export default observer((props: DateTimeProps) => {
             }}
             type="number"
             value={meta.dateString.yyyy}
-            onChangeText={v => onChangeDateString(v, "yyyy")}
+            onChange={v => onChangeDateString(v, "yyyy")}
           />
         </View>
         <TouchableOpacity

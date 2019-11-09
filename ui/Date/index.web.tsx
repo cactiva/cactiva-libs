@@ -9,7 +9,7 @@ import Icon from "../Icon";
 import Input from "../Input";
 
 export default observer((props: DateTimeProps) => {
-  const { value, style, mode, onFocus, onChangeText } = props;
+  const { value, style, mode, onFocus, onChange } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -44,15 +44,16 @@ export default observer((props: DateTimeProps) => {
       meta.value = new Date(
         `${meta.dateString.yyyy}-${meta.dateString.mm}-${meta.dateString.dd}`
       );
-      onChangeText && onChangeText(dateToString(meta.value));
+      onChange && onChange(dateToString(meta.value));
     }
   };
   const onDayPress = dateString => {
+    console.log(dateString);
     meta.value = new Date(dateString);
     meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
     meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);
     meta.dateString.yyyy = `${meta.value.getFullYear()}`;
-    onChangeText && onChangeText(dateString);
+    onChange && onChange(dateString);
   };
   useEffect(() => {
     if (value) {
@@ -105,7 +106,7 @@ export default observer((props: DateTimeProps) => {
               }}
               type="number"
               value={meta.dateString.dd}
-              onChangeText={v => onChangeDateString(v, "dd")}
+              onChange={v => onChangeDateString(v, "dd")}
               onFocus={() => (meta.isShown = false)}
               returnKeyType="next"
             />
@@ -126,7 +127,7 @@ export default observer((props: DateTimeProps) => {
               }}
               type="number"
               value={meta.dateString.mm}
-              onChangeText={v => onChangeDateString(v, "mm")}
+              onChange={v => onChangeDateString(v, "mm")}
               onFocus={() => (meta.isShown = false)}
               returnKeyType="next"
             />
@@ -147,7 +148,7 @@ export default observer((props: DateTimeProps) => {
               }}
               type="number"
               value={meta.dateString.yyyy}
-              onChangeText={v => onChangeDateString(v, "yyyy")}
+              onChange={v => onChangeDateString(v, "yyyy")}
               onFocus={() => (meta.isShown = false)}
               returnKeyType="next"
             />

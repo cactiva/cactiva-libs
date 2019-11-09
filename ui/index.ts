@@ -16,3 +16,7 @@ export { default as Camera } from "./Camera";
 export { default as Location } from "./Location";
 export { default as BottomNavigation } from "./BottomNavigation";
 export { default as Carousel } from "./Carousel";
+export { default as Text } from "./Text";
+export { default as Image } from "./Image";
+export { default as ImageBackground } from "./ImageBackground";
+export { default as FlatList } from "./FlatList";

@@ -52,7 +52,7 @@ export default observer((props: InputProps) => {
       ComponentProps = {
         keyboardType: "number-pad",
         ...ComponentProps,
-        value: `${value}` || ""
+        value: value ? `${value}` : ""
       };
       break;
     case "multiline":

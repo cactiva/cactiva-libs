@@ -53,6 +53,8 @@ export default observer((props: LocationProps) => {
         meta.error = true;
       }
     });
+    meta.location = value;
+    console.log(value);
   }, []);
   return (
     <View

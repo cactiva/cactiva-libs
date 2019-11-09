@@ -95,7 +95,7 @@ export default observer((props: SelectProps) => {
             >
               <Icon
                 source="Entypo"
-                name={meta.isShown ? "chevron-down" : "chevron-up"}
+                name={meta.isShown ? "chevron-up" : "chevron-down"}
                 color={theme.dark}
                 size={20}
               />

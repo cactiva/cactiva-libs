@@ -21,11 +21,20 @@ export interface ButtonProps extends TouchableOpacityProps {
   iconEnd?: IconProps | any;
   theme?: ThemeProps;
   styles?: ButtonStyles;
+  shadow?: Boolean;
   children?: any;
 }
 
 export default observer((props: ButtonProps) => {
-  const { label, iconStart, iconEnd, styles, disabled, children } = props;
+  const {
+    label,
+    iconStart,
+    iconEnd,
+    styles,
+    disabled,
+    children,
+    shadow
+  } = props;
   const theme = {
     ...DefaultTheme,
     ...props.theme
@@ -34,7 +43,17 @@ export default observer((props: ButtonProps) => {
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
   const isIconEnd =
     !!iconEnd && !!iconEnd.source && !!iconEnd.name ? true : false;
+  const styleShadow = {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
 
+    elevation: 6
+  };
   return (
     <TouchableOpacity
       {...props}
@@ -44,8 +63,11 @@ export default observer((props: ButtonProps) => {
         display: "flex",
         alignItems: "stretch",
         opacity: disabled ? 0.8 : 1,
-        minWidth: 60,
-        ...(_.get(props, "style", {}) as any)
+        minWidth: 50,
+        paddingTop: 10,
+        paddingBottom: 10,
+        ...(_.get(props, "style", {}) as any),
+        ...(shadow ? styleShadow : {})
       }}
     >
       <View
@@ -54,7 +76,6 @@ export default observer((props: ButtonProps) => {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: 45,
           ..._.get(styles, "wrapper", {})
         }}
       >

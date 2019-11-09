@@ -9,17 +9,17 @@ export interface UIHeaderProps {
   leftAction?: boolean;
   safeAreaView?: boolean;
   title: string | object;
-  rightAction?: object;
   theme?: ThemeProps;
   style?: any;
   styles?: {
     root?: any;
     title?: any;
   };
+  children?: any;
 }
 
 export default observer((props: UIHeaderProps) => {
-  const { leftAction, title, rightAction, style, styles, safeAreaView } = props;
+  const { leftAction, title, children, style, styles, safeAreaView } = props;
   const statusbar = StatusBar.currentHeight || 0;
   const theme = {
     ...DefaultTheme,
@@ -30,7 +30,6 @@ export default observer((props: UIHeaderProps) => {
   const onGoBack = () => {
     nav.goBack();
   };
-
   return (
     <View
       style={{
@@ -39,8 +38,6 @@ export default observer((props: UIHeaderProps) => {
         alignItems: "stretch",
         justifyContent: "flex-start",
         padding: 5,
-        paddingLeft: 10,
-        paddingRight: 10,
         borderStyle: "solid",
         paddingTop: safeAreaView ? statusbar : 5,
         ...style,
@@ -100,9 +97,7 @@ export default observer((props: UIHeaderProps) => {
             typeof title === "object" && React.isValidElement(title) && title
           )}
         </View>
-        {typeof rightAction === "object" &&
-          React.isValidElement(rightAction) &&
-          rightAction}
+        {children}
       </View>
     </View>
   );

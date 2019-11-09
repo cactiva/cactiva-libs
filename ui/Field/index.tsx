@@ -74,7 +74,7 @@ export default observer((props: FieldProps) => {
     ? label + (isRequired === true ? " *" : "")
     : "";
   const onChange = value => {
-    switch (field.type) {
+    switch (_.get(children, "props.type", "text")) {
       case "number":
         value = !!value ? parseInt(value) : value;
         break;
@@ -127,7 +127,7 @@ export default observer((props: FieldProps) => {
         ...field,
         value: value,
         placeholder: placeholder,
-        onSelect: value => onChange(value),
+        onSelect: value => onChange(value.value || value.text),
         onFocus: (e: any) => (meta.focus = e)
       };
       break;
