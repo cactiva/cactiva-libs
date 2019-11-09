@@ -47,8 +47,6 @@ export default observer((props: FieldProps) => {
   } = props;
   let field = props.field;
   const dim = useDimensions().window;
-  const platform =
-    dim.width > 780 && Platform.OS === "web" ? "desktop" : "mobile";
   const meta = useObservable({
     focus: false,
     validate: false,

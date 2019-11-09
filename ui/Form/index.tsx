@@ -22,11 +22,8 @@ export interface FormProps {
 export default observer((props: FormProps) => {
   const { children, data, setValue } = props;
   const dim = useDimensions().window;
-  const platform =
-    dim.width > 780 && Platform.OS === "web" ? "desktop" : "mobile";
   const style = {
     zIndex: Platform.OS === "web" ? 9 : 1,
-    ...(platform === "desktop" ? styleFormDesktop : styleFormMobile),
     ..._.get(props, "style", {})
   };
 
@@ -58,16 +55,3 @@ const RenderChild = observer((props: any) => {
     ...children.props
   });
 });
-
-const styleFormDesktop = {
-  display: "flex",
-  flexDirection: "row",
-  flexWrap: "wrap",
-  alignItems: "stretch",
-  justifyContent: "space-between"
-};
-
-const styleFormMobile = {
-  display: "flex",
-  flexDirection: "column"
-};
