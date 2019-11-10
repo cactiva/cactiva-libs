@@ -133,7 +133,7 @@ const ModalCamera = observer((props: any) => {
     };
   };
 
-  const snap = async () => {
+  const snap = () => {
     if (meta.photo && !meta.resnap) {
       meta.resnap = true;
     } else if (camera.current) {

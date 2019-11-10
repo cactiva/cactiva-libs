@@ -74,10 +74,14 @@ export default observer((props: DateTimeProps) => {
   };
   useEffect(() => {
     if (value) {
-      if (typeof value === "string") meta.value = new Date(value);
-      else meta.value = value;
+      let newDate;
+      if (typeof value === "string") newDate = new Date(value);
+      meta.value = newDate;
+      meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
+      meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);
+      meta.dateString.yyyy = `${meta.value.getFullYear()}`;
     }
-  }, [value]);
+  }, []);
   return (
     <>
       <View

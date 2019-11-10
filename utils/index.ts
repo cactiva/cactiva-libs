@@ -73,7 +73,7 @@ const dateToString = date => {
 };
 const dateToLocal = date => {
   var d = new Date(date),
-    month = "" + (d.getMonth() + 1),
+    month = "" + d.getMonth(),
     day = "" + d.getDate(),
     year = d.getFullYear();
 

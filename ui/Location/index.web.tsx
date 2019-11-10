@@ -11,5 +11,7 @@ export default () => {
 };
 
 export const getLocation = () => {
-  return null;
+  return new Promise(reject => {
+    reject("Web not support Location");
+  });
 };
