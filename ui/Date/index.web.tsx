@@ -48,7 +48,6 @@ export default observer((props: DateTimeProps) => {
     }
   };
   const onDayPress = dateString => {
-    console.log(dateString);
     meta.value = new Date(dateString);
     meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
     meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);

@@ -54,7 +54,7 @@ export default observer((props: FieldProps) => {
     errorMessage: []
   });
   let labelText =
-    meta.focus || !!value || meta.error
+    meta.focus || !!value || meta.error || !children.props.placeholder
       ? label + (isRequired === true ? " *" : "")
       : " ";
   const isIconStart =
@@ -66,19 +66,18 @@ export default observer((props: FieldProps) => {
     ..._.get(props, "theme", {}),
     ..._.get(field, "theme", {})
   };
-  const placeholder = meta.focus
-    ? field && field.placeholder
-      ? field.placeholder
-      : ""
-    : !meta.error
-    ? label + (isRequired === true ? " *" : "")
-    : "";
+  const placeholder =
+    !meta.error && !meta.focus ? children.props.placeholder : "";
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
       case "number":
         value = !!value ? parseInt(value) : value;
         break;
     }
+    validation(value);
+    setValue && setValue(value);
+  };
+  const validation = value => {
     if (isRequired && !value) {
       meta.error = true;
       meta.errorMessage = [`${label} is required.`];
@@ -98,22 +97,14 @@ export default observer((props: FieldProps) => {
         meta.errorMessage = [];
       }
     }
-    setValue && setValue(value);
   };
+
   const fieldType = _.get(children, "props.fieldType", "input");
   let childProps;
   switch (fieldType) {
     default:
-      if (!field)
-        field = {
-          style: {
-            flex: 1
-          },
-          fieldType: "input"
-        };
-      field.fieldType = "input";
       childProps = {
-        ...field,
+        style: { flex: 1 },
         value: value,
         onChangeText: onChange,
         placeholder: placeholder,
@@ -124,7 +115,6 @@ export default observer((props: FieldProps) => {
     case "select":
       childProps = {
         style: { flex: 1 },
-        ...field,
         value: value,
         placeholder: placeholder,
         onSelect: value => onChange(value.value || value.text),
@@ -135,7 +125,6 @@ export default observer((props: FieldProps) => {
       labelText = label;
       childProps = {
         style: { flex: 1 },
-        ...field,
         value: value,
         onChange: value => onChange(value),
         onFocus: (e: any) => (meta.focus = e)

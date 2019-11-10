@@ -71,6 +71,29 @@ const dateToString = date => {
 
   return [year, month, day].join("-");
 };
+const dateToLocal = date => {
+  var d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
+
+  var monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+
+  return day + " " + monthNames[month] + " " + year;
+};
 export {
   scale,
   verticalScale,
@@ -79,5 +102,6 @@ export {
   randString,
   deepFind,
   fuzzyMatch,
-  dateToString
+  dateToString,
+  dateToLocal
 };

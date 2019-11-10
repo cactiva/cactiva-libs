@@ -56,7 +56,7 @@ export default observer((props: UIHeaderProps) => {
             <Icon
               source={"AntDesign"}
               name={"arrowleft"}
-              color={theme.primary}
+              color={theme.dark}
               size={24}
               style={{
                 margin: 5

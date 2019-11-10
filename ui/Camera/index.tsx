@@ -226,7 +226,7 @@ const ModalCamera = observer((props: any) => {
               ref={camera}
               {...meta.cameraProps}
             >
-              {meta.snap && <Spinner color={theme.primary} size={60} />}
+              {meta.snap && <Spinner color={theme.primary} size="large" />}
             </Camera>
           )}
         </View>
