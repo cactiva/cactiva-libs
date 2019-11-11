@@ -7,6 +7,7 @@ import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon, { IconProps } from "../Icon";
 import { InputProps, InputType } from "../Input";
 import { uuid } from "../../utils";
+import Theme from "@src/theme.json";
 
 interface StylesFieldProps {
   root?: any;
@@ -67,8 +68,7 @@ export default observer((props: FieldProps) => {
     !!iconEnd && !!iconEnd.source && !!iconEnd.name ? true : false;
   const theme = {
     ...DefaultTheme,
-    ..._.get(props, "theme", {}),
-    ..._.get(field, "theme", {})
+    ...Theme.colors
   };
   const placeholder =
     !meta.error && !meta.focus ? children.props.placeholder : "";

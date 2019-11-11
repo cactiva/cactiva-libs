@@ -9,6 +9,7 @@ import {
 import { ThemeProps, DefaultTheme } from "../../theme";
 import Icon, { IconProps } from "../Icon";
 import _ from "lodash";
+import Theme from "@src/theme.json";
 
 interface ButtonStyles {
   wrapper?: any;
@@ -19,7 +20,6 @@ export interface ButtonProps extends TouchableOpacityProps {
   label?: string;
   iconStart?: IconProps | any;
   iconEnd?: IconProps | any;
-  theme?: ThemeProps;
   styles?: ButtonStyles;
   shadow?: Boolean;
   type?: "submit";
@@ -38,7 +38,7 @@ export default observer((props: ButtonProps) => {
   } = props;
   const theme = {
     ...DefaultTheme,
-    ...props.theme
+    ...Theme.colors
   };
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;

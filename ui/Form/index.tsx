@@ -21,26 +21,23 @@ export interface FormProps {
 }
 
 export default observer((props: FormProps) => {
-  const { children, data, setValue } = props;
+  const { children, data, setValue, onSubmit } = props;
   const dim = useDimensions().window;
   const meta = useObservable({
-    validate: false,
-    valid: []
+    initError: false,
+    validate: {}
   });
   const style = {
     zIndex: Platform.OS === "web" ? 9 : 1,
     ..._.get(props, "style", {})
   };
+
   useEffect(() => {
-    const clength = children.length;
-    if (meta.valid.length >= clength) {
-      let s = meta.valid.splice(
-        meta.valid.length - clength - 1,
-        meta.valid.length - 1
-      );
-      console.log(s);
-    }
-  }, [meta.valid]);
+    children.map(el => {
+      if (el.props && el.props.isRequired && el.props.path)
+        meta.validate[el.props.path] = false;
+    });
+  }, []);
   return (
     <View style={style}>
       {children.map((el: any) => {
@@ -48,9 +45,10 @@ export default observer((props: FormProps) => {
           <RenderChild
             data={data}
             setValue={setValue}
-            children={el}
+            child={el}
             key={uuid()}
             meta={meta}
+            onSubmit={onSubmit}
           />
         );
       })}
@@ -59,36 +57,45 @@ export default observer((props: FormProps) => {
 });
 
 const RenderChild = observer((props: any) => {
-  const { data, children, setValue, meta } = props;
+  const { data, child, setValue, meta, onSubmit } = props;
   let custProps: any;
-  const onSubmit = () => {
-    meta.validate = true;
+  const onPress = () => {
+    meta.initError = true;
+    let valid = true;
+    Object.keys(meta.validate).map(e => {
+      if (!meta.validate[e]) valid = false;
+    });
+    if (valid) onSubmit();
+  };
+  const isValid = value => {
+    meta.validate[child.props.path] = value;
   };
   const defaultSetValue = (value: any, path: any) => {
     if (setValue) setValue(value, path);
     else data[path] = value;
-    if (meta.validate) meta.validate = false;
+    if (meta.initError) meta.initError = false;
   };
-  if (children.props.type === "submit") {
+  if (child.props.type === "submit") {
     custProps = {
       ...custProps,
-      onPress: onSubmit
+      onPress: onPress
     };
   } else {
     custProps = {
       ...custProps,
-      value: data[children.props.path],
-      setValue: (value: any) => defaultSetValue(value, children.props.path)
+      isValid: isValid,
+      value: data[child.props.path],
+      setValue: (value: any) => defaultSetValue(value, child.props.path)
     };
   }
-  if (children.props.isRequired) {
+  if (child.props.isRequired) {
     custProps = {
       ...custProps,
-      isValidate: meta.validate
+      isValidate: meta.initError
     };
   }
-  return React.cloneElement(children, {
+  return React.cloneElement(child, {
     ...custProps,
-    ...children.props
+    ...child.props
   });
 });
