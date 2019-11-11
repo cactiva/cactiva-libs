@@ -1,5 +1,6 @@
 import { createBrowserApp } from "@react-navigation/web";
 import { createStackNavigator } from "react-navigation-stack";
+import { useDimensions } from "react-native-hooks";
 import React from "react";
 
 const theme = require("../theme.json");
@@ -12,7 +13,12 @@ export const AppContainer = () => {
   );
 
   if (theme.device === "mobile")
-    return () => { return <div className="mobile-root"><App /></div > };
+    return () => {
+      const dim = useDimensions().window;
+      if (dim.width > 460)
+        return <div className="mobile-root"><App /></div >
+      return <App />;
+    };
   return App;
 };
 
