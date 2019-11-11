@@ -71,7 +71,9 @@ export default observer((props: FieldProps) => {
     ...Theme.colors
   };
   const placeholder =
-    !meta.error && !meta.focus ? children.props.placeholder : "";
+    !meta.error && !meta.focus
+      ? children.props.placeholder + (isRequired === true ? " *" : "")
+      : "";
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
       case "number":
@@ -183,7 +185,6 @@ export default observer((props: FieldProps) => {
       style={{
         zIndex:
           ["select", "date"].indexOf(fieldType) > -1 && meta.focus ? 9 : 1,
-        marginTop: 5,
         marginBottom: 10,
         marginLeft: 0,
         marginRight: 0,
@@ -194,9 +195,7 @@ export default observer((props: FieldProps) => {
       <Text
         style={{
           fontSize: 14,
-          fontWeight: "600",
-          marginBottom: 5,
-          color: meta.error ? theme.danger : theme.primary,
+          color: theme.primary,
           ...((styles && styles.label) || {})
         }}
       >
@@ -215,7 +214,7 @@ export default observer((props: FieldProps) => {
           alignItems: "stretch",
           paddingRight: 2,
           paddingLeft: 2,
-          padding: 5,
+          padding: 4,
           justifyContent: "flex-start",
           display: "flex",
           ...((styles && styles.field) || {})

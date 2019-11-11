@@ -1,15 +1,15 @@
-import React from "react";
+import Theme from "@src/theme.json";
+import _ from "lodash";
 import { observer } from "mobx-react-lite";
+import React from "react";
 import {
-  TouchableOpacityProps,
-  TouchableOpacity,
   Text,
+  TouchableOpacity,
+  TouchableOpacityProps,
   View
 } from "react-native";
-import { ThemeProps, DefaultTheme } from "../../theme";
+import { DefaultTheme } from "../../theme";
 import Icon, { IconProps } from "../Icon";
-import _ from "lodash";
-import Theme from "@src/theme.json";
 
 interface ButtonStyles {
   wrapper?: any;
