@@ -22,6 +22,7 @@ export interface ButtonProps extends TouchableOpacityProps {
   theme?: ThemeProps;
   styles?: ButtonStyles;
   shadow?: Boolean;
+  type?: "submit";
   children?: any;
 }
 

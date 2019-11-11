@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { observer } from "mobx-react-lite";
-import React from "react";
+import { observer, useObservable } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
@@ -17,16 +17,30 @@ export interface FormProps {
   children?: any;
   style?: any;
   theme?: ThemeProps;
+  onSubmit?: () => void;
 }
 
 export default observer((props: FormProps) => {
   const { children, data, setValue } = props;
   const dim = useDimensions().window;
+  const meta = useObservable({
+    validate: false,
+    valid: []
+  });
   const style = {
     zIndex: Platform.OS === "web" ? 9 : 1,
     ..._.get(props, "style", {})
   };
-
+  useEffect(() => {
+    const clength = children.length;
+    if (meta.valid.length >= clength) {
+      let s = meta.valid.splice(
+        meta.valid.length - clength - 1,
+        meta.valid.length - 1
+      );
+      console.log(s);
+    }
+  }, [meta.valid]);
   return (
     <View style={style}>
       {children.map((el: any) => {
@@ -36,6 +50,7 @@ export default observer((props: FormProps) => {
             setValue={setValue}
             children={el}
             key={uuid()}
+            meta={meta}
           />
         );
       })}
@@ -44,14 +59,36 @@ export default observer((props: FormProps) => {
 });
 
 const RenderChild = observer((props: any) => {
-  const { data, children, setValue } = props;
+  const { data, children, setValue, meta } = props;
+  let custProps: any;
+  const onSubmit = () => {
+    meta.validate = true;
+  };
   const defaultSetValue = (value: any, path: any) => {
     if (setValue) setValue(value, path);
     else data[path] = value;
+    if (meta.validate) meta.validate = false;
   };
+  if (children.props.type === "submit") {
+    custProps = {
+      ...custProps,
+      onPress: onSubmit
+    };
+  } else {
+    custProps = {
+      ...custProps,
+      value: data[children.props.path],
+      setValue: (value: any) => defaultSetValue(value, children.props.path)
+    };
+  }
+  if (children.props.isRequired) {
+    custProps = {
+      ...custProps,
+      isValidate: meta.validate
+    };
+  }
   return React.cloneElement(children, {
-    value: data[children.props.path],
-    setValue: (value: any) => defaultSetValue(value, children.props.path),
+    ...custProps,
     ...children.props
   });
 });

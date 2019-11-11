@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
-import React from "react";
+import React, { useEffect } from "react";
 import { Platform, Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
@@ -29,6 +29,8 @@ export interface FieldProps {
   styles?: StylesFieldProps;
   children?: any;
   isRequired?: boolean;
+  isValidate?: boolean;
+  isValid?: (status: boolean) => void;
   validate?: (value: any) => void;
 }
 
@@ -43,7 +45,9 @@ export default observer((props: FieldProps) => {
     styles,
     children,
     isRequired,
-    validate
+    validate,
+    isValidate,
+    isValid
   } = props;
   let field = props.field;
   const dim = useDimensions().window;
@@ -97,6 +101,7 @@ export default observer((props: FieldProps) => {
         meta.errorMessage = [];
       }
     }
+    isValid && isValid(!meta.error);
   };
 
   const fieldType = _.get(children, "props.fieldType", "input");
@@ -167,6 +172,12 @@ export default observer((props: FieldProps) => {
       ...childProps
     })
   );
+
+  useEffect(() => {
+    if (!!isValidate) {
+      validation(value);
+    }
+  }, [isValidate]);
   return (
     <View
       style={{
