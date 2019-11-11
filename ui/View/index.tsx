@@ -27,6 +27,11 @@ export default (props: CustomViewProps) => {
   if (type === "SafeAreaView")
     return <SafeAreaView {...props} style={safeAreaStyle} />;
   if (type === "AnimatedView") return <Animated.View {...props} />;
-  if (type === "ScrollView") return <ScrollView {...props} />;
+  if (type === "ScrollView") {
+    const style = props.style;
+    const p = {...props};
+    delete p.style
+    return <ScrollView {...p} contentContainerStyle={style} />;
+  }
   return <View {...props} />;
 };
