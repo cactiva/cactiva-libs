@@ -17,7 +17,7 @@ export interface FormProps {
   children?: any;
   style?: any;
   theme?: ThemeProps;
-  onSubmit?: () => void;
+  onSubmit?: (data?: any) => void;
 }
 
 export default observer((props: FormProps) => {
@@ -65,7 +65,7 @@ const RenderChild = observer((props: any) => {
     Object.keys(meta.validate).map(e => {
       if (!meta.validate[e]) valid = false;
     });
-    if (valid) onSubmit();
+    if (valid) onSubmit(data);
   };
   const isValid = value => {
     meta.validate[child.props.path] = value;

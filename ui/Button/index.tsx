@@ -59,7 +59,6 @@ export default observer((props: ButtonProps) => {
     <TouchableOpacity
       {...props}
       style={{
-        borderRadius: 4,
         backgroundColor: theme.primary,
         display: "flex",
         alignItems: "stretch",

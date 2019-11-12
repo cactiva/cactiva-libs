@@ -7,7 +7,8 @@ import { DefaultTheme } from "../../theme";
 import Icon from "../Icon";
 
 export interface UIHeaderProps {
-  leftAction?: boolean;
+  backBtn?: boolean;
+  onPressBackBtn?: () => void;
   safeAreaView?: boolean;
   title?: string | object;
   style?: any;
@@ -21,7 +22,8 @@ export interface UIHeaderProps {
 
 export default observer((props: UIHeaderProps) => {
   const {
-    leftAction,
+    backBtn,
+    onPressBackBtn,
     title,
     children,
     style,
@@ -37,7 +39,9 @@ export default observer((props: UIHeaderProps) => {
   const nav = useNavigation();
 
   const onGoBack = () => {
-    nav.goBack();
+    if (!!onPressBackBtn) {
+      onPressBackBtn();
+    } else nav.goBack();
   };
 
   const styleShadow = {
@@ -58,10 +62,12 @@ export default observer((props: UIHeaderProps) => {
         alignItems: "stretch",
         justifyContent: "flex-start",
         padding: 5,
-        borderStyle: "solid",
         backgroundColor: "#fff",
         marginTop: safeAreaView ? -statusbar : 0,
         paddingTop: safeAreaView ? statusbar : 5,
+        borderBottomWidth: 1,
+        borderColor: "#f0eff4",
+        borderStyle: "solid",
         ...style,
         ...(styles ? styles.root : {}),
         ...(shadow ? styleShadow : {})
@@ -74,7 +80,7 @@ export default observer((props: UIHeaderProps) => {
           alignItems: "center"
         }}
       >
-        {leftAction && (
+        {backBtn && (
           <TouchableOpacity onPress={onGoBack}>
             <Icon
               source={"AntDesign"}

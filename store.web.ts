@@ -5,16 +5,14 @@ const storage = localStorage;
 export default (name: string, data: any) => {
   const initData = data;
   const vname = `store.${name}`;
-  const obs = observable(initData);
-  setTimeout(async () => {
-    const sjson = await storage.getItem(vname);
-    if (sjson) {
-      const sdata = JSON.parse(sjson);
-      Object.keys(sdata).map(s => {
-        console.log(s);
-      });
-    }
-  });
+  const sData = storage.getItem(vname);
+  let obs = null;
+  if (sData) {
+    obs = observable(JSON.parse(sData));
+  } else {
+    obs = observable(initData);
+  }
+
   observe(obs, () => {
     storage.setItem(vname, JSON.stringify(obs));
   });

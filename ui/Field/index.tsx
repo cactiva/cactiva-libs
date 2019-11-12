@@ -76,7 +76,7 @@ export default observer((props: FieldProps) => {
       : "";
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
-      case "number":
+      case "decimal":
         value = !!value ? parseInt(value) : value;
         break;
     }
@@ -86,7 +86,7 @@ export default observer((props: FieldProps) => {
   const validation = value => {
     if (isRequired && !value) {
       meta.error = true;
-      meta.errorMessage = [`${label} is required.`];
+      meta.errorMessage = [`${label} is required!`];
     }
     if (meta.error && !!value) {
       meta.error = false;
@@ -95,7 +95,7 @@ export default observer((props: FieldProps) => {
     if (!meta.validate) meta.validate = true;
     if (validate) {
       let res: any = validate(value);
-      if (res !== false && res !== undefined) {
+      if (res !== false && res !== undefined && res !== null) {
         meta.error = true;
         meta.errorMessage = res;
       } else {
