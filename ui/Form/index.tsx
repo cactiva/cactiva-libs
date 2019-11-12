@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform, View } from "react-native";
+import { Platform, View, KeyboardAvoidingView } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import { FieldProps } from "../Field";
@@ -42,7 +42,7 @@ export default observer((props: FormProps) => {
     }
   }, [meta.valid]);
   return (
-    <View style={style}>
+    <KeyboardAvoidingView style={style}>
       {children.map((el: any) => {
         return (
           <RenderChild
@@ -54,7 +54,8 @@ export default observer((props: FormProps) => {
           />
         );
       })}
-    </View>
+      <View style={{ flex: 1 }} />
+    </KeyboardAvoidingView>
   );
 });
 

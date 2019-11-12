@@ -1,18 +1,23 @@
 import { observable, observe, toJS } from "mobx";
-import FastStorage from "react-native-fast-storage";
+import { AsyncStorage } from "react-native";
 
-const storage = FastStorage;
+const storage = AsyncStorage;
 
 export default (name: string, data: any) => {
   const initData = data;
   const vname = `store.${name}`;
-  const sData = storage.getItem(vname);
-  let obs = null;
-  if (sData) {
-    obs = observable(JSON.parse(sData));
-  } else {
-    obs = observable(initData);
-  }
+  const obs = observable(initData);
+  setTimeout(async () => {
+    const sData = await storage.getItem(vname);
+    if (sData) {
+      try {
+        const data = JSON.parse(sData);
+        for (let i in data) {
+          obs[i] = data[i];
+        }
+      } catch (e) {}
+    }
+  });
 
   observe(obs, () => {
     storage.setItem(vname, JSON.stringify(obs));
