@@ -7,6 +7,7 @@ import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon, { IconProps } from "../Icon";
 import { InputProps, InputType } from "../Input";
 import { uuid } from "../../utils";
+import Theme from "@src/theme.json";
 
 interface StylesFieldProps {
   root?: any;
@@ -67,14 +68,15 @@ export default observer((props: FieldProps) => {
     !!iconEnd && !!iconEnd.source && !!iconEnd.name ? true : false;
   const theme = {
     ...DefaultTheme,
-    ..._.get(props, "theme", {}),
-    ..._.get(field, "theme", {})
+    ...Theme.colors
   };
   const placeholder =
-    !meta.error && !meta.focus ? children.props.placeholder : "";
+    !meta.error && !meta.focus
+      ? children.props.placeholder + (isRequired === true ? " *" : "")
+      : "";
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
-      case "number":
+      case "decimal":
         value = !!value ? parseInt(value) : value;
         break;
     }
@@ -84,7 +86,7 @@ export default observer((props: FieldProps) => {
   const validation = value => {
     if (isRequired && !value) {
       meta.error = true;
-      meta.errorMessage = [`${label} is required.`];
+      meta.errorMessage = [`${label} is required!`];
     }
     if (meta.error && !!value) {
       meta.error = false;
@@ -93,7 +95,7 @@ export default observer((props: FieldProps) => {
     if (!meta.validate) meta.validate = true;
     if (validate) {
       let res: any = validate(value);
-      if (res !== false && res !== undefined) {
+      if (res !== false && res !== undefined && res !== null) {
         meta.error = true;
         meta.errorMessage = res;
       } else {
@@ -183,7 +185,6 @@ export default observer((props: FieldProps) => {
       style={{
         zIndex:
           ["select", "date"].indexOf(fieldType) > -1 && meta.focus ? 9 : 1,
-        marginTop: 5,
         marginBottom: 10,
         marginLeft: 0,
         marginRight: 0,
@@ -194,9 +195,7 @@ export default observer((props: FieldProps) => {
       <Text
         style={{
           fontSize: 14,
-          fontWeight: "600",
-          marginBottom: 5,
-          color: meta.error ? theme.danger : theme.primary,
+          color: theme.primary,
           ...((styles && styles.label) || {})
         }}
       >
@@ -215,7 +214,7 @@ export default observer((props: FieldProps) => {
           alignItems: "stretch",
           paddingRight: 2,
           paddingLeft: 2,
-          padding: 5,
+          padding: 4,
           justifyContent: "flex-start",
           display: "flex",
           ...((styles && styles.field) || {})

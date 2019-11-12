@@ -1,14 +1,15 @@
-import React from "react";
+import Theme from "@src/theme.json";
+import _ from "lodash";
 import { observer } from "mobx-react-lite";
+import React from "react";
 import {
-  TouchableOpacityProps,
-  TouchableOpacity,
   Text,
+  TouchableOpacity,
+  TouchableOpacityProps,
   View
 } from "react-native";
-import { ThemeProps, DefaultTheme } from "../../theme";
+import { DefaultTheme } from "../../theme";
 import Icon, { IconProps } from "../Icon";
-import _ from "lodash";
 
 interface ButtonStyles {
   wrapper?: any;
@@ -19,7 +20,6 @@ export interface ButtonProps extends TouchableOpacityProps {
   label?: string;
   iconStart?: IconProps | any;
   iconEnd?: IconProps | any;
-  theme?: ThemeProps;
   styles?: ButtonStyles;
   shadow?: Boolean;
   type?: "submit";
@@ -38,7 +38,7 @@ export default observer((props: ButtonProps) => {
   } = props;
   const theme = {
     ...DefaultTheme,
-    ...props.theme
+    ...Theme.colors
   };
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
@@ -59,7 +59,6 @@ export default observer((props: ButtonProps) => {
     <TouchableOpacity
       {...props}
       style={{
-        borderRadius: 4,
         backgroundColor: theme.primary,
         display: "flex",
         alignItems: "stretch",

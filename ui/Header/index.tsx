@@ -1,34 +1,58 @@
+import Theme from "@src/theme.json";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
-import { DefaultTheme, ThemeProps } from "../../theme";
+import { DefaultTheme } from "../../theme";
 import Icon from "../Icon";
 
 export interface UIHeaderProps {
-  leftAction?: boolean;
+  backBtn?: boolean;
+  onPressBackBtn?: () => void;
   safeAreaView?: boolean;
-  title: string | object;
-  theme?: ThemeProps;
+  title?: string | object;
   style?: any;
   styles?: {
     root?: any;
     title?: any;
   };
   children?: any;
+  shadow?: Boolean;
 }
 
 export default observer((props: UIHeaderProps) => {
-  const { leftAction, title, children, style, styles, safeAreaView } = props;
+  const {
+    backBtn,
+    onPressBackBtn,
+    title,
+    children,
+    style,
+    styles,
+    safeAreaView,
+    shadow
+  } = props;
   const statusbar = StatusBar.currentHeight || 0;
   const theme = {
     ...DefaultTheme,
-    ...props.theme
+    ...Theme.colors
   };
   const nav = useNavigation();
 
   const onGoBack = () => {
-    nav.goBack();
+    if (!!onPressBackBtn) {
+      onPressBackBtn();
+    } else nav.goBack();
+  };
+
+  const styleShadow = {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+    elevation: 6
   };
   return (
     <View
@@ -38,10 +62,15 @@ export default observer((props: UIHeaderProps) => {
         alignItems: "stretch",
         justifyContent: "flex-start",
         padding: 5,
-        borderStyle: "solid",
+        backgroundColor: "#fff",
+        marginTop: safeAreaView ? -statusbar : 0,
         paddingTop: safeAreaView ? statusbar : 5,
+        borderBottomWidth: 1,
+        borderColor: "#f0eff4",
+        borderStyle: "solid",
         ...style,
-        ...(styles ? styles.root : {})
+        ...(styles ? styles.root : {}),
+        ...(shadow ? styleShadow : {})
       }}
     >
       <View
@@ -51,7 +80,7 @@ export default observer((props: UIHeaderProps) => {
           alignItems: "center"
         }}
       >
-        {leftAction && (
+        {backBtn && (
           <TouchableOpacity onPress={onGoBack}>
             <Icon
               source={"AntDesign"}

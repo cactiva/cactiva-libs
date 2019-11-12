@@ -7,11 +7,17 @@ import {
   StyleSheet,
   View,
   ViewProps,
-  ScrollView
+  ScrollView,
+  KeyboardAvoidingView
 } from "react-native";
 
 interface CustomViewProps extends ViewProps {
-  type?: "View" | "SafeAreaView" | "AnimatedView" | "ScrollView";
+  type?:
+    | "View"
+    | "SafeAreaView"
+    | "AnimatedView"
+    | "ScrollView"
+    | "KeyboardAvoidingView";
   children?: any;
 }
 
@@ -29,9 +35,12 @@ export default (props: CustomViewProps) => {
   if (type === "AnimatedView") return <Animated.View {...props} />;
   if (type === "ScrollView") {
     const style = props.style;
-    const p = {...props};
-    delete p.style
+    const p = { ...props };
+    delete p.style;
     return <ScrollView {...p} contentContainerStyle={style} />;
+  }
+  if (type === "KeyboardAvoidingView") {
+    return <KeyboardAvoidingView behavior="padding" enabled {...props} />;
   }
   return <View {...props} />;
 };

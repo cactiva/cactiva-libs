@@ -6,17 +6,10 @@ const storage = AsyncStorage;
 export default (name: string, data: any) => {
   const initData = data;
   const vname = `store.${name}`;
-  const obs = observable(initData);
-  setTimeout(async () => {
-    const sData = await storage.getItem(vname);
-    if (sData) {
-      try {
-        const data = JSON.parse(sData);
-        for (let i in data) {
-          obs[i] = data[i];
-        }
-      } catch (e) {}
-    }
+  const sData = storage.getItem(vname);
+  let obs = observable(initData);
+  sData.then(res => {
+    if (res) obs = observable(JSON.parse(res));
   });
 
   observe(obs, () => {
