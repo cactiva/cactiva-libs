@@ -29,7 +29,7 @@ export default observer((props: InputProps) => {
     }
     onChangeText && onChangeText(v);
   };
-  let style = { ...styleInput, ...props.style };
+  let style = { minWidth: 10, ...styleInput, ...props.style };
 
   const cprops = { ...props };
   delete cprops.fieldType;
@@ -71,5 +71,5 @@ const styleInput = {
   borderWidth: 0,
   margin: 0,
   color: "#3a3a3a",
-  minHeight: 27
+  minHeight: 30
 };

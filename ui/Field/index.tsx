@@ -58,10 +58,7 @@ export default observer((props: FieldProps) => {
     error: false,
     errorMessage: []
   });
-  let labelText =
-    meta.focus || !!value || meta.error || !children.props.placeholder
-      ? label + (isRequired === true ? " *" : "")
-      : " ";
+  let labelText = label + (isRequired ? ' *' : '');
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
   const isIconEnd =
@@ -77,7 +74,7 @@ export default observer((props: FieldProps) => {
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
       case "decimal":
-        value = !!value ? parseInt(value) : value;
+        value = !!value ? value * 1 : value;
         break;
     }
     validation(value);
@@ -129,7 +126,6 @@ export default observer((props: FieldProps) => {
       };
       break;
     case "date":
-      labelText = label;
       childProps = {
         style: { flex: 1 },
         value: value,
@@ -138,7 +134,6 @@ export default observer((props: FieldProps) => {
       };
       break;
     case "radio-group":
-      labelText = label;
       childProps = {
         onChange: onChange,
         value: value,
@@ -146,7 +141,6 @@ export default observer((props: FieldProps) => {
       };
       break;
     case "checkbox-group":
-      labelText = label;
       childProps = {
         onChange: onChange,
         value: value,
@@ -154,14 +148,12 @@ export default observer((props: FieldProps) => {
       };
       break;
     case "camera":
-      labelText = label;
       childProps = {
         onCapture: onChange,
         value: value
       };
       break;
     case "location":
-      labelText = label;
       childProps = {
         onCapture: onChange,
         value: value
@@ -185,7 +177,7 @@ export default observer((props: FieldProps) => {
       style={{
         zIndex:
           ["select", "date"].indexOf(fieldType) > -1 && meta.focus ? 9 : 1,
-        marginBottom: 10,
+        marginBottom: 20,
         marginLeft: 0,
         marginRight: 0,
         ...style,
@@ -196,6 +188,7 @@ export default observer((props: FieldProps) => {
         style={{
           fontSize: 14,
           color: theme.primary,
+          marginBottom: 5,
           ...((styles && styles.label) || {})
         }}
       >

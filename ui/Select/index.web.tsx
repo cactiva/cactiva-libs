@@ -1,5 +1,5 @@
 import { observer, useObservable } from "mobx-react-lite";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -12,10 +12,16 @@ import { DefaultTheme } from "../../theme";
 import { fuzzyMatch } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
+import Theme from "@src/theme.json";
+import { toJS } from "mobx";
+import { createPortal } from "react-dom";
 
 export default observer((props: SelectProps) => {
   const { value, placeholder, items, style, onFocus } = props;
-  const theme = DefaultTheme;
+  const theme = {
+    ...DefaultTheme,
+    ...Theme.colors
+  };
   const meta = useObservable({
     isShown: false,
     value: null,
@@ -29,7 +35,7 @@ export default observer((props: SelectProps) => {
     meta.filter = value;
   };
   useEffect(() => {
-    if (value) meta.value = items.find(x => x.value === value);
+    if (value) meta.value = items.find(x => typeof x === 'string' ? x === value : x.value === value);
   }, []);
 
   useEffect(() => {
@@ -42,11 +48,12 @@ export default observer((props: SelectProps) => {
         style={{
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
+          minHeight: 30,
           minWidth: 147,
           ...style
         }}
         ref={(ref: any) => {
-          if (ref && !meta.dimensions) {
+          if (ref) {
             const dimensions = ref.getBoundingClientRect();
             const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
             meta.dimensions = dimensions;
@@ -102,55 +109,55 @@ export default observer((props: SelectProps) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "stretch",
-              justifyContent: "space-between",
-              ...style
-            }}
-            onPress={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              meta.isShown = !meta.isShown;
-            }}
-          >
-            <View
+            <TouchableOpacity
               style={{
-                flex: 1
+                flex: 1,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "stretch",
+                justifyContent: "space-between",
+                ...style
+              }}
+              onPress={e => {
+                e.stopPropagation();
+                e.preventDefault();
+                meta.isShown = !meta.isShown;
               }}
             >
-              <Text
+              <View
                 style={{
-                  flex: 1,
-                  marginTop: 5,
-                  marginBottom: 5,
-                  color: value ? "#3a3a3a" : "#757575"
+                  flex: 1
                 }}
               >
-                {meta.value ? meta.value.text : placeholder}
-              </Text>
-            </View>
-            <View
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingLeft: 5,
-                paddingRight: 5
-              }}
-            >
-              <Icon
-                source="Entypo"
-                name={meta.isShown ? "chevron-up" : "chevron-down"}
-                color="#3a3a3a"
-                size={20}
-              />
-            </View>
-          </TouchableOpacity>
-        )}
+                <Text
+                  style={{
+                    flex: 1,
+                    marginTop: 5,
+                    marginBottom: 5,
+                    color: value ? "#3a3a3a" : "#757575"
+                  }}
+                >
+                  {meta.value ? (typeof meta.value === "string" ? meta.value : meta.value.text) : placeholder}
+                </Text>
+              </View>
+              <View
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingLeft: 5,
+                  paddingRight: 5
+                }}
+              >
+                <Icon
+                  source="Entypo"
+                  name={meta.isShown ? "chevron-up" : "chevron-down"}
+                  color="#3a3a3a"
+                  size={20}
+                />
+              </View>
+            </TouchableOpacity>
+          )}
         <ModalItems meta={meta} {...props} theme={theme} />
       </div>
       {meta.isShown && (
@@ -178,75 +185,45 @@ export default observer((props: SelectProps) => {
 
 const ModalItems = observer((props: any) => {
   const { meta, theme } = props;
-  const getPosition = () => {
-    if (meta.dimensions && meta.contentHeight > 0) {
-      if (
-        meta.dimensions.bottom + meta.contentHeight <= meta.scrollH ||
-        (meta.scrollH - (meta.dimensions.top + meta.contentHeight) < 0 &&
-          meta.dimensions.bottom < meta.scrollH / 4)
-      ) {
-        return "bottom";
-      } else {
-        return "top";
+  const [loaded, setLoaded] = useState(false);
+  const rootPortal = document.getElementById('root-portal');
+  useEffect(() => {
+    const iv = setInterval(() => {
+      const rootPortal = document.getElementById('root-portal');
+      if (rootPortal) {
+        setLoaded(true);
+        clearInterval(iv);
       }
-    }
-    return null;
-  };
-  return (
+    }, 100);
+  }, [])
+  if (!loaded! || !meta.isShown) return null;
+  return createPortal(
     <div
       style={{
+        position: "absolute",
+        top: meta.dimensions.top,
+        left: meta.dimensions.left,
+        right: 0,
+        minHeight: 40,
+        maxHeight: 250,
+        backgroundColor: "#fff",
+        width: meta.dimensions.width,
+        zIndex: 9,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        bottom: getPosition() === "top" ? meta.dimensions.height : null,
-        top: getPosition() === "bottom" ? 0 : null,
-        left: 0,
-        right: 0
+        alignItems: "stretch",
+        justifyContent: "flex-start",
+        borderWidth: 1,
+        borderColor: theme.light,
+        borderStyle: "solid",
+        boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.16)"
       }}
     >
-      {meta.isShown && (
-        <div
-          ref={(ref: any) => {
-            if (ref && meta.contentHeight === 0) {
-              const dimensions = ref.getBoundingClientRect();
-              meta.contentHeight = dimensions.height;
-            }
-          }}
-          style={{
-            position: "absolute",
-            bottom: getPosition() === "top" ? 0 : null,
-            top: getPosition() === "bottom" ? 0 : null,
-            left: 0,
-            right: 0,
-            minHeight: 40,
-            maxHeight: 250,
-            backgroundColor: "#fff",
-            width: meta.dimensions.width,
-            zIndex: 9,
-            borderTopLeftRadius: getPosition() === "top" ? 8 : 0,
-            borderTopRightRadius: getPosition() === "top" ? 8 : 0,
-            borderBottomLeftRadius: getPosition() === "bottom" ? 8 : 0,
-            borderBottomRightRadius: getPosition() === "bottom" ? 8 : 0,
-            display: "flex",
-            alignItems: "stretch",
-            justifyContent: "flex-start",
-            borderWidth: 1,
-            borderColor: theme.light,
-            borderStyle: "solid",
-            borderTopWidth: getPosition() === "top" ? 1 : 0,
-            borderBottomWidth: getPosition() === "bottom" ? 1 : 0,
-            boxShadow:
-              getPosition() === "top"
-                ? "0px -4px 5px rgba(0, 0, 0, 0.16)"
-                : "0px 4px 5px rgba(0, 0, 0, 0.16)",
-            opacity: !!getPosition() && meta.isShown ? 1 : 0
-          }}
-        >
-          <RenderItem {...props} meta={meta} theme={theme} />
-        </div>
-      )}
-    </div>
+      <RenderItem {...props} meta={meta} theme={theme} />
+    </div>, rootPortal
   );
 });
 
@@ -256,7 +233,7 @@ const RenderItem = observer((props: any) => {
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      style={{ margin: 5, width: meta.dimensions.width }}
+      style={{ width: meta.dimensions.width }}
     >
       <FlatList
         data={(items || []).filter((item: any) => {
@@ -268,7 +245,7 @@ const RenderItem = observer((props: any) => {
           return true;
         })}
         keyExtractor={(item: any) => {
-          return `select-${item.value}`;
+          return `select-${typeof item === "string" ? item : item.value}`;
         }}
         ItemSeparatorComponent={() => (
           <View
@@ -292,20 +269,20 @@ const RenderItem = observer((props: any) => {
           </Text>
         )}
         renderItem={({ item }) => {
-          const active = value === item.value;
+          const textLabel = typeof item === "string" ? item : item.text;
+          const textValue = typeof item === "string" ? item : item.value;
+          const active = value === textValue && !!textValue;
           return (
             <TouchableOpacity
-              onPress={e => {
-                e.stopPropagation();
-                e.preventDefault();
+              onPress={() => {
                 onSelect(item);
                 meta.isShown = false;
                 meta.value = item;
               }}
               style={{
-                paddingRight: 10,
-                paddingLeft: 10,
-                minHeight: 35,
+                paddingRight: 5,
+                paddingLeft: 5,
+                minHeight: 40,
                 display: "flex",
                 justifyContent: "center",
                 backgroundColor: active ? theme.primary : "#fff"
@@ -316,7 +293,7 @@ const RenderItem = observer((props: any) => {
                   color: active ? "#fff" : theme.dark
                 }}
               >
-                {item.text}
+                {textLabel}
               </Text>
             </TouchableOpacity>
           );

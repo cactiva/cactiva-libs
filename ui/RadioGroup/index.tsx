@@ -24,7 +24,7 @@ export default observer((props: RadioGroupProps) => {
             onPress={v => {
               onChange && onChange(el.props.value || el.props.text);
             }}
-            checked={el.props.value == value || el.props.text == value}
+            checked={(el.props.value === value || el.props.text === value) && !!value}
             mode={mode}
             children={el}
             key={uuid()}

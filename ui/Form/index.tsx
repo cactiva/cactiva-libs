@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { Platform, View, KeyboardAvoidingView } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
-import { FieldProps } from "../Field";
+import Field, { FieldProps } from "../Field";
 import { uuid } from "../../utils";
 
 export interface FormFieldProps extends FieldProps {
@@ -59,44 +59,66 @@ export default observer((props: FormProps) => {
 
 const RenderChild = observer((props: any) => {
   const { data, child, setValue, meta, onSubmit } = props;
-  let custProps: any;
-  const onPress = () => {
-    meta.initError = true;
-    let valid = true;
-    Object.keys(meta.validate).map(e => {
-      if (!meta.validate[e]) valid = false;
+  if (!child) { return null; }
+  if (child.type === Field) {
+    let custProps: any;
+    const onPress = () => {
+      meta.initError = true;
+      let valid = true;
+      Object.keys(meta.validate).map(e => {
+        if (!meta.validate[e]) valid = false;
+      });
+      if (valid) onSubmit(data);
+    };
+    const isValid = value => {
+      meta.validate[child.props.path] = value;
+    };
+    const defaultSetValue = (value: any, path: any) => {
+      if (setValue) setValue(value, path);
+      else data[path] = value;
+      if (meta.initError) meta.initError = false;
+    };
+    if (child.props.type === "submit") {
+      custProps = {
+        ...custProps,
+        onPress: onPress
+      };
+    } else {
+      custProps = {
+        ...custProps,
+        isValid: isValid,
+        value: _.get(data, child.props.path),
+        setValue: (value: any) => defaultSetValue(value, child.props.path)
+      };
+    }
+    if (child.props.isRequired) {
+      custProps = {
+        ...custProps,
+        isValidate: meta.initError
+      };
+    }
+    return React.cloneElement(child, {
+      ...custProps,
+      ...child.props
     });
-    if (valid) onSubmit(data);
-  };
-  const isValid = value => {
-    meta.validate[child.props.path] = value;
-  };
-  const defaultSetValue = (value: any, path: any) => {
-    if (setValue) setValue(value, path);
-    else data[path] = value;
-    if (meta.initError) meta.initError = false;
-  };
-  if (child.props.type === "submit") {
-    custProps = {
-      ...custProps,
-      onPress: onPress
-    };
   } else {
-    custProps = {
-      ...custProps,
-      isValid: isValid,
-      value: _.get(data, child.props.path),
-      setValue: (value: any) => defaultSetValue(value, child.props.path)
-    };
+    const childrenRaw = _.get(child, 'props.children')
+    const hasChildren = !!childrenRaw;
+    if (!hasChildren) {
+      return child;
+    } else {
+      const children = Array.isArray(childrenRaw) ? childrenRaw : [childrenRaw]
+      return React.cloneElement(child, {
+        ...child.props,
+        children: children.map((el) => <RenderChild
+          data={data}
+          setValue={setValue}
+          child={el}
+          key={uuid()}
+          meta={meta}
+          onSubmit={onSubmit}
+        />)
+      })
+    }
   }
-  if (child.props.isRequired) {
-    custProps = {
-      ...custProps,
-      isValidate: meta.initError
-    };
-  }
-  return React.cloneElement(child, {
-    ...custProps,
-    ...child.props
-  });
 });

@@ -15,6 +15,7 @@ import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
+import Theme from "@src/theme.json";
 
 export interface SelectItemProps {
   text: any;
@@ -24,7 +25,7 @@ export interface SelectItemProps {
 export interface SelectProps {
   value?: any;
   placeholder?: string;
-  items: SelectItemProps[];
+  items: (SelectItemProps | string)[];
   onSelect?: (item: any) => void;
   fieldType?: "select";
   style?: any;
@@ -41,10 +42,10 @@ export default observer((props: SelectProps) => {
   });
   const theme = {
     ...DefaultTheme,
-    ..._.get(props, "theme", {})
+    ...Theme.colors
   };
   useEffect(() => {
-    if (value) meta.value = items.find(x => x.value === value);
+    if (value) meta.value = items.find(x => typeof x === 'string' ? x === value : x.value === value);
   }, []);
 
   return (
@@ -216,7 +217,9 @@ const RenderItem = observer((props: any) => {
             </Text>
           )}
           renderItem={({ item }) => {
-            const active = value === item.value;
+            const textLabel = typeof item === "string" ? item : item.text;
+            const textValue = typeof item === "string" ? item : item.value;
+            const active = value === textValue && !!textValue;
             return (
               <TouchableOpacity
                 onPress={() => {
@@ -238,7 +241,7 @@ const RenderItem = observer((props: any) => {
                     color: active ? "#fff" : theme.dark
                   }}
                 >
-                  {item.text}
+                  {textLabel}
                 </Text>
               </TouchableOpacity>
             );

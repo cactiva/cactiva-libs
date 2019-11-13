@@ -3,6 +3,29 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon from "../Icon";
+import Theme from "@src/theme.json";
+import Svg, {
+  Circle,
+  Ellipse,
+  G,
+  TSpan,
+  TextPath,
+  Path,
+  Polygon,
+  Polyline,
+  Line,
+  Rect,
+  Use,
+  Image,
+  Symbol,
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Stop,
+  ClipPath,
+  Pattern,
+  Mask,
+} from 'react-native-svg';
 
 export type RadioModeType = "default" | "checkbox";
 
@@ -21,7 +44,7 @@ export default observer((props: RadioProps) => {
   const checked = props.checked === true ? true : false;
   const theme = {
     ...DefaultTheme,
-    ...props.theme
+    ...Theme.colors
   };
 
   return (
@@ -67,33 +90,15 @@ export default observer((props: RadioProps) => {
               color={checked ? "white" : theme.light}
             />
           </View>
-        ) : (
-          <View
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 5,
-              backgroundColor: checked ? "white" : theme.light,
-              borderWidth: 1,
-              borderStyle: "solid",
-              borderColor: checked ? theme.primary : theme.medium,
-              width: 20,
-              height: 20,
-              borderRadius: 40,
-              marginRight: 8
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: checked ? theme.primary : theme.light,
-                width: 10,
-                height: 10,
-                borderRadius: 40
-              }}
-            />
-          </View>
-        )}
+        ) : (<View style={{
+          marginRight: 8
+        }}>
+          <Svg width="20" height="20" viewBox="0 0 400 400" fill="none">
+            <Circle cx="200" cy="200" r="195" stroke={theme.medium} fill={"white"} strokeWidth={20} />
+            <Circle cx="200" cy="200" r="100" fill={checked ? theme.primary : "white"} />
+          </Svg>
+        </View>
+          )}
         <Text
           style={{
             color: theme.dark
