@@ -59,17 +59,20 @@ export default observer((props: FormProps) => {
 
 const RenderChild = observer((props: any) => {
   const { data, child, setValue, meta, onSubmit } = props;
-  if (!child) { return null; }
+  if (!child) {
+    return null;
+  }
+  const onPress = () => {
+    meta.initError = true;
+    let valid = true;
+    Object.keys(meta.validate).map(e => {
+      if (!meta.validate[e]) valid = false;
+    });
+    if (valid) onSubmit(data);
+  };
+
   if (child.type === Field) {
     let custProps: any;
-    const onPress = () => {
-      meta.initError = true;
-      let valid = true;
-      Object.keys(meta.validate).map(e => {
-        if (!meta.validate[e]) valid = false;
-      });
-      if (valid) onSubmit(data);
-    };
     const isValid = value => {
       meta.validate[child.props.path] = value;
     };
@@ -102,23 +105,29 @@ const RenderChild = observer((props: any) => {
       ...child.props
     });
   } else {
-    const childrenRaw = _.get(child, 'props.children')
+    const childrenRaw = _.get(child, "props.children");
     const hasChildren = !!childrenRaw;
     if (!hasChildren) {
       return child;
     } else {
-      const children = Array.isArray(childrenRaw) ? childrenRaw : [childrenRaw]
+      const children = Array.isArray(childrenRaw) ? childrenRaw : [childrenRaw];
+      const props = { ...child.props };
+      if (child.props.type === "submit") {
+        props.onPress = onPress;
+      }
       return React.cloneElement(child, {
-        ...child.props,
-        children: children.map((el) => <RenderChild
-          data={data}
-          setValue={setValue}
-          child={el}
-          key={uuid()}
-          meta={meta}
-          onSubmit={onSubmit}
-        />)
-      })
+        ...props,
+        children: children.map(el => (
+          <RenderChild
+            data={data}
+            setValue={setValue}
+            child={el}
+            key={uuid()}
+            meta={meta}
+            onSubmit={onSubmit}
+          />
+        ))
+      });
     }
   }
 });
