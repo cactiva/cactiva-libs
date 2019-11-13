@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { TextInput, TextInputProps } from "react-native";
-
+import _ from 'lodash';
 export type InputType =
   | "text"
   | "number"
@@ -38,6 +38,7 @@ export default observer((props: InputProps) => {
     ...cprops,
     style,
     value: value || "",
+    placeholder: _.get(cprops, 'placeholder', ''),
     onChangeText: setValue
   };
   switch (type) {

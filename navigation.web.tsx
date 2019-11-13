@@ -12,14 +12,15 @@ export const AppContainer = () => {
     })
   );
 
-  if (theme.device === "mobile")
-    return () => {
+  return () => {
+    if (theme.device === "mobile") {
       const dim = useDimensions().window;
       if (dim.width > 460)
-        return <div className="mobile-root"><App /></div >
-      return <App />;
-    };
-  return App;
+        return <><div className="mobile-root"><App /></div><div id="root-portal" /></>
+    }
+
+    return <><App /><div id="root-portal" /></>;
+  };
 };
 
 function importAllRoute(r, except) {

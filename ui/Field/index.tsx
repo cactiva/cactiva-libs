@@ -1,13 +1,13 @@
+import Theme from "@src/theme.json";
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import Icon, { IconProps } from "../Icon";
-import { InputProps, InputType } from "../Input";
 import { uuid } from "../../utils";
-import Theme from "@src/theme.json";
+import Icon, { IconProps } from "../Icon";
+import { InputProps } from "../Input";
 
 interface StylesFieldProps {
   root?: any;
@@ -72,7 +72,7 @@ export default observer((props: FieldProps) => {
   };
   const placeholder =
     !meta.error && !meta.focus
-      ? children.props.placeholder + (isRequired === true ? " *" : "")
+      ? _.get(children, 'props.placeholder', '')
       : "";
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
@@ -207,8 +207,8 @@ export default observer((props: FieldProps) => {
           borderColor: meta.error
             ? theme.danger
             : meta.focus
-            ? theme.primary
-            : theme.light,
+              ? theme.primary
+              : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",
