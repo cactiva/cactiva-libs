@@ -41,7 +41,7 @@ export default observer((props: ButtonProps) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        opacity: disabled ? 0.8 : 1,
+        opacity: disabled ? 0.7 : 1,
         minWidth: 50,
         paddingTop: 10,
         paddingBottom: 10,

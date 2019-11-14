@@ -25,7 +25,6 @@ interface CustomViewProps
     | "AnimatedView"
     | "ScrollView"
     | "KeyboardAvoidingView";
-  children?: any;
 }
 
 export default (props: CustomViewProps) => {

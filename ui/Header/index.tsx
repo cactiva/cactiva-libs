@@ -1,7 +1,13 @@
 import Theme from "@src/theme.json";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { StatusBar, Text, TouchableOpacity, View } from "react-native";
+import {
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+  Platform
+} from "react-native";
 import { useNavigation } from "react-navigation-hooks";
 import { DefaultTheme } from "../../theme";
 import Icon from "../Icon";
@@ -31,7 +37,7 @@ export default observer((props: UIHeaderProps) => {
     safeAreaView,
     shadow
   } = props;
-  const statusbar = StatusBar.currentHeight || 0;
+  const statusbar = Platform.OS === "android" ? StatusBar.currentHeight : 0;
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -54,6 +60,7 @@ export default observer((props: UIHeaderProps) => {
     shadowRadius: 4.65,
     elevation: 6
   };
+
   return (
     <View
       style={{

@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform } from "react-native";
+import { Platform, ViewProps } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import Field, { FieldProps } from "../Field";
@@ -12,11 +12,10 @@ export interface FormFieldProps extends FieldProps {
   key: string;
 }
 
-export interface FormProps {
+export interface FormProps extends ViewProps {
   data?: any;
   setValue?: (value: any, path: any) => void;
   children?: any;
-  style?: any;
   theme?: ThemeProps;
   onSubmit?: (data?: any) => void;
 }
@@ -30,7 +29,7 @@ export default observer((props: FormProps) => {
   });
   const style = {
     zIndex: Platform.OS === "web" ? 9 : 1,
-    ..._.get(props, "style", {})
+    ...(_.get(props, "style", {}) as any)
   };
 
   useEffect(() => {
@@ -38,15 +37,22 @@ export default observer((props: FormProps) => {
     Object.keys(meta.validate).map(e => {
       if (!meta.validate[e]) valid = false;
     });
-    if (meta.initError && valid && onSubmit) onSubmit(data);
-  }, [meta.initError]);
+    if (meta.initError && valid && onSubmit) {
+      onSubmit(data);
+    }
+  }, [meta.initError, meta.validate]);
 
   useEffect(() => {
     if (children) {
-      children.map(el => {
-        if (el.props && el.props.isRequired && el.props.path)
-          meta.validate[el.props.path] = false;
-      });
+      if (Array.isArray(children)) {
+        children.map(el => {
+          if (el.props && el.props.isRequired && el.props.path)
+            meta.validate[el.props.path] = false;
+        });
+      } else {
+        if (children.props && children.props.isRequired && children.props.path)
+          meta.validate[children.props.path] = false;
+      }
     }
   }, []);
   return (
@@ -60,7 +66,7 @@ export default observer((props: FormProps) => {
         keyboardShouldPersistTaps={"handled"}
         keyboardDismissMode={"on-drag"}
       >
-        {children &&
+        {children && Array.isArray(children) ? (
           children.map((el: any) => {
             return (
               <RenderChild
@@ -72,7 +78,17 @@ export default observer((props: FormProps) => {
                 onSubmit={onSubmit}
               />
             );
-          })}
+          })
+        ) : (
+          <RenderChild
+            data={data}
+            setValue={setValue}
+            child={children}
+            key={uuid()}
+            meta={meta}
+            onSubmit={onSubmit}
+          />
+        )}
       </View>
     </View>
   );
@@ -85,6 +101,13 @@ const RenderChild = observer((props: any) => {
   }
   const onPress = () => {
     meta.initError = true;
+    let valid = true;
+    Object.keys(meta.validate).map(e => {
+      if (!meta.validate[e]) valid = false;
+    });
+    if (meta.initError && valid && onSubmit) {
+      onSubmit(data);
+    }
   };
 
   if (child.type === Field) {
