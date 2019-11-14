@@ -8,10 +8,17 @@ import {
   View,
   ViewProps,
   ScrollView,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ScrollViewProps,
+  KeyboardAvoidingViewProps
 } from "react-native";
+import { SafeAreaViewProps } from "react-navigation";
 
-interface CustomViewProps extends ViewProps {
+interface CustomViewProps
+  extends ViewProps,
+    ScrollViewProps,
+    SafeAreaViewProps,
+    KeyboardAvoidingViewProps {
   type?:
     | "View"
     | "SafeAreaView"

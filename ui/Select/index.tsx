@@ -31,10 +31,11 @@ export interface SelectProps {
   style?: any;
   theme?: ThemeProps;
   onFocus?: (e: any) => void;
+  readonly?: boolean;
 }
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style } = props;
+  const { value, placeholder, items, style, readonly } = props;
   const meta = useObservable({
     isShown: false,
     value: null,
@@ -45,7 +46,10 @@ export default observer((props: SelectProps) => {
     ...Theme.colors
   };
   useEffect(() => {
-    if (value) meta.value = items.find(x => typeof x === 'string' ? x === value : x.value === value);
+    if (value)
+      meta.value = items.find(x =>
+        typeof x === "string" ? x === value : x.value === value
+      );
   }, []);
 
   return (
@@ -59,6 +63,7 @@ export default observer((props: SelectProps) => {
           justifyContent: "space-between",
           ...style
         }}
+        disabled={readonly}
         onPress={() =>
           (meta.isShown = items && items.length > 0 ? true : false)
         }
@@ -79,22 +84,24 @@ export default observer((props: SelectProps) => {
             {meta.value ? meta.value.text : placeholder}
           </Text>
         </View>
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingLeft: 5,
-            paddingRight: 5
-          }}
-        >
-          <Icon
-            source="Entypo"
-            name={meta.isShown ? "chevron-up" : "chevron-down"}
-            color={theme.dark}
-            size={24}
-          />
-        </View>
+        {!readonly && (
+          <View
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingLeft: 5,
+              paddingRight: 5
+            }}
+          >
+            <Icon
+              source="Entypo"
+              name={meta.isShown ? "chevron-up" : "chevron-down"}
+              color={theme.dark}
+              size={24}
+            />
+          </View>
+        )}
       </TouchableOpacity>
       <ModalItems meta={meta} {...props} theme={theme} />
     </>

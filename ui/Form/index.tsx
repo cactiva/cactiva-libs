@@ -1,11 +1,12 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform, View, KeyboardAvoidingView } from "react-native";
+import { Platform } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import Field, { FieldProps } from "../Field";
 import { uuid } from "../../utils";
+import View from "../View";
 
 export interface FormFieldProps extends FieldProps {
   key: string;
@@ -33,27 +34,47 @@ export default observer((props: FormProps) => {
   };
 
   useEffect(() => {
-    children.map(el => {
-      if (el.props && el.props.isRequired && el.props.path)
-        meta.validate[el.props.path] = false;
+    let valid = true;
+    Object.keys(meta.validate).map(e => {
+      if (!meta.validate[e]) valid = false;
     });
+    if (meta.initError && valid && onSubmit) onSubmit(data);
+  }, [meta.initError]);
+
+  useEffect(() => {
+    if (children) {
+      children.map(el => {
+        if (el.props && el.props.isRequired && el.props.path)
+          meta.validate[el.props.path] = false;
+      });
+    }
   }, []);
   return (
-    <KeyboardAvoidingView style={style}>
-      {children.map((el: any) => {
-        return (
-          <RenderChild
-            data={data}
-            setValue={setValue}
-            child={el}
-            key={uuid()}
-            meta={meta}
-            onSubmit={onSubmit}
-          />
-        );
-      })}
-      <View style={{ flex: 1 }} />
-    </KeyboardAvoidingView>
+    <View type={"KeyboardAvoidingView"}>
+      <View
+        type={"ScrollView"}
+        style={{
+          flexGrow: 1,
+          ...style
+        }}
+        keyboardShouldPersistTaps={"handled"}
+        keyboardDismissMode={"on-drag"}
+      >
+        {children &&
+          children.map((el: any) => {
+            return (
+              <RenderChild
+                data={data}
+                setValue={setValue}
+                child={el}
+                key={uuid()}
+                meta={meta}
+                onSubmit={onSubmit}
+              />
+            );
+          })}
+      </View>
+    </View>
   );
 });
 
@@ -64,11 +85,6 @@ const RenderChild = observer((props: any) => {
   }
   const onPress = () => {
     meta.initError = true;
-    let valid = true;
-    Object.keys(meta.validate).map(e => {
-      if (!meta.validate[e]) valid = false;
-    });
-    if (valid) onSubmit(data);
   };
 
   if (child.type === Field) {

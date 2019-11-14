@@ -18,8 +18,9 @@ interface StylesFieldProps {
 }
 
 export interface FieldProps {
-  label: string;
-  path: string;
+  label?: string;
+  isLabel?: boolean;
+  path?: string;
   field?: InputProps;
   value?: any;
   setValue?: (value: any) => void;
@@ -47,6 +48,7 @@ export default observer((props: FieldProps) => {
     children,
     isRequired,
     validate,
+    isLabel,
     isValidate,
     isValid
   } = props;
@@ -58,7 +60,8 @@ export default observer((props: FieldProps) => {
     error: false,
     errorMessage: []
   });
-  let labelText = label + (isRequired ? ' *' : '');
+  let labelText =
+    isLabel == false || !label ? "" : label + (isRequired ? " *" : "");
   const isIconStart =
     !!iconStart && !!iconStart.source && !!iconStart.name ? true : false;
   const isIconEnd =
@@ -68,9 +71,7 @@ export default observer((props: FieldProps) => {
     ...Theme.colors
   };
   const placeholder =
-    !meta.error && !meta.focus
-      ? _.get(children, 'props.placeholder', '')
-      : "";
+    !meta.error && !meta.focus ? _.get(children, "props.placeholder", "") : "";
   const onChange = value => {
     switch (_.get(children, "props.type", "text")) {
       case "decimal":
@@ -108,7 +109,7 @@ export default observer((props: FieldProps) => {
   switch (fieldType) {
     default:
       childProps = {
-        style: { flex: 1 },
+        style: { flex: 1, ..._.get(children, "props.style", {}) },
         value: value,
         onChangeText: onChange,
         placeholder: placeholder,
@@ -118,7 +119,7 @@ export default observer((props: FieldProps) => {
       break;
     case "select":
       childProps = {
-        style: { flex: 1 },
+        style: { flex: 1, ..._.get(children, "props.style", {}) },
         value: value,
         placeholder: placeholder,
         onSelect: value => onChange(value.value || value.text),
@@ -127,7 +128,7 @@ export default observer((props: FieldProps) => {
       break;
     case "date":
       childProps = {
-        style: { flex: 1 },
+        style: { flex: 1, ..._.get(children, "props.style", {}) },
         value: value,
         onChange: value => onChange(value),
         onFocus: (e: any) => (meta.focus = e)
@@ -184,24 +185,26 @@ export default observer((props: FieldProps) => {
         ..._.get(styles, "root", {})
       }}
     >
-      <Text
-        style={{
-          fontSize: 14,
-          color: theme.primary,
-          marginBottom: 5,
-          ...((styles && styles.label) || {})
-        }}
-      >
-        {labelText}
-      </Text>
+      {!!labelText && (
+        <Text
+          style={{
+            fontSize: 14,
+            color: theme.primary,
+            marginBottom: 5,
+            ...((styles && styles.label) || {})
+          }}
+        >
+          {labelText}
+        </Text>
+      )}
       <View
         style={{
           borderStyle: "solid",
           borderColor: meta.error
             ? theme.danger
             : meta.focus
-              ? theme.primary
-              : theme.light,
+            ? theme.primary
+            : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",

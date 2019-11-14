@@ -21,3 +21,4 @@ export { default as Image } from "./Image";
 export { default as MapView } from "./MapView";
 export { default as ImageBackground } from "./ImageBackground";
 export { default as FlatList } from "./FlatList";
+export { default as WebView } from "./WebView";
