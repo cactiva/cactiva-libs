@@ -35,7 +35,10 @@ export default observer((props: SelectProps) => {
     meta.filter = value;
   };
   useEffect(() => {
-    if (value) meta.value = items.find(x => typeof x === 'string' ? x === value : x.value === value);
+    if (value)
+      meta.value = items.find(x =>
+        typeof x === "string" ? x === value : x.value === value
+      );
   }, []);
 
   useEffect(() => {
@@ -49,7 +52,6 @@ export default observer((props: SelectProps) => {
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
           minHeight: 30,
-          minWidth: 147,
           ...style
         }}
         ref={(ref: any) => {
@@ -109,55 +111,59 @@ export default observer((props: SelectProps) => {
             </TouchableOpacity>
           </View>
         ) : (
-            <TouchableOpacity
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "stretch",
+              justifyContent: "space-between",
+              ...style
+            }}
+            onPress={e => {
+              e.stopPropagation();
+              e.preventDefault();
+              meta.isShown = !meta.isShown;
+            }}
+          >
+            <View
               style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "stretch",
-                justifyContent: "space-between",
-                ...style
-              }}
-              onPress={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                meta.isShown = !meta.isShown;
+                flex: 1
               }}
             >
-              <View
+              <Text
                 style={{
-                  flex: 1
+                  flex: 1,
+                  marginTop: 5,
+                  marginBottom: 5,
+                  color: value ? "#3a3a3a" : "#757575"
                 }}
               >
-                <Text
-                  style={{
-                    flex: 1,
-                    marginTop: 5,
-                    marginBottom: 5,
-                    color: value ? "#3a3a3a" : "#757575"
-                  }}
-                >
-                  {meta.value ? (typeof meta.value === "string" ? meta.value : meta.value.text) : placeholder}
-                </Text>
-              </View>
-              <View
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingLeft: 5,
-                  paddingRight: 5
-                }}
-              >
-                <Icon
-                  source="Entypo"
-                  name={meta.isShown ? "chevron-up" : "chevron-down"}
-                  color="#3a3a3a"
-                  size={20}
-                />
-              </View>
-            </TouchableOpacity>
-          )}
+                {meta.value
+                  ? typeof meta.value === "string"
+                    ? meta.value
+                    : meta.value.text
+                  : placeholder}
+              </Text>
+            </View>
+            <View
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingLeft: 5,
+                paddingRight: 5
+              }}
+            >
+              <Icon
+                source="Entypo"
+                name={meta.isShown ? "chevron-up" : "chevron-down"}
+                color="#3a3a3a"
+                size={20}
+              />
+            </View>
+          </TouchableOpacity>
+        )}
         <ModalItems meta={meta} {...props} theme={theme} />
       </div>
       {meta.isShown && (
@@ -186,16 +192,16 @@ export default observer((props: SelectProps) => {
 const ModalItems = observer((props: any) => {
   const { meta, theme } = props;
   const [loaded, setLoaded] = useState(false);
-  const rootPortal = document.getElementById('root-portal');
+  const rootPortal = document.getElementById("root-portal");
   useEffect(() => {
     const iv = setInterval(() => {
-      const rootPortal = document.getElementById('root-portal');
+      const rootPortal = document.getElementById("root-portal");
       if (rootPortal) {
         setLoaded(true);
         clearInterval(iv);
       }
     }, 100);
-  }, [])
+  }, []);
   if (!loaded! || !meta.isShown) return null;
   return createPortal(
     <div
@@ -223,7 +229,8 @@ const ModalItems = observer((props: any) => {
       }}
     >
       <RenderItem {...props} meta={meta} theme={theme} />
-    </div>, rootPortal
+    </div>,
+    rootPortal
   );
 });
 

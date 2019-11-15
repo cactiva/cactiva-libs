@@ -5,7 +5,7 @@ import View from "../View";
 import { useDimensions } from "react-native-hooks";
 import _ from "lodash";
 
-export interface CarouselProps extends Carousel.propTypes {
+export interface CarouselProps {
   data: any[];
   renderItem: any;
   itemWidth: number;
@@ -15,6 +15,7 @@ export interface CarouselProps extends Carousel.propTypes {
   loop?: boolean;
   isPagination?: boolean;
   paginationProps?: Pagination.propTypes;
+  onSnapToItem?: any;
 }
 
 export default observer((props: CarouselProps) => {
