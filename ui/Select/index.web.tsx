@@ -1,20 +1,13 @@
+import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { createPortal } from "react-dom";
+import { FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SelectProps } from ".";
 import { DefaultTheme } from "../../theme";
 import { fuzzyMatch } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
-import Theme from "@src/theme.json";
-import { toJS } from "mobx";
-import { createPortal } from "react-dom";
 
 export default observer((props: SelectProps) => {
   const { value, placeholder, items, style, onFocus } = props;
@@ -32,7 +25,7 @@ export default observer((props: SelectProps) => {
   });
 
   const onSearch = value => {
-    meta.filter = value;
+    meta.filter = value || "";
   };
   useEffect(() => {
     if (value) meta.value = items.find(x => typeof x === 'string' ? x === value : x.value === value);
@@ -203,16 +196,12 @@ const ModalItems = observer((props: any) => {
         position: "absolute",
         top: meta.dimensions.top,
         left: meta.dimensions.left,
-        right: 0,
         minHeight: 40,
+        marginTop: 28,
         maxHeight: 250,
         backgroundColor: "#fff",
         width: meta.dimensions.width,
         zIndex: 9,
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8,
-        borderBottomLeftRadius: 8,
-        borderBottomRightRadius: 8,
         display: "flex",
         alignItems: "stretch",
         justifyContent: "flex-start",
@@ -237,10 +226,10 @@ const RenderItem = observer((props: any) => {
     >
       <FlatList
         data={(items || []).filter((item: any) => {
-          if (meta.filter.length > 0)
+          if (meta.filter && meta.filter.length > 0)
             return fuzzyMatch(
               meta.filter.toLowerCase(),
-              item.text.toLowerCase()
+              (typeof item === "string" ? item : item.text).toLowerCase()
             );
           return true;
         })}

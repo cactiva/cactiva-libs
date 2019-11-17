@@ -4,6 +4,8 @@ import { MapViewProps } from "./index";
 // import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
 // import { GoogleLayer } from 'react-leaflet-google-v2';
 import { GoogleMap, Marker, withGoogleMap, withScriptjs } from "react-google-maps";
+import ErrorBoundary from "@src/libs/ErrorBoundary";
+import { Text, View } from "react-native";
 
 const MapViewInner = observer((props: MapViewProps) => {
     const { location, style, zoom } = props;
@@ -12,8 +14,6 @@ const MapViewInner = observer((props: MapViewProps) => {
     if (location) {
         center = { lat: location.latitude, lng: location.longitude };
     }
-    console.log(center);
-
     return <GoogleMap
         defaultZoom={zoom || 15}
         defaultCenter={center}
@@ -41,12 +41,14 @@ export default ((props: MapViewProps) => {
         },
         ...props.style
     }
-    return <MapView
-        {...props}
-        googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
-            "AIzaSyD-6dn4tHXYdHJNZLGmQvvNSgL4elJPGSY"
-            }`}
-        loadingElement={<div style={{ height: `100%` }} />}
-        containerElement={<div style={mapStyle} />}
-        mapElement={<div style={{ height: `100%` }} />} />
+    return <ErrorBoundary errorComponent={<View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <Text style={{ fontSize: 16 }}>Maps is unavailable</Text>
+    </View>}><MapView
+            {...props}
+            googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
+                "AIzaSyD-6dn4tHXYdHJNZLGmQvvNSgL4elJPGSY"
+                }`}
+            loadingElement={<div style={{ height: `100%` }} />}
+            containerElement={<div style={mapStyle} />}
+            mapElement={<div style={{ height: `100%` }} />} /></ErrorBoundary>
 })

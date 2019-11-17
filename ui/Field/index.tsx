@@ -121,7 +121,7 @@ export default observer((props: FieldProps) => {
         style: { flex: 1 },
         value: value,
         placeholder: placeholder,
-        onSelect: value => onChange(value.value || value.text),
+        onSelect: value => onChange(typeof value === 'string' ? value : value.value || value.text),
         onFocus: (e: any) => (meta.focus = e)
       };
       break;

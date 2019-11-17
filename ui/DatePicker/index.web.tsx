@@ -1,5 +1,5 @@
 import { observer, useObservable } from "mobx-react-lite";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import { DateTimeProps } from ".";
@@ -7,6 +7,7 @@ import { DefaultTheme } from "../../theme";
 import { dateToString } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
+import { createPortal } from "react-dom";
 
 export default observer((props: DateTimeProps) => {
   const { value, style, mode, onFocus, onChange } = props;
@@ -211,109 +212,72 @@ export default observer((props: DateTimeProps) => {
 
 const CalendarDropdown = observer((props: any) => {
   const { meta, theme, onDayPress, minDate, maxDate } = props;
-  const getPosition = () => {
-    if (meta.dimensions && meta.contentHeight > 0) {
-      if (
-        meta.dimensions.bottom + meta.contentHeight <= meta.scrollH ||
-        (meta.scrollH - (meta.dimensions.top + meta.contentHeight) < 0 &&
-          meta.dimensions.bottom < meta.scrollH / 2)
-      ) {
-        return "bottom";
-      } else {
-        return "top";
+  const [loaded, setLoaded] = useState(false);
+  const rootPortal = document.getElementById('root-portal');
+  useEffect(() => {
+    const iv = setInterval(() => {
+      const rootPortal = document.getElementById('root-portal');
+      if (rootPortal) {
+        setLoaded(true);
+        clearInterval(iv);
       }
-    }
-    return null;
-  };
-  return (
+    }, 100);
+  }, [])
+  if (!loaded! || !meta.isShown) return null;
+  return createPortal(
     <div
       style={{
+        position: "absolute",
+        top: meta.dimensions.top,
+        left: meta.dimensions.left,
+        minHeight: 40,
+        maxHeight: 350,
+        backgroundColor: "#fff",
+        zIndex: 9,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        bottom: getPosition() === "top" ? meta.dimensions.height : null,
-        top: getPosition() === "bottom" ? 0 : null,
-        left: 0,
-        right: 0
+        alignItems: "stretch",
+        justifyContent: "flex-start",
+        borderWidth: 1,
+        borderColor: theme.light,
+        borderStyle: "solid",
+        padding: 5,
+        boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.16)",
+        width: 260,
       }}
     >
-      {meta.isShown && (
-        <div
-          ref={(ref: any) => {
-            if (ref && meta.contentHeight === 0) {
-              const dimensions = ref.getBoundingClientRect();
-              meta.contentHeight = dimensions.height;
-            }
-          }}
-          style={{
-            position: "absolute",
-            bottom: getPosition() === "top" ? 0 : null,
-            top: getPosition() === "bottom" ? 0 : null,
-            // left: 0,
-            // right: 0,
-            minHeight: 40,
-            maxHeight: 350,
-            backgroundColor: "#fff",
-            zIndex: 9,
-            borderTopLeftRadius: getPosition() === "top" ? 8 : 0,
-            borderTopRightRadius: getPosition() === "top" ? 8 : 0,
-            borderBottomLeftRadius: getPosition() === "bottom" ? 8 : 0,
-            borderBottomRightRadius: getPosition() === "bottom" ? 8 : 0,
-            display: "flex",
-            alignItems: "stretch",
-            justifyContent: "flex-start",
-            borderWidth: 1,
-            borderColor: theme.light,
-            borderStyle: "solid",
-            borderTopWidth: getPosition() === "top" ? 1 : 0,
-            borderBottomWidth: getPosition() === "bottom" ? 1 : 0,
-            padding: 5,
-            marginTop: getPosition() === "top" ? 10 : 0,
-            marginBottom: getPosition() === "bottom" ? 10 : 0,
-            boxShadow:
-              getPosition() === "top"
-                ? "0px -4px 5px rgba(0, 0, 0, 0.16)"
-                : "0px 4px 5px rgba(0, 0, 0, 0.16)",
-            width: 260,
-            opacity: !!getPosition() && meta.isShown ? 1 : 0
-          }}
-        >
-          <Calendar
-            current={dateToString(meta.value)}
-            onDayPress={day => {
-              onDayPress(day.dateString);
-              meta.isShown = false;
-            }}
-            style={styles.calendar}
-            markedDates={{
-              [dateToString(meta.value)]: {
-                selected: true,
-                selectedColor: theme.primary
-              }
-            }}
-            minDate={minDate && dateToString(minDate)}
-            maxDate={minDate && dateToString(maxDate)}
-            renderArrow={direction => (
-              <Icon
-                source="Entypo"
-                name={`chevron-${direction}`}
-                color={theme.primary}
-                size={24}
-              />
-            )}
-            theme={{
-              textDayFontWeight: "300",
-              textMonthFontWeight: "bold",
-              textDayHeaderFontWeight: "300",
-              textDayFontSize: 14,
-              textMonthFontSize: 14,
-              textDayHeaderFontSize: 14
-            }}
+      <Calendar
+        current={dateToString(meta.value)}
+        onDayPress={day => {
+          onDayPress(day.dateString);
+          meta.isShown = false;
+        }}
+        style={styles.calendar}
+        markedDates={{
+          [dateToString(meta.value)]: {
+            selected: true,
+            selectedColor: theme.primary
+          }
+        }}
+        minDate={minDate && dateToString(minDate)}
+        maxDate={minDate && dateToString(maxDate)}
+        renderArrow={direction => (
+          <Icon
+            source="Entypo"
+            name={`chevron-${direction}`}
+            color={theme.primary}
+            size={24}
           />
-        </div>
-      )}
-    </div>
+        )}
+        theme={{
+          textDayFontWeight: "300",
+          textMonthFontWeight: "bold",
+          textDayHeaderFontWeight: "300",
+          textDayFontSize: 14,
+          textMonthFontSize: 14,
+          textDayHeaderFontSize: 14
+        }}
+      />
+    </div>, rootPortal
   );
 });
 

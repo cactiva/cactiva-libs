@@ -62,13 +62,16 @@ const RenderChild = observer((props: any) => {
   if (!child) {
     return null;
   }
-  const onPress = () => {
+  const onPress = (e) => {
     meta.initError = true;
     let valid = true;
     Object.keys(meta.validate).map(e => {
       if (!meta.validate[e]) valid = false;
     });
-    if (valid) onSubmit(data);
+    if (child.props.onPress) {
+      child.props.onPress(e);
+    }
+    if (valid && onSubmit) onSubmit(data);
   };
 
   if (child.type === Field) {
@@ -78,7 +81,13 @@ const RenderChild = observer((props: any) => {
     };
     const defaultSetValue = (value: any, path: any) => {
       if (setValue) setValue(value, path);
-      else data[path] = value;
+      else {
+        if (data) {
+          _.set(data, path, value);
+        } else {
+          console.error('Failed to set value: Form data props is undefined')
+        }
+      };
       if (meta.initError) meta.initError = false;
     };
     if (child.props.type === "submit") {

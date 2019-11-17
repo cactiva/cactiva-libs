@@ -37,10 +37,13 @@ const findLargestSmallest = (a: string, b: string) =>
         largest: b,
         smallest: a
       };
-const fuzzyMatch = (strA: string, strB: string, fuzziness = 1) => {
+const fuzzyMatch = (strA: string, strB: string, fuzziness = 0) => {
   if (strA === "" || strB === "") {
     return false;
   }
+
+  if (strA === strB) return true;
+
 
   const { largest, smallest } = findLargestSmallest(strA, strB);
   const maxIters = largest.length - smallest.length;

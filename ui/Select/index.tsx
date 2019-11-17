@@ -11,10 +11,10 @@ import {
   View
 } from "react-native";
 import { useDimensions } from "react-native-hooks";
-import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
+import { DefaultTheme, ThemeProps } from "../../theme";
 import Theme from "@src/theme.json";
 
 export interface SelectItemProps {
@@ -191,11 +191,11 @@ const RenderItem = observer((props: any) => {
             if (meta.filter.length > 0)
               return fuzzyMatch(
                 meta.filter.toLowerCase(),
-                item.text.toLowerCase()
+                (typeof item === "string" ? item : item.text).toLowerCase()
               );
             return true;
           })}
-          keyExtractor={(item: any) => `select-${item.value}`}
+          keyExtractor={(item: any) => `select-${(typeof item === "string" ? item : item.value)}`}
           ItemSeparatorComponent={() => (
             <View
               style={{
