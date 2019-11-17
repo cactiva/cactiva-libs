@@ -10,8 +10,8 @@ export default (name: string, data: any) => {
   let obs = observable(initData);
   sData
     .then(res => {
-      let newData = JSON.parse(res);
       if (res) {
+        let newData = JSON.parse(res);
         for (let i in obs) {
           delete obs[i];
         }

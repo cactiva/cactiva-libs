@@ -1,13 +1,13 @@
-import React from "react";
-import { observer } from "mobx-react-lite";
-import { ActivityIndicatorProps, ActivityIndicator } from "react-native";
-
-import { DefaultTheme, ThemeProps } from "../../theme";
 import Theme from "@src/theme.json";
+import { observer } from "mobx-react-lite";
+import React from "react";
+import { ActivityIndicator, ActivityIndicatorProps } from "react-native";
+import { DefaultTheme } from "../../theme";
+
 export default observer((props: ActivityIndicatorProps) => {
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
   };
-  return <ActivityIndicator {...props} color={props.color ? props.color : theme.primary} />;
+  return <ActivityIndicator color={theme.primary} {...props} />;
 });

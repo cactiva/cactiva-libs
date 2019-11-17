@@ -1,21 +1,21 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform, View, KeyboardAvoidingView } from "react-native";
+import { Platform, ViewProps } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import Field, { FieldProps } from "../Field";
 import { uuid } from "../../utils";
+import View from "../View";
 
 export interface FormFieldProps extends FieldProps {
   key: string;
 }
 
-export interface FormProps {
+export interface FormProps extends ViewProps {
   data?: any;
   setValue?: (value: any, path: any) => void;
   children?: any;
-  style?: any;
   theme?: ThemeProps;
   onSubmit?: (data?: any) => void;
 }
@@ -29,31 +29,68 @@ export default observer((props: FormProps) => {
   });
   const style = {
     zIndex: Platform.OS === "web" ? 9 : 1,
-    ..._.get(props, "style", {})
+    ...(_.get(props, "style", {}) as any)
   };
 
   useEffect(() => {
-    children.map(el => {
-      if (el.props && el.props.isRequired && el.props.path)
-        meta.validate[el.props.path] = false;
+    let valid = true;
+    Object.keys(meta.validate).map(e => {
+      if (!meta.validate[e]) valid = false;
     });
+    if (meta.initError && valid && onSubmit) {
+      onSubmit(data);
+    }
+  }, [meta.initError, meta.validate]);
+
+  useEffect(() => {
+    if (children) {
+      if (Array.isArray(children)) {
+        children.map(el => {
+          if (el.props && el.props.isRequired && el.props.path)
+            meta.validate[el.props.path] = false;
+        });
+      } else {
+        if (children.props && children.props.isRequired && children.props.path)
+          meta.validate[children.props.path] = false;
+      }
+    }
   }, []);
   return (
-    <KeyboardAvoidingView style={style}>
-      {children.map((el: any) => {
-        return (
+    <View type={"KeyboardAvoidingView"}>
+      <View
+        type={"ScrollView"}
+        style={{
+          flexGrow: 1,
+          ...style
+        }}
+        keyboardShouldPersistTaps={"handled"}
+        keyboardDismissMode={"on-drag"}
+      >
+        {children && Array.isArray(children) ? (
+          children.map((el: any) => {
+            return (
+              <RenderChild
+                data={data}
+                setValue={setValue}
+                child={el}
+                key={uuid()}
+                meta={meta}
+                onSubmit={onSubmit}
+              />
+            );
+          })
+        ) : (
           <RenderChild
             data={data}
             setValue={setValue}
-            child={el}
+            child={children}
             key={uuid()}
             meta={meta}
             onSubmit={onSubmit}
           />
-        );
-      })}
-      <View style={{ flex: 1 }} />
-    </KeyboardAvoidingView>
+        )}
+      </View>
+    </View>
   );
 });
 
@@ -68,10 +105,9 @@ const RenderChild = observer((props: any) => {
     Object.keys(meta.validate).map(e => {
       if (!meta.validate[e]) valid = false;
     });
-    if (child.props.onPress) {
-      child.props.onPress(e);
+    if (meta.initError && valid && onSubmit) {
+      onSubmit(data);
     }
-    if (valid && onSubmit) onSubmit(data);
   };
 
   if (child.type === Field) {

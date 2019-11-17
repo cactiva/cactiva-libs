@@ -1,21 +1,13 @@
-import _ from "lodash";
+import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import {
-  FlatList,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View
-} from "react-native";
-import { useDimensions } from "react-native-hooks";
+import { FlatList, Modal, ScrollView, Text, TouchableOpacity } from "react-native";
+import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch } from "../../utils";
+import Header from "../Header";
 import Icon from "../Icon";
 import Input from "../Input";
-import { DefaultTheme, ThemeProps } from "../../theme";
-import Theme from "@src/theme.json";
+import View from "../View";
 
 export interface SelectItemProps {
   text: any;
@@ -31,10 +23,11 @@ export interface SelectProps {
   style?: any;
   theme?: ThemeProps;
   onFocus?: (e: any) => void;
+  readonly?: boolean;
 }
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style } = props;
+  const { value, placeholder, items, style, readonly } = props;
   const meta = useObservable({
     isShown: false,
     value: null,
@@ -45,56 +38,56 @@ export default observer((props: SelectProps) => {
     ...Theme.colors
   };
   useEffect(() => {
-    if (value) meta.value = items.find(x => typeof x === 'string' ? x === value : x.value === value);
+    if (value)
+      meta.value = items.find(x =>
+        typeof x === "string" ? x === value : x.value === value
+      );
   }, []);
 
   return (
     <>
       <TouchableOpacity
         style={{
-          flex: 1,
           display: "flex",
           flexDirection: "row",
           alignItems: "stretch",
           justifyContent: "space-between",
           ...style
         }}
+        disabled={readonly}
         onPress={() =>
           (meta.isShown = items && items.length > 0 ? true : false)
         }
       >
-        <View
+        <Text
           style={{
-            flex: 1
+            flex: 1,
+            paddingLeft: 5,
+            marginTop: 5,
+            marginBottom: 5,
+            color: value ? "#3a3a3a" : "#757575"
           }}
         >
-          <Text
+          {meta.value ? meta.value.text : placeholder}
+        </Text>
+        {!readonly && (
+          <View
             style={{
-              flex: 1,
-              marginTop: 5,
-              marginBottom: 5,
-              color: value ? "#3a3a3a" : "#757575"
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingLeft: 5,
+              paddingRight: 5
             }}
           >
-            {meta.value ? meta.value.text : placeholder}
-          </Text>
-        </View>
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingLeft: 5,
-            paddingRight: 5
-          }}
-        >
-          <Icon
-            source="Entypo"
-            name={meta.isShown ? "chevron-up" : "chevron-down"}
-            color={theme.dark}
-            size={24}
-          />
-        </View>
+            <Icon
+              source="Entypo"
+              name={meta.isShown ? "chevron-up" : "chevron-down"}
+              color={theme.dark}
+              size={24}
+            />
+          </View>
+        )}
       </TouchableOpacity>
       <ModalItems meta={meta} {...props} theme={theme} />
     </>
@@ -103,7 +96,10 @@ export default observer((props: SelectProps) => {
 
 const ModalItems = observer((props: any) => {
   const { meta, theme } = props;
-  const dim = useDimensions().window;
+  const onSearch = value => {
+    meta.filter = value;
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -112,142 +108,105 @@ const ModalItems = observer((props: any) => {
       onRequestClose={() => (meta.isShown = false)}
     >
       <View
+        type={"SafeAreaView"}
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          minHeight: 40,
-          maxHeight: 400,
           backgroundColor: "#fff",
-          zIndex: 9,
-          borderTopLeftRadius: 18,
-          borderTopRightRadius: 18,
-          display: "flex",
-          alignItems: "stretch",
-          justifyContent: "flex-start",
-          padding: 10
+          flexGrow: 1,
+          flexShrink: 1
         }}
       >
+        <Header
+          safeAreaView={true}
+          backBtn={true}
+          onPressBackBtn={() => (meta.isShown = false)}
+          title={
+            <Input
+              placeholder={props.placeholder || "Search..."}
+              value={meta.filter}
+              onChangeText={onSearch}
+              style={{
+                padding: 10
+              }}
+            />
+          }
+          style={{
+            paddingTop: 0
+          }}
+        ></Header>
         <RenderItem {...props} meta={meta} theme={theme} />
       </View>
-      <TouchableWithoutFeedback onPress={() => (meta.isShown = false)}>
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: "rgba(0,0,0,.3)",
-            zIndex: 1,
-            height: dim.height
-          }}
-        />
-      </TouchableWithoutFeedback>
     </Modal>
   );
 });
 
 const RenderItem = observer((props: any) => {
-  const { meta, placeholder, items, value, onSelect, theme } = props;
-
-  const onSearch = value => {
-    meta.filter = value;
-  };
+  const { meta, items, value, onSelect, theme } = props;
   return (
-    <>
-      <Text
-        style={{
-          padding: 5,
-          fontSize: 16,
-          marginTop: 5,
-          marginBottom: 5,
-          fontWeight: "bold",
-          color: theme.primary
-        }}
-      >
-        {placeholder}
-      </Text>
-      {items.length > 5 && (
-        <Input
-          value={meta.filter}
-          onChangeText={onSearch}
-          placeholder="Search"
-          style={{
-            backgroundColor: theme.light,
-            minHeight: 40,
-            maxHeight: 40,
-            paddingLeft: 5,
-            paddingRight: 5,
-            marginTop: 0,
-            flex: 1
-          }}
-        />
-      )}
-      <ScrollView keyboardShouldPersistTaps="handled">
-        <FlatList
-          data={items.filter((item: any) => {
-            if (meta.filter.length > 0)
-              return fuzzyMatch(
-                meta.filter.toLowerCase(),
-                (typeof item === "string" ? item : item.text).toLowerCase()
-              );
-            return true;
-          })}
-          keyExtractor={(item: any) => `select-${(typeof item === "string" ? item : item.value)}`}
-          ItemSeparatorComponent={() => (
-            <View
-              style={{
-                borderBottomWidth: 1,
-                borderStyle: "solid",
-                borderColor: theme.light,
-                borderWidth: 0
+    <ScrollView keyboardShouldPersistTaps="handled">
+      <FlatList
+        data={items.filter((item: any) => {
+          if (meta.filter.length > 0)
+            return fuzzyMatch(
+              meta.filter.toLowerCase(),
+              item.text.toLowerCase()
+            );
+          return true;
+        })}
+        keyExtractor={(item: any) => `select-${item.value}`}
+        ItemSeparatorComponent={() => (
+          <View
+            style={{
+              borderBottomWidth: 1,
+              borderStyle: "solid",
+              borderColor: theme.light,
+              borderWidth: 0
+            }}
+          />
+        )}
+        ListEmptyComponent={() => (
+          <Text
+            style={{
+              margin: 10,
+              textAlign: "center"
+            }}
+          >
+            No item to display.
+          </Text>
+        )}
+        renderItem={({ item }) => {
+          const textLabel = typeof item === "string" ? item : item.text;
+          const textValue = typeof item === "string" ? item : item.value;
+          let active = false;
+          if (value && value.value) {
+            active = value.value === textValue && !!textValue;
+          }
+          return (
+            <TouchableOpacity
+              onPress={() => {
+                onSelect(item);
+                meta.isShown = false;
+                meta.value = item;
               }}
-            />
-          )}
-          ListEmptyComponent={() => (
-            <Text
               style={{
-                margin: 10,
-                textAlign: "center"
+                paddingRight: 10,
+                paddingLeft: 10,
+                minHeight: 40,
+                display: "flex",
+                justifyContent: "center",
+                backgroundColor: active ? theme.primary : "#fff"
               }}
             >
-              No item to display.
-            </Text>
-          )}
-          renderItem={({ item }) => {
-            const textLabel = typeof item === "string" ? item : item.text;
-            const textValue = typeof item === "string" ? item : item.value;
-            const active = value === textValue && !!textValue;
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  onSelect(item);
-                  meta.isShown = false;
-                  meta.value = item;
-                }}
+              <Text
                 style={{
-                  paddingRight: 5,
-                  paddingLeft: 5,
-                  minHeight: 40,
-                  display: "flex",
-                  justifyContent: "center",
-                  backgroundColor: active ? theme.primary : "#fff"
+                  color: active ? "#fff" : theme.dark
                 }}
               >
-                <Text
-                  style={{
-                    color: active ? "#fff" : theme.dark
-                  }}
-                >
-                  {textLabel}
-                </Text>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </ScrollView>
-    </>
+                {textLabel}
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+    </ScrollView>
   );
 });
