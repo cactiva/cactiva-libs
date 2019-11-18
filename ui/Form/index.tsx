@@ -56,39 +56,39 @@ export default observer((props: FormProps) => {
     }
   }, []);
   return (
-      <View
-        type={"ScrollView"}
-        style={{
-          flexGrow: 1,
-          ...style
-        }}
-        keyboardShouldPersistTaps={"handled"}
-        keyboardDismissMode={"on-drag"}
-      >
-        {children && Array.isArray(children) ? (
-          children.map((el: any) => {
-            return (
-              <RenderChild
-                data={data}
-                setValue={setValue}
-                child={el}
-                key={uuid()}
-                meta={meta}
-                onSubmit={onSubmit}
-              />
-            );
-          })
-        ) : (
-          <RenderChild
-            data={data}
-            setValue={setValue}
-            child={children}
-            key={uuid()}
-            meta={meta}
-            onSubmit={onSubmit}
-          />
-        )}
-      </View>
+    <View
+      type={"ScrollView"}
+      style={{
+        flexGrow: 1,
+        ...style
+      }}
+      keyboardShouldPersistTaps={"handled"}
+      keyboardDismissMode={"on-drag"}
+    >
+      {children && Array.isArray(children) ? (
+        children.map((el: any) => {
+          return (
+            <RenderChild
+              data={data}
+              setValue={setValue}
+              child={el}
+              key={uuid()}
+              meta={meta}
+              onSubmit={onSubmit}
+            />
+          );
+        })
+      ) : (
+        <RenderChild
+          data={data}
+          setValue={setValue}
+          child={children}
+          key={uuid()}
+          meta={meta}
+          onSubmit={onSubmit}
+        />
+      )}
+    </View>
   );
 });
 
@@ -97,7 +97,7 @@ const RenderChild = observer((props: any) => {
   if (!child) {
     return null;
   }
-  const onPress = (e) => {
+  const onPress = e => {
     meta.initError = true;
     let valid = true;
     Object.keys(meta.validate).map(e => {
@@ -107,7 +107,6 @@ const RenderChild = observer((props: any) => {
       onSubmit(data);
     }
   };
-
   if (child.type === Field) {
     let custProps: any;
     const isValid = value => {
@@ -119,9 +118,9 @@ const RenderChild = observer((props: any) => {
         if (data) {
           _.set(data, path, value);
         } else {
-          console.error('Failed to set value: Form data props is undefined')
+          console.error("Failed to set value: Form data props is undefined");
         }
-      };
+      }
       if (meta.initError) meta.initError = false;
     };
     if (child.props.type === "submit") {

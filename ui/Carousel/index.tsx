@@ -4,6 +4,7 @@ import Carousel, { Pagination } from "react-native-snap-carousel";
 import View from "../View";
 import { useDimensions } from "react-native-hooks";
 import _ from "lodash";
+import { ViewProps } from "react-native";
 
 export interface CarouselProps {
   data: any[];
@@ -11,7 +12,7 @@ export interface CarouselProps {
   itemWidth: number;
   sliderWidth: number;
   children?: any;
-  style?: any;
+  style?: ViewProps;
   loop?: boolean;
   isPagination?: boolean;
   paginationProps?: Pagination.propTypes;

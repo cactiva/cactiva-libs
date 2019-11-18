@@ -1,3 +1,4 @@
+import Theme from "@src/theme.json";
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
@@ -11,7 +12,7 @@ import {
   TouchableWithoutFeedback,
   View
 } from "react-native";
-import { DefaultTheme, ThemeProps } from "../../theme";
+import { DefaultTheme } from "../../theme";
 import { dateToString } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
@@ -22,7 +23,6 @@ export interface DateTimeProps {
   fieldType?: "date";
   maxDate?: Date;
   minDate?: Date;
-  theme?: ThemeProps;
   style?: any;
   value?: any;
   onFocus?: (e: any) => void;
@@ -42,7 +42,7 @@ export default observer((props: DateTimeProps) => {
 
   const theme = {
     ...DefaultTheme,
-    ..._.get(props, "theme", {})
+    ...Theme.colors
   };
   const onChangeDateString = (v, p) => {
     if (p === "dd") {

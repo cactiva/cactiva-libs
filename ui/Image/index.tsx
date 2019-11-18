@@ -11,7 +11,6 @@ export default observer((props: ImageProps) => {
   const meta = useObservable({
     status: "init"
   });
-
   return (
     <>
       {meta.status !== "error" && (
@@ -21,6 +20,10 @@ export default observer((props: ImageProps) => {
           onLoadStart={() => (meta.status = "loading")}
           onError={e => {
             meta.status = "error";
+          }}
+          style={{
+            ...(_.get(props, "style", {}) as any),
+            display: meta.status === "ready" ? undefined : "none"
           }}
         />
       )}

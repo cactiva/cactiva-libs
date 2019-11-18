@@ -20,8 +20,8 @@ export default observer((props: MapViewProps) => {
   const mapProps = props;
   delete mapProps.markers;
   const initial = {
-    longitude: -2.3932595,
-    latitude: 108.8485046,
+    latitude: -2.3932595,
+    longitude: 108.8485046,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421
   };

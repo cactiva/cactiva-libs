@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { SelectProps } from ".";
 import { DefaultTheme } from "../../theme";
-import { fuzzyMatch } from "../../utils";
+import { fuzzyMatch, textStyle } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style, onFocus, readonly } = props;
+  const { value, placeholder, items, onFocus, readonly } = props;
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -33,6 +33,13 @@ export default observer((props: SelectProps) => {
   const onSearch = value => {
     meta.filter = value || "";
   };
+
+  const tStyle = textStyle(props.style);
+  const style = props.style;
+  if (!!style)
+    Object.keys(style).map(k => {
+      if (Object.keys(tStyle).indexOf(k) > -1) delete style[k];
+    });
   useEffect(() => {
     if (value)
       meta.value = items.find(x =>
@@ -50,8 +57,7 @@ export default observer((props: SelectProps) => {
         style={{
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
-          minHeight: 30,
-          ...style
+          minHeight: 30
         }}
         ref={(ref: any) => {
           if (ref) {
@@ -69,7 +75,8 @@ export default observer((props: SelectProps) => {
               display: "flex",
               flexDirection: "row",
               alignItems: "stretch",
-              justifyContent: "space-between"
+              justifyContent: "space-between",
+              ...style
             }}
           >
             <Input
@@ -136,7 +143,9 @@ export default observer((props: SelectProps) => {
                   flex: 1,
                   marginTop: 5,
                   marginBottom: 5,
-                  color: value ? "#3a3a3a" : "#757575"
+                  fontSize: Theme.fontSize,
+                  color: value ? "#3a3a3a" : "#757575",
+                  ...tStyle
                 }}
               >
                 {meta.value

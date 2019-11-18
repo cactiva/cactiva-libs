@@ -2,6 +2,9 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { TextInput, TextInputProps } from "react-native";
 import _ from "lodash";
+import { DefaultTheme } from "../../theme";
+import Theme from "@src/theme.json";
+
 export type InputType =
   | "text"
   | "number"
@@ -28,9 +31,17 @@ export default observer((props: InputProps) => {
     }
     onChangeText && onChangeText(v);
   };
+  const theme = {
+    ...DefaultTheme,
+    ...Theme.colors
+  };
   let style = {
     minWidth: 10,
-    ...styleInput,
+    borderWidth: 0,
+    margin: 0,
+    color: theme.dark,
+    minHeight: 30,
+    fontSize: Theme.fontSize,
     ...(_.get(props, "style", {}) as any)
   };
 
@@ -69,10 +80,3 @@ export default observer((props: InputProps) => {
   }
   return <TextInput {...ComponentProps} />;
 });
-
-const styleInput = {
-  borderWidth: 0,
-  margin: 0,
-  color: "#3a3a3a",
-  minHeight: 30
-};

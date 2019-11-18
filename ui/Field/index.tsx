@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { uuid } from "../../utils";
+import { uuid, textStyle } from "../../utils";
 import Icon, { IconProps } from "../Icon";
 import { InputProps } from "../Input";
 
@@ -43,7 +43,6 @@ export default observer((props: FieldProps) => {
     label,
     iconStart,
     iconEnd,
-    style,
     styles,
     children,
     isRequired,
@@ -122,7 +121,10 @@ export default observer((props: FieldProps) => {
         style: { flex: 1, ..._.get(children, "props.style", {}) },
         value: value,
         placeholder: placeholder,
-        onSelect: value => onChange(typeof value === 'string' ? value : value.value || value.text),
+        onSelect: value =>
+          onChange(
+            typeof value === "string" ? value : value.value || value.text
+          ),
         onFocus: (e: any) => (meta.focus = e)
       };
       break;
@@ -167,6 +169,12 @@ export default observer((props: FieldProps) => {
       ...childProps
     })
   );
+  const tStyle = textStyle(props.style);
+  const style = props.style;
+  if (!!style)
+    Object.keys(style).map(k => {
+      if (Object.keys(tStyle).indexOf(k) > -1) delete style[k];
+    });
 
   useEffect(() => {
     if (!!isValidate) {
@@ -191,7 +199,8 @@ export default observer((props: FieldProps) => {
             fontSize: 14,
             color: theme.primary,
             marginBottom: 5,
-            ...((styles && styles.label) || {})
+            ...((styles && styles.label) || {}),
+            ...tStyle
           }}
         >
           {labelText}
