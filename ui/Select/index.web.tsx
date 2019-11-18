@@ -2,7 +2,13 @@ import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { SelectProps } from ".";
 import { DefaultTheme } from "../../theme";
 import { fuzzyMatch } from "../../utils";
@@ -10,7 +16,7 @@ import Icon from "../Icon";
 import Input from "../Input";
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style, onFocus } = props;
+  const { value, placeholder, items, style, onFocus, readonly } = props;
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -113,6 +119,7 @@ export default observer((props: SelectProps) => {
               justifyContent: "space-between",
               ...style
             }}
+            disabled={readonly}
             onPress={e => {
               e.stopPropagation();
               e.preventDefault();
@@ -148,12 +155,14 @@ export default observer((props: SelectProps) => {
                 paddingRight: 5
               }}
             >
-              <Icon
-                source="Entypo"
-                name={meta.isShown ? "chevron-up" : "chevron-down"}
-                color="#3a3a3a"
-                size={20}
-              />
+              {!readonly && (
+                <Icon
+                  source="Entypo"
+                  name={meta.isShown ? "chevron-up" : "chevron-down"}
+                  color="#3a3a3a"
+                  size={20}
+                />
+              )}
             </View>
           </TouchableOpacity>
         )}

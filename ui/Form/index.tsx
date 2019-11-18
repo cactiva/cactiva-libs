@@ -56,7 +56,6 @@ export default observer((props: FormProps) => {
     }
   }, []);
   return (
-    <View type={"KeyboardAvoidingView"}>
       <View
         type={"ScrollView"}
         style={{
@@ -90,7 +89,6 @@ export default observer((props: FormProps) => {
           />
         )}
       </View>
-    </View>
   );
 });
 
