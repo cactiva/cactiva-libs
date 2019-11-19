@@ -23,3 +23,4 @@ export { default as MapView, Marker } from "./MapView";
 export { default as ImageBackground } from "./ImageBackground";
 export { default as FlatList } from "./FlatList";
 export { default as WebView } from "./WebView";
+export { default as Modal } from "./Modal";
