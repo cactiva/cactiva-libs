@@ -35,11 +35,12 @@ export default observer((props: SelectProps) => {
   };
 
   const tStyle = textStyle(props.style);
-  const style = props.style;
+  const style = { ...props.style };
   if (!!style)
     Object.keys(style).map(k => {
       if (Object.keys(tStyle).indexOf(k) > -1) delete style[k];
     });
+
   useEffect(() => {
     if (value)
       meta.value = items.find(x =>

@@ -11,19 +11,25 @@ export default observer((props: ImageProps) => {
   const meta = useObservable({
     status: "init"
   });
+  const style: any = _.get(props, "style", {});
+
   return (
     <>
       {meta.status !== "error" && (
         <Image
           {...props}
-          onLoad={() => (meta.status = "ready")}
-          onLoadStart={() => (meta.status = "loading")}
+          onLoad={() => {
+            meta.status = "ready";
+          }}
+          onLoadStart={() => {
+            meta.status = "loading";
+          }}
           onError={e => {
             meta.status = "error";
           }}
           style={{
-            ...(_.get(props, "style", {}) as any),
-            display: meta.status === "ready" ? undefined : "none"
+            ...style,
+            opacity: meta.status === "ready" ? 1 : 0
           }}
         />
       )}
@@ -42,7 +48,9 @@ const RenderImage = observer((props: any) => {
       style={{
         ..._.get(imgProps, "style", {}),
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        position: "absolute",
+        top: 0
       }}
     >
       {meta.status === "loading" ? (

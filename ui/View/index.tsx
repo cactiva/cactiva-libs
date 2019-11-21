@@ -10,9 +10,11 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   ScrollViewProps,
-  KeyboardAvoidingViewProps
+  KeyboardAvoidingViewProps,
+  ImageBackgroundProps
 } from "react-native";
 import { SafeAreaViewProps } from "react-navigation";
+import ImageBackground from "../ImageBackground";
 
 interface CustomViewProps
   extends ViewProps,
@@ -25,6 +27,7 @@ interface CustomViewProps
     | "AnimatedView"
     | "ScrollView"
     | "KeyboardAvoidingView";
+  source?: any;
 }
 
 export default (props: CustomViewProps) => {

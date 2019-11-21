@@ -16,7 +16,7 @@ export { default as Button } from "./Button";
 export { default as Camera } from "./Camera";
 export { default as Location, getLocation } from "./Location";
 export { default as BottomNavigation } from "./BottomNavigation";
-export { default as Carousel } from "./Carousel";
+export { default as Carousel, Pagination } from "./Carousel";
 export { default as Text } from "./Text";
 export { default as Image } from "./Image";
 export { default as MapView, Marker } from "./MapView";
