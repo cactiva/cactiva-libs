@@ -105,7 +105,7 @@ export default observer((props: FieldProps) => {
   };
 
   const fieldType = _.get(children, "props.fieldType", "input");
-  const childStyle = _.get(children, "props.style", {});
+  const childStyle = { ..._.get(children, "props.style", {}) };
   childStyle.flex = 1;
   let childProps;
   switch (fieldType) {
