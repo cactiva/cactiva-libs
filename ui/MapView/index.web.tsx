@@ -53,5 +53,6 @@ export default (props: MapViewProps) => {
       containerElement={<div style={mapStyle} />}
       mapElement={<div style={{ height: `100%` }} />} />
   </ErrorBoundary>
-})
+}
+
 
