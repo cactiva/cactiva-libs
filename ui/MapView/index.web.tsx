@@ -3,9 +3,11 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 // import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
 // import { GoogleLayer } from 'react-leaflet-google-v2';
-import { GoogleMap, Marker, withGoogleMap, withScriptjs } from "react-google-maps";
+import { GoogleMap, Marker as MarkerComponent, withGoogleMap, withScriptjs } from "react-google-maps";
 import { Text, View } from "react-native";
 import { MapViewProps } from "./index";
+
+export const Marker = MarkerComponent;
 
 const MapViewInner = observer((props: MapViewProps) => {
   const { location, style, zoom } = props;
@@ -28,7 +30,7 @@ const MapViewInner = observer((props: MapViewProps) => {
   </GoogleMap>
 });
 
-const MapView = withScriptjs(withGoogleMap(MapViewInner))
+const MapViewComponent = withScriptjs(withGoogleMap(MapViewInner))
 export default ((props: MapViewProps) => {
 
   const mapStyle = {
@@ -41,7 +43,7 @@ export default ((props: MapViewProps) => {
   }
   return <ErrorBoundary errorComponent={<View style={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
     <Text style={{ fontSize: 16 }}>Maps is unavailable</Text>
-  </View>}><MapView
+  </View>}><MapViewComponent
       {...props}
       googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${
         "AIzaSyD-6dn4tHXYdHJNZLGmQvvNSgL4elJPGSY"
@@ -50,3 +52,4 @@ export default ((props: MapViewProps) => {
       containerElement={<div style={mapStyle} />}
       mapElement={<div style={{ height: `100%` }} />} /></ErrorBoundary>
 })
+

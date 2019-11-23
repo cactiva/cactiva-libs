@@ -1,11 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import MapView, {
-  MapViewProps as MapViewPropsOrigin,
-  Marker as MarkerOrigin,
-  MarkerProps
-} from "react-native-maps";
-import { uuid } from "../../utils";
+import MapView, { MapViewProps as MapViewPropsOrigin, Marker as MarkerOrigin, MarkerProps } from "react-native-maps";
 import View from "../View";
 
 export interface MapViewProps extends MapViewPropsOrigin {
