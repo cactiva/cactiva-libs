@@ -1,9 +1,15 @@
 import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { FlatList, Modal, ScrollView, Text, TouchableOpacity } from "react-native";
+import {
+  FlatList,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity
+} from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { fuzzyMatch } from "../../utils";
+import { fuzzyMatch, textStyle } from "../../utils";
 import Header from "../Header";
 import Icon from "../Icon";
 import Input from "../Input";
@@ -27,7 +33,7 @@ export interface SelectProps {
 }
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style, readonly } = props;
+  const { value, placeholder, items, readonly } = props;
   const meta = useObservable({
     isShown: false,
     value: null,
@@ -37,6 +43,14 @@ export default observer((props: SelectProps) => {
     ...DefaultTheme,
     ...Theme.colors
   };
+
+  const tStyle = textStyle(props.style);
+  const style = { ...props.style };
+  if (!!style)
+    Object.keys(style).map(k => {
+      if (Object.keys(tStyle).indexOf(k) > -1) delete style[k];
+    });
+
   useEffect(() => {
     if (value)
       meta.value = items.find(x =>
@@ -65,7 +79,9 @@ export default observer((props: SelectProps) => {
             paddingLeft: 5,
             marginTop: 5,
             marginBottom: 5,
-            color: value ? "#3a3a3a" : "#757575"
+            fontSize: Theme.fontSize,
+            color: value ? "#3a3a3a" : "#757575",
+            ...tStyle
           }}
         >
           {meta.value ? meta.value.text : placeholder}

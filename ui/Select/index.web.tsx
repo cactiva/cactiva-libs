@@ -2,15 +2,21 @@ import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { FlatList, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { SelectProps } from ".";
 import { DefaultTheme } from "../../theme";
-import { fuzzyMatch } from "../../utils";
+import { fuzzyMatch, textStyle } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, style, onFocus } = props;
+  const { value, placeholder, items, onFocus, readonly } = props;
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -27,6 +33,14 @@ export default observer((props: SelectProps) => {
   const onSearch = value => {
     meta.filter = value || "";
   };
+
+  const tStyle = textStyle(props.style);
+  const style = { ...props.style };
+  if (!!style)
+    Object.keys(style).map(k => {
+      if (Object.keys(tStyle).indexOf(k) > -1) delete style[k];
+    });
+
   useEffect(() => {
     if (value)
       meta.value = items.find(x =>
@@ -44,8 +58,7 @@ export default observer((props: SelectProps) => {
         style={{
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
-          minHeight: 30,
-          ...style
+          minHeight: 30
         }}
         ref={(ref: any) => {
           if (ref) {
@@ -63,7 +76,8 @@ export default observer((props: SelectProps) => {
               display: "flex",
               flexDirection: "row",
               alignItems: "stretch",
-              justifyContent: "space-between"
+              justifyContent: "space-between",
+              ...style
             }}
           >
             <Input
@@ -113,6 +127,7 @@ export default observer((props: SelectProps) => {
               justifyContent: "space-between",
               ...style
             }}
+            disabled={readonly}
             onPress={e => {
               e.stopPropagation();
               e.preventDefault();
@@ -129,7 +144,9 @@ export default observer((props: SelectProps) => {
                   flex: 1,
                   marginTop: 5,
                   marginBottom: 5,
-                  color: value ? "#3a3a3a" : "#757575"
+                  fontSize: Theme.fontSize,
+                  color: value ? "#3a3a3a" : "#757575",
+                  ...tStyle
                 }}
               >
                 {meta.value
@@ -148,12 +165,14 @@ export default observer((props: SelectProps) => {
                 paddingRight: 5
               }}
             >
-              <Icon
-                source="Entypo"
-                name={meta.isShown ? "chevron-up" : "chevron-down"}
-                color="#3a3a3a"
-                size={20}
-              />
+              {!readonly && (
+                <Icon
+                  source="Entypo"
+                  name={meta.isShown ? "chevron-up" : "chevron-down"}
+                  color="#3a3a3a"
+                  size={20}
+                />
+              )}
             </View>
           </TouchableOpacity>
         )}

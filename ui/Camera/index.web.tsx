@@ -29,31 +29,24 @@ export default observer((props: CameraProps) => {
     ref: false,
     resnap: false
   });
-  const capture = React.useCallback(
-    () => {
-      meta.isShown = false;
-      meta.photo = webcamRef.current.getScreenshot();
-    },
-    [webcamRef]
-  );
-
+  const capture = React.useCallback(() => {
+    meta.isShown = false;
+    meta.photo = webcamRef.current.getScreenshot();
+  }, [webcamRef]);
 
   return (
-    <> <TouchableOpacity
-      onPress={() => (meta.isShown = true)}
-      style={{
-        flex: 1,
-        ...style
-      }}
-    >
-      <View
+    <>
+      <TouchableOpacity
+        onPress={() => (meta.isShown = true)}
         style={{
+          flex: 1,
           height: 100,
           backgroundColor: theme.medium,
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 4,
-          overflow: "hidden"
+          overflow: "hidden",
+          ...style
         }}
       >
         {meta.photo && (
@@ -82,45 +75,53 @@ export default observer((props: CameraProps) => {
             right: 0
           }}
         >
-          <Icon
-            source="Entypo"
-            name="camera"
-            size={45}
-            color="white"
-          />
+          <Icon source="Entypo" name="camera" size={45} color="white" />
         </View>
-      </View>
-    </TouchableOpacity>
-      {meta.isShown &&
-        <ModalCamera videoConstraints={meta.cameraProps} webcamRef={webcamRef} capture={capture} />}
+      </TouchableOpacity>
+      {meta.isShown && (
+        <ModalCamera
+          videoConstraints={meta.cameraProps}
+          webcamRef={webcamRef}
+          capture={capture}
+        />
+      )}
     </>
   );
 });
 
 const ModalCamera = ({ videoConstraints, webcamRef, capture }: any) => {
   const [loaded, setLoaded] = useState(false);
-  const rootPortal = document.getElementById('root-portal');
+  const rootPortal = document.getElementById("root-portal");
   useEffect(() => {
     const iv = setInterval(() => {
-      const rootPortal = document.getElementById('root-portal');
+      const rootPortal = document.getElementById("root-portal");
       if (rootPortal) {
         setLoaded(true);
         clearInterval(iv);
       }
     }, 100);
-  }, [])
+  }, []);
 
   if (!loaded) return null;
-  return createPortal(<div
-    onClick={capture}
-    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'white' }}>
-    <Webcam
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      videoConstraints={videoConstraints}
-    />
-  </div>,
+  return createPortal(
+    <div
+      onClick={capture}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "white"
+      }}
+    >
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        videoConstraints={videoConstraints}
+      />
+    </div>,
     rootPortal
-  )
-}
+  );
+};

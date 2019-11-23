@@ -44,7 +44,6 @@ const fuzzyMatch = (strA: string, strB: string, fuzziness = 0) => {
 
   if (strA === strB) return true;
 
-
   const { largest, smallest } = findLargestSmallest(strA, strB);
   const maxIters = largest.length - smallest.length;
   const minMatches = smallest.length - fuzziness;
@@ -97,6 +96,23 @@ const dateToLocal = date => {
 
   return day + " " + monthNames[month] + " " + year;
 };
+const textStyle = style => {
+  const textStyleProps = [
+    "fontSize",
+    "color",
+    "fontWeight",
+    "lineHeight",
+    "fontFamily",
+    "textAlign",
+    "fontStyle"
+  ];
+  const newTextStyle = {};
+  if (!!style)
+    Object.keys(style).map(k => {
+      if (textStyleProps.indexOf(k) > -1) newTextStyle[k] = style[k];
+    });
+  return newTextStyle;
+};
 export {
   scale,
   verticalScale,
@@ -106,5 +122,6 @@ export {
   deepFind,
   fuzzyMatch,
   dateToString,
-  dateToLocal
+  dateToLocal,
+  textStyle
 };

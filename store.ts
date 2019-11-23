@@ -5,6 +5,9 @@ const storage = AsyncStorage;
 
 export default (name: string, data: any) => {
   const initData = data;
+  // Object.keys(data).map(k => {
+  //   initData[k] = observable(data[k]);
+  // });
   const vname = `store.${name}`;
   const sData = storage.getItem(vname);
   let obs = observable(initData);
@@ -12,11 +15,8 @@ export default (name: string, data: any) => {
     .then(res => {
       if (res) {
         let newData = JSON.parse(res);
-        for (let i in obs) {
-          delete obs[i];
-        }
         for (let i in newData) {
-          obs[i] = newData[i];
+          obs[i] = observable(newData[i]);
         }
       } else {
         storage.setItem(vname, JSON.stringify(obs));
@@ -28,5 +28,5 @@ export default (name: string, data: any) => {
       });
     });
 
-  return obs;
+  return obs as any;
 };

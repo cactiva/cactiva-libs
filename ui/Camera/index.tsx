@@ -53,62 +53,57 @@ export default observer((props: CameraProps) => {
           onPress={() => (meta.isShown = true)}
           style={{
             flex: 1,
+            height: 100,
+            backgroundColor: theme.medium,
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 4,
+            overflow: "hidden",
             ...style
           }}
         >
+          {meta.photo && (
+            <Image
+              source={{ uri: meta.photo.uri }}
+              resizeMode="cover"
+              style={{
+                height: 100,
+                width: dim.width,
+                flexGrow: 1,
+                flexShrink: 1,
+                flexBasis: 0
+              }}
+            />
+          )}
           <View
             style={{
-              height: 100,
-              backgroundColor: theme.medium,
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: 4,
-              overflow: "hidden"
+              display: "flex",
+              zIndex: 1,
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0
             }}
           >
-            {meta.photo && (
-              <Image
-                source={{ uri: meta.photo.uri }}
-                resizeMode="cover"
-                style={{
-                  height: 100,
-                  width: dim.width,
-                  flexGrow: 1,
-                  flexShrink: 1,
-                  flexBasis: 0
-                }}
-              />
-            )}
-            <View
+            <Icon
+              source="Entypo"
+              name="camera"
+              size={45}
+              color="white"
               style={{
-                alignItems: "center",
-                justifyContent: "center",
-                display: "flex",
-                zIndex: 1,
-                position: "absolute",
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 2
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                elevation: 5
               }}
-            >
-              <Icon
-                source="Entypo"
-                name="camera"
-                size={45}
-                color="white"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: {
-                    width: 0,
-                    height: 2
-                  },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 3.84,
-                  elevation: 5
-                }}
-              />
-            </View>
+            />
           </View>
         </TouchableOpacity>
         <ModalCamera
