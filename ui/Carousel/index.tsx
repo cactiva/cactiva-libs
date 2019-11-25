@@ -62,7 +62,6 @@ export default observer((props: CarouselProps) => {
         itemWidth={dim.width - 50}
         sliderWidth={dim.width}
         layout={"default"}
-        layoutCardOffset={18}
         containerCustomStyle={{
           overflow: "visible"
         }}
@@ -87,8 +86,8 @@ export const Pagination = observer((props: any) => {
       dotsLength={0}
       activeDotIndex={0}
       containerStyle={{
-        paddingHorizontal: 5,
-        paddingVertical: 5
+        paddingHorizontal: 0,
+        paddingVertical: 0
       }}
       dotStyle={{
         height: 8,
@@ -96,8 +95,12 @@ export const Pagination = observer((props: any) => {
         borderRadius: 20,
         backgroundColor: theme.primary
       }}
-      inactiveDotOpacity={0.4}
-      inactiveDotScale={0.6}
+      dotContainerStyle={{
+        marginLeft: 3,
+        marginRight: 3
+      }}
+      inactiveDotOpacity={0.3}
+      inactiveDotScale={1}
       {...props}
     />
   );
