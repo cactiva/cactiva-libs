@@ -13,6 +13,7 @@ export default observer((props: TextProps) => {
   const style = {
     fontSize: Theme.fontSize,
     color: theme.dark,
+    fontFamily: _.get(Theme, "fontFamily", undefined),
     ...(_.get(props, "style", {}) as any)
   };
   return <Text {...props} style={style} />;

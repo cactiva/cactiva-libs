@@ -15,10 +15,11 @@ export interface CameraProps {
   style?: any;
   theme?: ThemeProps;
   fieldType?: "camera";
+  relativePath: string;
 }
 
 export default observer((props: CameraProps) => {
-  const { style } = props;
+  const { style, value } = props;
   const meta = useObservable({
     hasCameraPermission: null,
     isShown: false,
@@ -133,13 +134,15 @@ const ModalCamera = observer((props: any) => {
       meta.resnap = true;
     } else if (camera.current) {
       meta.snap = true;
-      camera.current.takePictureAsync({ base64: true }).then((res: any) => {
-        meta.photo = res;
-        onCapture && onCapture(res.base64);
-        meta.snap = false;
-        meta.isShown = false;
-        meta.resnap = false;
-      });
+      camera.current
+        .takePictureAsync({ quality: 80, skipProcessing: true })
+        .then((res: any) => {
+          meta.photo = res;
+          onCapture && onCapture(res.uri);
+          meta.snap = false;
+          meta.isShown = false;
+          meta.resnap = false;
+        });
     }
   };
   const capture = !meta.photo || meta.resnap;
