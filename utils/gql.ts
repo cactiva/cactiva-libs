@@ -1,15 +1,12 @@
-import axios from "axios";
+import api from "./api.old";
 import session from "@src/stores/session";
 const config = require("../../../settings.json");
 interface QueryOptions {
   onError?: (e?: any) => void;
+  payload?: any;
   headers?: any;
 }
-export const query = async (
-  q: string,
-  payload?: any,
-  options: QueryOptions = {}
-) => {
+export const query = async (q: string, options: QueryOptions = {}) => {
   const headers = {
     "content-type": "application/json",
     ...options.headers
@@ -18,20 +15,18 @@ export const query = async (
   if (session && session.jwt) {
     headers["Authorization"] = `Bearer ${session.jwt}`;
   }
-  
-  try {
-    const res = await axios.post(
-      `http://${config.backend.host}:${config.backend.port}/hasura/v1/graphql`,
-      {
-        query: q,
-        payload
-      },
-      {
-        headers
-      }
-    );
 
-    return res.data.data;
+  try {
+    const res = await api({
+      url: `${config.backend.protocol}://${config.backend.host}:${config.backend.port}/hasura/v1/graphql`,
+      method: "post",
+      data: {
+        query: q,
+        payload: options.payload
+      }
+    });
+
+    console.log(res);
   } catch (e) {
     if (options && options.onError) {
       options.onError(e);

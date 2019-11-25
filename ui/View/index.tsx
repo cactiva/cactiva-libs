@@ -1,20 +1,6 @@
 import React from "react";
-import {
-  Animated,
-  Platform,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  View,
-  ViewProps,
-  ScrollView,
-  KeyboardAvoidingView,
-  ScrollViewProps,
-  KeyboardAvoidingViewProps,
-  ImageBackgroundProps
-} from "react-native";
+import { Animated, KeyboardAvoidingView, KeyboardAvoidingViewProps, Platform, SafeAreaView, ScrollView, ScrollViewProps, StatusBar, StyleSheet, View, ViewProps } from "react-native";
 import { SafeAreaViewProps } from "react-navigation";
-import ImageBackground from "../ImageBackground";
 
 interface CustomViewProps
   extends ViewProps,

@@ -6,7 +6,8 @@ import {
   Modal,
   ScrollView,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch, textStyle } from "../../utils";
@@ -77,14 +78,14 @@ export default observer((props: SelectProps) => {
           style={{
             flex: 1,
             paddingLeft: 5,
-            marginTop: 5,
-            marginBottom: 5,
+            marginTop: Platform.OS === 'ios' ? 6 : 5,
+            marginBottom: Platform.OS === 'ios' ? 7 : 5,
             fontSize: Theme.fontSize,
             color: value ? "#3a3a3a" : "#757575",
             ...tStyle
           }}
         >
-          {meta.value ? meta.value.text : placeholder}
+          {meta.value ? typeof meta.value === 'string' ? meta.value : meta.value.text : placeholder}
         </Text>
         {!readonly && (
           <View
@@ -168,7 +169,9 @@ const RenderItem = observer((props: any) => {
             );
           return true;
         })}
-        keyExtractor={(item: any) => `select-${item.value}`}
+        keyExtractor={(item: any) => {
+          return `select-${typeof item === 'string' ? item : item.value}`
+        }}
         ItemSeparatorComponent={() => (
           <View
             style={{

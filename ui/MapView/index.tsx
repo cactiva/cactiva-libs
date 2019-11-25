@@ -1,7 +1,8 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import MapView, { MapViewProps as MapViewPropsOrigin, Marker as MarkerOrigin, MarkerProps } from "react-native-maps";
+import { default as MapViewNative, MapViewProps as MapViewPropsOrigin, Marker as MarkerOrigin, MarkerProps } from "react-native-maps";
 import View from "../View";
+import { Text } from "react-native";
 
 export interface MapViewProps extends MapViewPropsOrigin {
   style?: any;
@@ -23,7 +24,7 @@ export default observer((props: MapViewProps) => {
 
   return (
     <View style={style}>
-      <MapView
+      <MapViewNative
         initialRegion={initial}
         style={{
           flexGrow: 1
@@ -34,7 +35,7 @@ export default observer((props: MapViewProps) => {
         {/* {markers &&
           markers.length > 0 &&
           markers.map(marker => <Marker key={uuid()} {...marker} />)} */}
-      </MapView>
+      </MapViewNative>
     </View>
   );
 });

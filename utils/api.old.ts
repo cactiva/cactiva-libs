@@ -1,4 +1,3 @@
-import axios from "axios";
 const config = require("../../../settings.json");
 
 export default (e: any) => {
@@ -10,15 +9,17 @@ export default (e: any) => {
   if (e.onError) {
     onError = e.onError;
   }
-  console.log(url);
-  return new Promise(async (resolve, reject) => {
-    try {
-      const res = await axios({ ...e, url });
-      resolve(res.data);
-    } catch (e) {
-      if (onError) {
-        onError(e);
-      }
-    }
-  });
+
+  const options: any = { method: e.method };
+  if (e.headers) {
+    options.headers = e.headers;
+  }
+  if (e.data) {
+    options.body = typeof e.data !== "string" ? JSON.stringify(e.data) : e.data;
+  }
+
+  if (onError) {
+    return fetch(url, options).catch(onError);
+  }
+  return fetch(url, options);
 };

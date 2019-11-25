@@ -105,8 +105,7 @@ export default observer((props: FieldProps) => {
   };
 
   const fieldType = _.get(children, "props.fieldType", "input");
-  const childStyle = _.get(children, "props.style", {});
-  childStyle.flex = 1;
+  const childStyle = { ..._.get(children, "props.style", {}), flex: 1 };
   let childProps;
   switch (fieldType) {
     default:
@@ -196,7 +195,7 @@ export default observer((props: FieldProps) => {
         ..._.get(styles, "root", {})
       }}
     >
-      {!!labelText && (!!value || !placeholder || meta.focus) && (
+      {!!labelText && (
         <Text
           style={{
             fontSize: 14,
@@ -215,8 +214,8 @@ export default observer((props: FieldProps) => {
           borderColor: meta.error
             ? theme.danger
             : meta.focus
-            ? theme.primary
-            : theme.light,
+              ? theme.primary
+              : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",

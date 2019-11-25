@@ -1,4 +1,3 @@
-import Theme from "@src/theme.json";
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
@@ -12,7 +11,7 @@ import {
   TouchableWithoutFeedback,
   View
 } from "react-native";
-import { DefaultTheme } from "../../theme";
+import { DefaultTheme, ThemeProps } from "../../theme";
 import { dateToString } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
@@ -23,6 +22,7 @@ export interface DateTimeProps {
   fieldType?: "date";
   maxDate?: Date;
   minDate?: Date;
+  theme?: ThemeProps;
   style?: any;
   value?: any;
   onFocus?: (e: any) => void;
@@ -42,10 +42,11 @@ export default observer((props: DateTimeProps) => {
 
   const theme = {
     ...DefaultTheme,
-    ...Theme.colors
+    ..._.get(props, "theme", {})
   };
   const onChangeDateString = (v, p) => {
     if (p === "dd") {
+      console.log(v);
       v = v > 31 ? 31 : v < 0 ? 0 : v;
       meta.dateString[p] = v == 0 ? "" : ("0" + v).slice(-2);
     } else if (p === "mm") {
@@ -109,7 +110,7 @@ export default observer((props: DateTimeProps) => {
             }}
             type="number"
             value={meta.dateString.dd}
-            onChange={v => onChangeDateString(v, "dd")}
+            onChangeText={v => onChangeDateString(v, "dd")}
           />
           <Text
             style={{
@@ -128,7 +129,7 @@ export default observer((props: DateTimeProps) => {
             }}
             type="number"
             value={meta.dateString.mm}
-            onChange={v => onChangeDateString(v, "mm")}
+            onChangeText={v => onChangeDateString(v, "mm")}
           />
           <Text
             style={{
@@ -147,7 +148,7 @@ export default observer((props: DateTimeProps) => {
             }}
             type="number"
             value={meta.dateString.yyyy}
-            onChange={v => onChangeDateString(v, "yyyy")}
+            onChangeText={v => onChangeDateString(v, "yyyy")}
           />
         </View>
         <TouchableOpacity

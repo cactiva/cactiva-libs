@@ -6,9 +6,9 @@ import React from "react";
 import { GoogleMap, Marker as MarkerComponent, withGoogleMap, withScriptjs } from "react-google-maps";
 import { Text, View } from "react-native";
 import { MapViewProps } from "./index";
+import { Platform } from "@unimodules/core";
 
 export const Marker = MarkerComponent;
-
 const MapViewInner = observer((props: MapViewProps) => {
   const { location, style, zoom } = props;
 
@@ -31,8 +31,10 @@ const MapViewInner = observer((props: MapViewProps) => {
   );
 });
 
-const MapView = withScriptjs(withGoogleMap(MapViewInner));
 export default (props: MapViewProps) => {
+  if (Platform.OS !== "web") return <Text>Wrong OS</Text>;
+  const MapView = withScriptjs(withGoogleMap(MapViewInner));
+
   const mapStyle = {
     ...{
       width: "100%",
