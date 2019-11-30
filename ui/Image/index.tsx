@@ -5,7 +5,7 @@ import { Image, ImageProps } from "react-native";
 import Spinner from "../Spinner";
 import View from "../View";
 
-const errorSource = require("@src/assets/images/404.jpg");
+const errorSource = require("@src/assets/images/404.png");
 
 export default observer((props: ImageProps) => {
   const meta = useObservable({

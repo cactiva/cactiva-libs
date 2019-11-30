@@ -15,7 +15,6 @@ export interface CameraProps {
   style?: any;
   theme?: ThemeProps;
   fieldType?: "camera";
-  relativePath: string;
 }
 
 export default observer((props: CameraProps) => {
