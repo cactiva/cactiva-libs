@@ -10,17 +10,21 @@ export default (e: any) => {
   if (e.onError) {
     onError = e.onError;
   }
+
   return new Promise(async (resolve, reject) => {
     try {
       const res = await axios({ ...e, url });
       if (res.status >= 200 && res.status < 300) {
-        resolve(res.data);
+        if (res.data) resolve(res.data);
+        else resolve(res);
       } else {
-        onError(res.data);
+        if (res.data) onError(res.data);
+        else onError(res);
       }
     } catch (e) {
       if (onError) {
-        onError(e.response.data);
+        if (e.response.data) onError(e.response.data);
+        else onError(e.response);
       }
     }
   });
