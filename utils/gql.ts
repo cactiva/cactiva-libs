@@ -1,4 +1,4 @@
-import api from "./api.old";
+import api from "./api";
 import session from "@src/stores/session";
 const config = require("../../../settings.json");
 interface QueryOptions {
