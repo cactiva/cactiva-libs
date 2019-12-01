@@ -23,7 +23,7 @@ export default (e: any) => {
       }
     } catch (e) {
       if (onError) {
-        if (e.response.data) onError(e.response.data);
+        if (e.response && e.response.data) onError(e.response.data);
         else onError(e.response);
       }
     }
