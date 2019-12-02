@@ -5,6 +5,7 @@ interface QueryOptions {
   onError?: (e?: any) => void;
   payload?: any;
   headers?: any;
+  auth?: boolean;
 }
 export const query = async (q: string, options: QueryOptions = {}) => {
   const headers = {
