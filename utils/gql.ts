@@ -13,7 +13,7 @@ export const query = async (q: string, options: QueryOptions = {}) => {
     ...options.headers
   };
 
-  if (session && session.jwt) {
+  if (auth === true && session && session.jwt) {
     headers["Authorization"] = `Bearer ${session.jwt}`;
   }
 
