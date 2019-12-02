@@ -2,31 +2,41 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { View } from "react-native";
 import { uuid } from "../../utils";
-import { RadioModeType } from "../Radio";
+import Radio, { RadioModeType, RadioProps } from "../Radio";
 
 export interface RadioGroupProps {
   mode?: RadioModeType;
   value?: any;
   onChange?: (value: any) => void;
   style?: any;
-  fieldType?: "radio-group";
   children?: any;
+  option?: RadioProps[];
 }
 
 export default observer((props: RadioGroupProps) => {
-  const { onChange, value, style, mode, children } = props;
+  const { onChange, value, style, mode, children, option } = props;
+  let cusstomChildren = [];
+  if (!!children) cusstomChildren = [...children];
+
+  if (!children && !!option && option.length > 0) {
+    option.map(op => {
+      cusstomChildren.push(<Radio {...op} />);
+    });
+  }
 
   return (
     <View style={style}>
-      {children.map((el: any) => {
+      {cusstomChildren.map((el: any) => {
         return (
           <RenderChild
             onPress={v => {
               onChange && onChange(el.props.value || el.props.text);
             }}
-            checked={(el.props.value === value || el.props.text === value) && !!value}
+            checked={
+              (el.props.value === value || el.props.text === value) && !!value
+            }
             mode={mode}
-            children={el}
+            child={el}
             key={uuid()}
           />
         );
@@ -36,12 +46,12 @@ export default observer((props: RadioGroupProps) => {
 });
 
 const RenderChild = observer((props: any) => {
-  const { children, onPress, checked, mode } = props;
+  const { child, onPress, checked, mode } = props;
 
-  return React.cloneElement(children, {
+  return React.cloneElement(child, {
     checked,
     mode,
     onPress,
-    ...children.props
+    ...child.props
   });
 });

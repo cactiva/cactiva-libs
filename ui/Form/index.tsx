@@ -4,14 +4,9 @@ import React, { useEffect } from "react";
 import { Platform, ViewProps } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
-import Field, { FieldProps } from "../Field";
 import { uuid } from "../../utils";
+import Field from "../Field";
 import View from "../View";
-import { toJS } from "mobx";
-
-export interface FormFieldProps extends FieldProps {
-  key: string;
-}
 
 export interface FormProps extends ViewProps {
   data?: any;
@@ -20,8 +15,6 @@ export interface FormProps extends ViewProps {
   theme?: ThemeProps;
   onSubmit?: (data?: any) => void;
 }
-
-
 
 export default observer((props: FormProps) => {
   const { children, data, setValue, onSubmit } = props;
@@ -82,15 +75,15 @@ export default observer((props: FormProps) => {
           );
         })
       ) : (
-          <RenderChild
-            data={data}
-            setValue={setValue}
-            child={children}
-            key={uuid()}
-            meta={meta}
-            onSubmit={onSubmit}
-          />
-        )}
+        <RenderChild
+          data={data}
+          setValue={setValue}
+          child={children}
+          key={uuid()}
+          meta={meta}
+          onSubmit={onSubmit}
+        />
+      )}
     </View>
   );
 });

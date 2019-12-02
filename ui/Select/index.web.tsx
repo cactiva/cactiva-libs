@@ -2,18 +2,15 @@ import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  FlatList,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { TouchableOpacity } from "react-native";
 import { SelectProps } from ".";
 import { DefaultTheme } from "../../theme";
 import { fuzzyMatch, textStyle } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
+import View from "../View";
+import Text from "../Text";
+import FlatList from "../FlatList";
 
 export default observer((props: SelectProps) => {
   const { value, placeholder, items, onFocus, readonly } = props;
@@ -246,7 +243,8 @@ const RenderItem = observer((props: any) => {
   const { meta, items, value, onSelect, theme } = props;
 
   return (
-    <ScrollView
+    <View
+      type={"ScrollView"}
       keyboardShouldPersistTaps="handled"
       style={{ width: meta.dimensions.width }}
     >
@@ -314,6 +312,6 @@ const RenderItem = observer((props: any) => {
           );
         }}
       />
-    </ScrollView>
+    </View>
   );
 });

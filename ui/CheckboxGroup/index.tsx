@@ -7,7 +7,6 @@ export interface CheckboxGroupProps {
   value?: string[];
   onChange?: (value: any) => void;
   style?: any;
-  fieldType?: "checkbox-group";
   children?: any;
 }
 

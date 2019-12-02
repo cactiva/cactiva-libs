@@ -1,6 +1,6 @@
 import React from "react";
-import HTML from "react-native-render-html";
+import { WebView } from "react-native-webview";
 
 export default (props: any) => {
-  return <HTML {...props} />;
+  return <WebView {...props} />;
 };

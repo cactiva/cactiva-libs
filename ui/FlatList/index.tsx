@@ -5,10 +5,11 @@ import { FlatList, FlatListProps } from "react-native";
 export default observer((props: FlatListProps<any>) => {
   return (
     <FlatList
-      // onEndReached={() => dispatchFetchPage()}
-      initialNumToRender={8}
-      maxToRenderPerBatch={2}
-      // onEndReachedThreshold={0.5}
+      initialNumToRender={20}
+      maxToRenderPerBatch={10}
+      windowSize={5}
+      removeClippedSubviews={true}
+      updateCellsBatchingPeriod={500}
       {...props}
     />
   );

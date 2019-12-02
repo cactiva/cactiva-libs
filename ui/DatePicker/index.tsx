@@ -19,7 +19,6 @@ import Input from "../Input";
 export interface DateTimeProps {
   mode?: "date" | "time";
   onChange?: (value: any) => void;
-  fieldType?: "date";
   maxDate?: Date;
   minDate?: Date;
   theme?: ThemeProps;
