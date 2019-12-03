@@ -39,7 +39,7 @@ export default observer((props: SelectProps) => {
     });
 
   useEffect(() => {
-    if (value)
+    if (value && Array.isArray(items))
       meta.value = items.find(x =>
         typeof x === "string" ? x === value : x.value === value
       );
