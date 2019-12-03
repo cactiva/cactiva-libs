@@ -5,9 +5,17 @@ import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { uuid, textStyle } from "../../utils";
+import { textStyle, uuid } from "../../utils";
+import { CameraProps } from "../Camera";
+import { CheckboxProps } from "../Checkbox";
+import { CheckboxGroupProps } from "../CheckboxGroup";
+import DatePicker, { DateTimeProps } from "../DatePicker";
 import Icon, { IconProps } from "../Icon";
 import { InputProps } from "../Input";
+import { LocationProps } from "../Location";
+import { RadioProps } from "../Radio";
+import RadioGroup, { RadioGroupProps } from "../RadioGroup";
+import Select, { SelectProps } from "../Select";
 
 interface StylesFieldProps {
   root?: any;
@@ -21,7 +29,16 @@ export interface FieldProps {
   label?: string;
   isLabel?: boolean;
   path?: string;
-  field?: InputProps;
+  field?:
+    | InputProps
+    | SelectProps
+    | DateTimeProps
+    | RadioGroupProps
+    | RadioProps
+    | CheckboxGroupProps
+    | CheckboxProps
+    | CameraProps
+    | LocationProps;
   value?: any;
   setValue?: (value: any) => void;
   iconStart?: IconProps;
@@ -104,7 +121,7 @@ export default observer((props: FieldProps) => {
     isValid && isValid(!meta.error);
   };
 
-  const fieldType = _.get(children, "props.fieldType", "input");
+  const fieldType = children.type;
   const childStyle = { ..._.get(children, "props.style", {}), flex: 1 };
   let childProps;
   switch (fieldType) {
@@ -118,7 +135,7 @@ export default observer((props: FieldProps) => {
         onBlur: () => (meta.focus = false)
       };
       break;
-    case "select":
+    case Select:
       childProps = {
         style: childStyle,
         value: value,
@@ -130,7 +147,7 @@ export default observer((props: FieldProps) => {
         onFocus: (e: any) => (meta.focus = e)
       };
       break;
-    case "date":
+    case DatePicker:
       childProps = {
         style: childStyle,
         value: value,
@@ -138,7 +155,7 @@ export default observer((props: FieldProps) => {
         onFocus: (e: any) => (meta.focus = e)
       };
       break;
-    case "radio-group":
+    case RadioGroup:
       childProps = {
         onChange: onChange,
         value: value,
@@ -214,8 +231,8 @@ export default observer((props: FieldProps) => {
           borderColor: meta.error
             ? theme.danger
             : meta.focus
-              ? theme.primary
-              : theme.light,
+            ? theme.primary
+            : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",

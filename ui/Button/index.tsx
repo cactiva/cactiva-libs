@@ -44,8 +44,7 @@ export default observer((props: ButtonProps) => {
         opacity: disabled ? 0.7 : 1,
         borderRadius: 4,
         minWidth: 30,
-        paddingTop: 10,
-        paddingBottom: 10,
+        padding: 10,
         ...(_.get(props, "style", {}) as any),
         ...(shadow ? styleShadow : {})
       }}

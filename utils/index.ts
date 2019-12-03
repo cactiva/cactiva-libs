@@ -11,7 +11,7 @@ const verticalScale = (size: number) => (height / guidelineBaseHeight) * size;
 const moderateScale = (size: number, factor: number = 0.5) =>
   size + (scale(size) - size) * factor;
 const uuid = (prefix: string = randString()) =>
-  `${prefix}-${new Date().getTime()}${Math.floor(
+  `${prefix ? prefix + "-" : ""}${new Date().getTime()}${Math.floor(
     10000000 + Math.random() * 90000000
   )}`;
 
@@ -113,6 +113,10 @@ const textStyle = style => {
     });
   return newTextStyle;
 };
+
+const capitalizeFLetter = (text: string) => {
+  return text[0].toUpperCase() + text.slice(1);
+};
 export {
   scale,
   verticalScale,
@@ -123,5 +127,6 @@ export {
   fuzzyMatch,
   dateToString,
   dateToLocal,
-  textStyle
+  textStyle,
+  capitalizeFLetter
 };

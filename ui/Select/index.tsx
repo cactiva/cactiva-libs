@@ -1,20 +1,16 @@
 import Theme from "@src/theme.json";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import {
-  FlatList,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  Platform
-} from "react-native";
+import { TouchableOpacity, Platform } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch, textStyle } from "../../utils";
 import Header from "../Header";
 import Icon from "../Icon";
 import Input from "../Input";
 import View from "../View";
+import Text from "../Text";
+import Modal from "../Modal";
+import FlatList from "../FlatList";
 
 export interface SelectItemProps {
   text: any;
@@ -26,7 +22,6 @@ export interface SelectProps {
   placeholder?: string;
   items: (SelectItemProps | string)[];
   onSelect?: (item: any) => void;
-  fieldType?: "select";
   style?: any;
   theme?: ThemeProps;
   onFocus?: (e: any) => void;
@@ -78,14 +73,18 @@ export default observer((props: SelectProps) => {
           style={{
             flex: 1,
             paddingLeft: 5,
-            marginTop: Platform.OS === 'ios' ? 6 : 5,
-            marginBottom: Platform.OS === 'ios' ? 7 : 5,
+            marginTop: Platform.OS === "ios" ? 6 : 5,
+            marginBottom: Platform.OS === "ios" ? 7 : 5,
             fontSize: Theme.fontSize,
             color: value ? "#3a3a3a" : "#757575",
             ...tStyle
           }}
         >
-          {meta.value ? typeof meta.value === 'string' ? meta.value : meta.value.text : placeholder}
+          {meta.value
+            ? typeof meta.value === "string"
+              ? meta.value
+              : meta.value.text
+            : placeholder}
         </Text>
         {!readonly && (
           <View
@@ -159,7 +158,7 @@ const ModalItems = observer((props: any) => {
 const RenderItem = observer((props: any) => {
   const { meta, items, value, onSelect, theme } = props;
   return (
-    <ScrollView keyboardShouldPersistTaps="handled">
+    <View type={"ScrollView"} keyboardShouldPersistTaps="handled">
       <FlatList
         data={items.filter((item: any) => {
           if (meta.filter.length > 0)
@@ -170,7 +169,7 @@ const RenderItem = observer((props: any) => {
           return true;
         })}
         keyExtractor={(item: any) => {
-          return `select-${typeof item === 'string' ? item : item.value}`
+          return `select-${typeof item === "string" ? item : item.value}`;
         }}
         ItemSeparatorComponent={() => (
           <View
@@ -226,6 +225,6 @@ const RenderItem = observer((props: any) => {
           );
         }}
       />
-    </ScrollView>
+    </View>
   );
 });
