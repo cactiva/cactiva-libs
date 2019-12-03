@@ -39,7 +39,7 @@ export default observer((props: SelectProps) => {
     });
 
   useEffect(() => {
-    if (value && Array.isArray(items))
+    if (value)
       meta.value = items.find(x =>
         typeof x === "string" ? x === value : x.value === value
       );
@@ -55,13 +55,14 @@ export default observer((props: SelectProps) => {
         style={{
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
-          minHeight: 30
+          minHeight: 30,
+          display: 'flex',
+          flex: 1,
         }}
         ref={(ref: any) => {
           if (ref) {
-            const dimensions = ref.getBoundingClientRect();
-            const parentDimension = ref.parentElement.parentElement.parentElement.getBoundingClientRect();
-            meta.dimensions = dimensions;
+            const parentDimension = ref.parentElement.getBoundingClientRect();
+            meta.dimensions = parentDimension;
             meta.scrollH = parentDimension.bottom;
           }
         }}
@@ -115,64 +116,64 @@ export default observer((props: SelectProps) => {
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "stretch",
-              justifyContent: "space-between",
-              ...style
-            }}
-            disabled={readonly}
-            onPress={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              meta.isShown = !meta.isShown;
-            }}
-          >
-            <View
+            <TouchableOpacity
               style={{
-                flex: 1
+                flex: 1,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "stretch",
+                justifyContent: "space-between",
+                ...style
+              }}
+              disabled={readonly}
+              onPress={e => {
+                e.stopPropagation();
+                e.preventDefault();
+                meta.isShown = !meta.isShown;
               }}
             >
-              <Text
+              <View
                 style={{
-                  flex: 1,
-                  marginTop: 5,
-                  marginBottom: 5,
-                  fontSize: Theme.fontSize,
-                  color: value ? "#3a3a3a" : "#757575",
-                  ...tStyle
+                  flex: 1
                 }}
               >
-                {meta.value
-                  ? typeof meta.value === "string"
-                    ? meta.value
-                    : meta.value.text
-                  : placeholder}
-              </Text>
-            </View>
-            <View
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingLeft: 5,
-                paddingRight: 5
-              }}
-            >
-              {!readonly && (
-                <Icon
-                  source="Entypo"
-                  name={meta.isShown ? "chevron-up" : "chevron-down"}
-                  color="#3a3a3a"
-                  size={20}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        )}
+                <Text
+                  style={{
+                    flex: 1,
+                    marginTop: 5,
+                    marginBottom: 5,
+                    fontSize: Theme.fontSize,
+                    color: value ? "#3a3a3a" : "#757575",
+                    ...tStyle
+                  }}
+                >
+                  {meta.value
+                    ? typeof meta.value === "string"
+                      ? meta.value
+                      : meta.value.text
+                    : placeholder}
+                </Text>
+              </View>
+              <View
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingLeft: 5,
+                  paddingRight: 5
+                }}
+              >
+                {!readonly && (
+                  <Icon
+                    source="Entypo"
+                    name={meta.isShown ? "chevron-up" : "chevron-down"}
+                    color="#3a3a3a"
+                    size={20}
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
         <ModalItems meta={meta} {...props} theme={theme} />
       </div>
       {meta.isShown && (
