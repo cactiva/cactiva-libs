@@ -25,6 +25,9 @@ export default (e: any) => {
       if (onError) {
         if (e.response && e.response.data) onError(e.response.data);
         else onError(e.response);
+      } else {
+        if (e.response && e.response.data) resolve(e.response.data);
+        else resolve(e.response);
       }
     }
   });

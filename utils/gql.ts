@@ -21,6 +21,7 @@ export const queryAll = async (q: string, options: QueryOptions = {}) => {
     const res: any = await api({
       url: `${config.backend.protocol}://${config.backend.host}:${config.backend.port}/hasura/v1/graphql`,
       method: "post",
+      headers,
       data: {
         query: q,
         payload: options.payload
