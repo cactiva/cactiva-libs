@@ -11,6 +11,8 @@ import View from "../View";
 import Text from "../Text";
 import Modal from "../Modal";
 import FlatList from "../FlatList";
+import _ from "lodash";
+import { processData } from "./index.web";
 
 export interface SelectItemProps {
   text: any;
@@ -26,15 +28,26 @@ export interface SelectProps {
   theme?: ThemeProps;
   onFocus?: (e: any) => void;
   readonly?: boolean;
+  textPath?: string;
+  valuePath?: string;
 }
 
+
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, readonly } = props;
+  const { value, placeholder, readonly } = props;
   const meta = useObservable({
     isShown: false,
     value: null,
+    items: props.items as any,
     filter: ""
   });
+
+  useEffect(() => {
+    meta.items = processData(props);
+  }, [props.items])
+
+  const items = meta.items;
+
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -105,7 +118,7 @@ export default observer((props: SelectProps) => {
           </View>
         )}
       </TouchableOpacity>
-      <ModalItems meta={meta} {...props} theme={theme} />
+      <ModalItems meta={meta} {...props} items={items} theme={theme} />
     </>
   );
 });

@@ -3,17 +3,30 @@ import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { TouchableOpacity } from "react-native";
-import { SelectProps } from ".";
+import { SelectProps } from "./index";
 import { DefaultTheme } from "../../theme";
-import { fuzzyMatch, textStyle } from "../../utils";
+import { textStyle } from "../../utils";
+import FlatList from "../FlatList";
 import Icon from "../Icon";
 import Input from "../Input";
-import View from "../View";
 import Text from "../Text";
-import FlatList from "../FlatList";
+import View from "../View";
+import _ from "lodash";
+
+export const processData = (props: SelectProps) => {
+  const textPath = _.get(props, 'textPath', 'text');
+  const valuePath = _.get(props, 'valuePath', 'value');
+
+  return (props.items || []).map((item) => {
+    return {
+      text: _.get(item, textPath),
+      value: _.get(item, valuePath)
+    }
+  })
+}
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, items, onFocus, readonly } = props;
+  const { value, placeholder, onFocus, readonly } = props;
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -24,8 +37,15 @@ export default observer((props: SelectProps) => {
     filter: "",
     scrollH: 0,
     dimensions: null,
-    contentHeight: 0
+    contentHeight: 0,
+    items: props.items as any
   });
+
+  useEffect(() => {
+    const res = processData(props);
+    console.log(res);
+  }, [props.items])
+  const items = meta.items;
 
   const onSearch = value => {
     meta.filter = value || "";
@@ -174,7 +194,7 @@ export default observer((props: SelectProps) => {
               </View>
             </TouchableOpacity>
           )}
-        <ModalItems meta={meta} {...props} theme={theme} />
+        <ModalItems meta={meta} {...props} items={items} theme={theme} />
       </div>
       {meta.isShown && (
         <div
@@ -252,10 +272,7 @@ const RenderItem = observer((props: any) => {
       <FlatList
         data={(items || []).filter((item: any) => {
           if (meta.filter && meta.filter.length > 0)
-            return fuzzyMatch(
-              meta.filter.toLowerCase(),
-              (typeof item === "string" ? item : item.text).toLowerCase()
-            );
+            return meta.filter.toLowerCase().indexOf((typeof item === "string" ? item : item.text).toLowerCase()) >= 0;
           return true;
         })}
         keyExtractor={(item: any) => {
