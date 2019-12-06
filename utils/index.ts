@@ -117,6 +117,11 @@ const textStyle = style => {
 const capitalizeFLetter = (text: string) => {
   return text[0].toUpperCase() + text.slice(1);
 };
+
+const truncateStr = (text: string, length: number) => {
+  let string = text.replace(/(\r\n|\n|\r)/gm, "");
+  return string.length > length ? string.substr(0, length - 1) + "..." : string;
+};
 export {
   scale,
   verticalScale,
@@ -128,5 +133,6 @@ export {
   dateToString,
   dateToLocal,
   textStyle,
-  capitalizeFLetter
+  capitalizeFLetter,
+  truncateStr
 };

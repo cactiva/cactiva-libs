@@ -3,7 +3,7 @@ import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
 import { TouchableOpacity, Platform } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
-import { fuzzyMatch, textStyle } from "../../utils";
+import { fuzzyMatch, textStyle, uuid } from "../../utils";
 import Header from "../Header";
 import Icon from "../Icon";
 import Input from "../Input";
@@ -32,7 +32,6 @@ export interface SelectProps {
   valuePath?: string;
 }
 
-
 export default observer((props: SelectProps) => {
   const { value, placeholder, readonly } = props;
   const meta = useObservable({
@@ -44,7 +43,7 @@ export default observer((props: SelectProps) => {
 
   useEffect(() => {
     meta.items = processData(props);
-  }, [props.items])
+  }, [props.items]);
 
   const items = meta.items;
 
@@ -65,7 +64,7 @@ export default observer((props: SelectProps) => {
       meta.value = items.find(x =>
         typeof x === "string" ? x === value : x.value === value
       );
-  }, []);
+  }, [value, items]);
 
   return (
     <>
@@ -182,7 +181,7 @@ const RenderItem = observer((props: any) => {
           return true;
         })}
         keyExtractor={(item: any) => {
-          return `select-${typeof item === "string" ? item : item.value}`;
+          return `${uuid()}-${typeof item === "string" ? item : item.value}`;
         }}
         ItemSeparatorComponent={() => (
           <View
@@ -205,39 +204,52 @@ const RenderItem = observer((props: any) => {
           </Text>
         )}
         renderItem={({ item }) => {
-          const textLabel = typeof item === "string" ? item : item.text;
-          const textValue = typeof item === "string" ? item : item.value;
-          let active = false;
-          if (value && value.value) {
-            active = value.value === textValue && !!textValue;
-          }
           return (
-            <TouchableOpacity
-              onPress={() => {
-                onSelect(item);
-                meta.isShown = false;
-                meta.value = item;
-              }}
-              style={{
-                paddingRight: 10,
-                paddingLeft: 10,
-                minHeight: 40,
-                display: "flex",
-                justifyContent: "center",
-                backgroundColor: active ? theme.primary : "#fff"
-              }}
-            >
-              <Text
-                style={{
-                  color: active ? "#fff" : theme.dark
-                }}
-              >
-                {textLabel}
-              </Text>
-            </TouchableOpacity>
+            <RenderItemRow
+              item={item}
+              value={value}
+              meta={meta}
+              onSelect={onSelect}
+              theme={theme}
+            ></RenderItemRow>
           );
         }}
       />
     </View>
+  );
+});
+
+const RenderItemRow = observer((props: any) => {
+  const { item, value, meta, onSelect, theme } = props;
+  const textLabel = typeof item === "string" ? item : item.text;
+  const textValue = typeof item === "string" ? item : item.value;
+  let active = false;
+  if (value && value.value) {
+    active = value.value === textValue && !!textValue;
+  }
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        onSelect(item);
+        meta.isShown = false;
+        meta.value = item;
+      }}
+      style={{
+        paddingRight: 10,
+        paddingLeft: 10,
+        minHeight: 40,
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: active ? theme.primary : "#fff"
+      }}
+    >
+      <Text
+        style={{
+          color: active ? "#fff" : theme.dark
+        }}
+      >
+        {textLabel}
+      </Text>
+    </TouchableOpacity>
   );
 });

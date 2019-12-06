@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
-import React from "react";
+import React, { useEffect } from "react";
 import { Image, ImageProps } from "react-native";
 import Spinner from "../Spinner";
 import View from "../View";
@@ -44,24 +44,34 @@ const RenderImage = observer((props: any) => {
     return null;
   }
   return (
-    <View
-      style={{
-        ..._.get(imgProps, "style", {}),
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",
-        top: 0
-      }}
-    >
+    <>
       {meta.status === "loading" ? (
-        <Spinner size={"large"} />
+        <View
+          style={{
+            ..._.get(imgProps, "style", {}),
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            top: 0
+          }}
+        >
+          <Spinner size={"large"} />
+        </View>
       ) : (
-        <Image
-          resizeMode={"contain"}
-          source={errorSource}
-          style={_.get(imgProps, "style", {})}
-        />
+        <View
+          style={{
+            ..._.get(imgProps, "style", {}),
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <Image
+            resizeMode={"contain"}
+            source={errorSource}
+            style={_.get(imgProps, "style", {})}
+          />
+        </View>
       )}
-    </View>
+    </>
   );
 });

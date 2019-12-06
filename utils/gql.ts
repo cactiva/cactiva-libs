@@ -1,19 +1,23 @@
 import api from "./api";
 import session from "@src/stores/session";
+import _ from "lodash";
+
 const config = require("../../../settings.json");
 interface QueryOptions {
   onError?: (e?: any) => void;
-  payload?: any;
+  variables?: any;
+  operationName?: any;
   headers?: any;
   auth?: boolean;
 }
-export const queryAll = async (q: string, options: QueryOptions = {}) => {
+
+export const queryAll = async (q: string, options?: QueryOptions) => {
   const headers = {
     "content-type": "application/json",
-    ...options.headers
+    ..._.get(options, "headers", {})
   };
 
-  if (options.auth !== false && session && session.jwt) {
+  if (_.get(options, "auth", false) && session && session.jwt) {
     headers["Authorization"] = `Bearer ${session.jwt}`;
   }
 
@@ -23,8 +27,9 @@ export const queryAll = async (q: string, options: QueryOptions = {}) => {
       method: "post",
       headers,
       data: {
+        operationName: _.get(options, "operationName", "MyQuery"),
         query: q,
-        payload: options.payload
+        variables: _.get(options, "variables", {})
       }
     });
 

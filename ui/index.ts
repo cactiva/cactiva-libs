@@ -25,5 +25,5 @@ export { default as FlatList } from "./FlatList";
 export { default as WebView } from "./WebView";
 export { default as Modal } from "./Modal";
 export { default as FormJson } from "./FormJson";
-export { default as Table, ConfigTableProps, TableFieldProps } from "./Table";
-export { default as Crud, CrudProps, ConfigCrudProps } from "./Crud";
+export { default as Table } from "./Table";
+export { default as Crud } from "./Crud";

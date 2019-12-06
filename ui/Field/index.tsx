@@ -208,8 +208,9 @@ export default observer((props: FieldProps) => {
         marginBottom: 20,
         marginLeft: 0,
         marginRight: 0,
-        ...style,
-        ..._.get(styles, "root", {})
+        overflow: "hidden",
+        ..._.get(styles, "root", {}),
+        ...style
       }}
     >
       {!!labelText && (

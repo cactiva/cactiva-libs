@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { TouchableOpacity } from "react-native";
 import { SelectProps } from "./index";
 import { DefaultTheme } from "../../theme";
-import { textStyle } from "../../utils";
+import { textStyle, uuid } from "../../utils";
 import FlatList from "../FlatList";
 import Icon from "../Icon";
 import Input from "../Input";
@@ -14,16 +14,16 @@ import View from "../View";
 import _ from "lodash";
 
 export const processData = (props: SelectProps) => {
-  const textPath = _.get(props, 'textPath', 'text');
-  const valuePath = _.get(props, 'valuePath', 'value');
+  const textPath = _.get(props, "textPath", "text");
+  const valuePath = _.get(props, "valuePath", "value");
 
-  return (props.items || []).map((item) => {
+  return (props.items || []).map(item => {
     return {
       text: _.get(item, textPath),
       value: _.get(item, valuePath)
-    }
-  })
-}
+    };
+  });
+};
 
 export default observer((props: SelectProps) => {
   const { value, placeholder, onFocus, readonly } = props;
@@ -43,8 +43,8 @@ export default observer((props: SelectProps) => {
 
   useEffect(() => {
     const res = processData(props);
-    console.log(res);
-  }, [props.items])
+    meta.items = res;
+  }, [props.items]);
   const items = meta.items;
 
   const onSearch = value => {
@@ -59,7 +59,7 @@ export default observer((props: SelectProps) => {
     });
 
   useEffect(() => {
-    if (value)
+    if (value && Array.isArray(items))
       meta.value = items.find(x =>
         typeof x === "string" ? x === value : x.value === value
       );
@@ -76,8 +76,8 @@ export default observer((props: SelectProps) => {
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
           minHeight: 30,
-          display: 'flex',
-          flex: 1,
+          display: "flex",
+          flex: 1
         }}
         ref={(ref: any) => {
           if (ref) {
@@ -110,7 +110,7 @@ export default observer((props: SelectProps) => {
                 minHeight: 27,
                 maxHeight: 27,
                 marginTop: 0,
-                flex: 1
+                flexGrow: 1
               }}
             />
             <TouchableOpacity
@@ -136,64 +136,64 @@ export default observer((props: SelectProps) => {
             </TouchableOpacity>
           </View>
         ) : (
-            <TouchableOpacity
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "stretch",
+              justifyContent: "space-between",
+              ...style
+            }}
+            disabled={readonly}
+            onPress={e => {
+              e.stopPropagation();
+              e.preventDefault();
+              meta.isShown = !meta.isShown;
+            }}
+          >
+            <View
               style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "stretch",
-                justifyContent: "space-between",
-                ...style
-              }}
-              disabled={readonly}
-              onPress={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                meta.isShown = !meta.isShown;
+                flex: 1
               }}
             >
-              <View
+              <Text
                 style={{
-                  flex: 1
+                  flex: 1,
+                  marginTop: 5,
+                  marginBottom: 5,
+                  fontSize: Theme.fontSize,
+                  color: value ? "#3a3a3a" : "#757575",
+                  ...tStyle
                 }}
               >
-                <Text
-                  style={{
-                    flex: 1,
-                    marginTop: 5,
-                    marginBottom: 5,
-                    fontSize: Theme.fontSize,
-                    color: value ? "#3a3a3a" : "#757575",
-                    ...tStyle
-                  }}
-                >
-                  {meta.value
-                    ? typeof meta.value === "string"
-                      ? meta.value
-                      : meta.value.text
-                    : placeholder}
-                </Text>
-              </View>
-              <View
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingLeft: 5,
-                  paddingRight: 5
-                }}
-              >
-                {!readonly && (
-                  <Icon
-                    source="Entypo"
-                    name={meta.isShown ? "chevron-up" : "chevron-down"}
-                    color="#3a3a3a"
-                    size={20}
-                  />
-                )}
-              </View>
-            </TouchableOpacity>
-          )}
+                {meta.value
+                  ? typeof meta.value === "string"
+                    ? meta.value
+                    : meta.value.text
+                  : placeholder}
+              </Text>
+            </View>
+            <View
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                paddingLeft: 5,
+                paddingRight: 5
+              }}
+            >
+              {!readonly && (
+                <Icon
+                  source="Entypo"
+                  name={meta.isShown ? "chevron-up" : "chevron-down"}
+                  color="#3a3a3a"
+                  size={20}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
         <ModalItems meta={meta} {...props} items={items} theme={theme} />
       </div>
       {meta.isShown && (
@@ -272,11 +272,17 @@ const RenderItem = observer((props: any) => {
       <FlatList
         data={(items || []).filter((item: any) => {
           if (meta.filter && meta.filter.length > 0)
-            return meta.filter.toLowerCase().indexOf((typeof item === "string" ? item : item.text).toLowerCase()) >= 0;
+            return (
+              meta.filter
+                .toLowerCase()
+                .indexOf(
+                  (typeof item === "string" ? item : item.text).toLowerCase()
+                ) >= 0
+            );
           return true;
         })}
         keyExtractor={(item: any) => {
-          return `select-${typeof item === "string" ? item : item.value}`;
+          return `${uuid()}-${typeof item === "string" ? item : item.value}`;
         }}
         ItemSeparatorComponent={() => (
           <View
@@ -300,36 +306,49 @@ const RenderItem = observer((props: any) => {
           </Text>
         )}
         renderItem={({ item }) => {
-          const textLabel = typeof item === "string" ? item : item.text;
-          const textValue = typeof item === "string" ? item : item.value;
-          const active = value === textValue && !!textValue;
           return (
-            <TouchableOpacity
-              onPress={() => {
-                onSelect(item);
-                meta.isShown = false;
-                meta.value = item;
-              }}
-              style={{
-                paddingRight: 5,
-                paddingLeft: 5,
-                minHeight: 40,
-                display: "flex",
-                justifyContent: "center",
-                backgroundColor: active ? theme.primary : "#fff"
-              }}
-            >
-              <Text
-                style={{
-                  color: active ? "#fff" : theme.dark
-                }}
-              >
-                {textLabel}
-              </Text>
-            </TouchableOpacity>
+            <RenderItemRow
+              item={item}
+              value={value}
+              meta={meta}
+              onSelect={onSelect}
+              theme={theme}
+            ></RenderItemRow>
           );
         }}
       />
     </View>
+  );
+});
+
+const RenderItemRow = observer((props: any) => {
+  const { item, value, meta, onSelect, theme } = props;
+  const textLabel = typeof item === "string" ? item : item.text;
+  const textValue = typeof item === "string" ? item : item.value;
+  const active = value === textValue && !!textValue;
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        onSelect(item);
+        meta.isShown = false;
+        meta.value = item;
+      }}
+      style={{
+        paddingRight: 5,
+        paddingLeft: 5,
+        minHeight: 40,
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: active ? theme.primary : "#fff"
+      }}
+    >
+      <Text
+        style={{
+          color: active ? "#fff" : theme.dark
+        }}
+      >
+        {textLabel}
+      </Text>
+    </TouchableOpacity>
   );
 });

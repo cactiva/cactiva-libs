@@ -8,6 +8,7 @@ import Carousel, {
   Pagination as PaginationOrigin
 } from "react-native-snap-carousel";
 import View from "../View";
+import { ViewStyle } from "react-native";
 
 export interface CarouselProps {
   data: any[];
@@ -47,11 +48,7 @@ export default observer((props: CarouselProps) => {
   }, [data]);
 
   const childrenWithProps = React.Children.map(children, child => {
-    let cprops = {
-      dotsLength: meta.dataLength,
-      activeDotIndex: meta.activeSlide
-    };
-    return renderChild(child, cprops);
+    return renderChild(child, meta);
   });
 
   return (
@@ -76,7 +73,28 @@ export default observer((props: CarouselProps) => {
   );
 });
 
-export const Pagination = observer((props: any) => {
+export interface PaginationProps {
+  activeDotIndex: number;
+  dotsLength: number;
+  activeOpacity?: number;
+  carouselRef?: any;
+  containerStyle?: ViewStyle;
+  dotColor?: string;
+  dotContainerStyle?: ViewStyle;
+  dotany?: any;
+  dotStyle?: ViewStyle;
+  inactiveDotColor?: string;
+  inactiveDotany?: any;
+  inactiveDotOpacity?: number;
+  inactiveDotScale?: number;
+  inactiveDotStyle?: ViewStyle;
+  renderDots?: () => void;
+  tappableDots?: boolean;
+  vertical?: boolean;
+  accessibilityLabel?: string;
+}
+
+export const Pagination = observer((props: PaginationProps) => {
   const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -106,15 +124,15 @@ export const Pagination = observer((props: any) => {
   );
 });
 
-const renderChild = (child: any, props: any) => {
+const renderChild = (child: any, meta: any) => {
   if (child.type === Pagination) {
-    let cprops = {};
-    if (child.type === Pagination) {
-      cprops = props;
-    }
+    let cprops = {
+      dotsLength: meta.dataLength,
+      activeDotIndex: meta.activeSlide
+    };
     return React.cloneElement(child, {
-      ...child.props,
-      ...cprops
+      ...cprops,
+      ...child.props
     });
   } else {
     const childrenRaw = _.get(child, "props.children");
@@ -124,8 +142,8 @@ const renderChild = (child: any, props: any) => {
     } else {
       const children = Array.isArray(childrenRaw) ? childrenRaw : [childrenRaw];
       return React.cloneElement(child, {
-        ...props,
-        children: React.Children.map(children, el => renderChild(el, props))
+        ...child.props,
+        children: React.Children.map(children, el => renderChild(el, meta))
       });
     }
   }
