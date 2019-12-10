@@ -159,6 +159,7 @@ const ModalItems = observer((props: any) => {
               placeholder={props.placeholder || "Search..."}
               value={meta.filter}
               onChangeText={onSearch}
+              autoFocus={true}
               style={{
                 padding: 10
               }}
@@ -185,6 +186,7 @@ const RenderItem = observer((props: any) => {
       }}
     >
       <FlatList
+        keyboardShouldPersistTaps={"handled"}
         data={items.filter((item: any) => {
           if (meta.filter.length > 0)
             return fuzzyMatch(
