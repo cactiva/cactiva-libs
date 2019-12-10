@@ -35,7 +35,6 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
 
     if (res && res.data) {
       const keys = Object.keys(res.data);
-      console.log(res.data[keys[0]]);
       return res.data[keys[0]];
     } else {
       return res;

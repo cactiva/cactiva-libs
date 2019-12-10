@@ -1,5 +1,17 @@
 import React from "react";
-import { Animated, KeyboardAvoidingView, KeyboardAvoidingViewProps, Platform, SafeAreaView, ScrollView, ScrollViewProps, StatusBar, StyleSheet, View, ViewProps } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  KeyboardAvoidingViewProps,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  ScrollViewProps,
+  StatusBar,
+  StyleSheet,
+  View,
+  ViewProps
+} from "react-native";
 import { SafeAreaViewProps } from "react-navigation";
 
 interface CustomViewProps
@@ -32,7 +44,13 @@ export default (props: CustomViewProps) => {
     const style = props.style;
     const p = { ...props };
     delete p.style;
-    return <ScrollView {...p} contentContainerStyle={style} />;
+    return (
+      <ScrollView
+        {...p}
+        keyboardShouldPersistTaps={"handled"}
+        contentContainerStyle={style}
+      />
+    );
   }
   if (type === "KeyboardAvoidingView") {
     return <KeyboardAvoidingView behavior="padding" enabled {...props} />;

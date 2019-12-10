@@ -51,7 +51,7 @@ export default observer((props: SelectProps) => {
     meta.filter = value || "";
   };
 
-  const tStyle = textStyle(props.style);
+  const tStyle: any = textStyle(props.style);
   const style = { ...props.style };
   if (!!style)
     Object.keys(style).map(k => {
@@ -63,7 +63,7 @@ export default observer((props: SelectProps) => {
       meta.value = items.find(x =>
         typeof x === "string" ? x === value : x.value === value
       );
-  }, []);
+  }, [value, items]);
 
   useEffect(() => {
     onFocus && onFocus(meta.isShown as any);
@@ -160,8 +160,8 @@ export default observer((props: SelectProps) => {
               <Text
                 style={{
                   flex: 1,
-                  marginTop: 5,
-                  marginBottom: 5,
+                  marginTop: 4,
+                  marginBottom: 4,
                   fontSize: Theme.fontSize,
                   color: value ? "#3a3a3a" : "#757575",
                   ...tStyle
@@ -187,7 +187,7 @@ export default observer((props: SelectProps) => {
                 <Icon
                   source="Entypo"
                   name={meta.isShown ? "chevron-up" : "chevron-down"}
-                  color="#3a3a3a"
+                  color={tStyle.color || Theme.colors.dark}
                   size={20}
                 />
               )}

@@ -41,6 +41,7 @@ export interface FieldProps {
     | LocationProps;
   value?: any;
   setValue?: (value: any) => void;
+  onChange?: (value: any) => void;
   iconStart?: IconProps;
   iconEnd?: IconProps;
   theme?: ThemeProps;
@@ -50,6 +51,7 @@ export interface FieldProps {
   isRequired?: boolean;
   isValidate?: boolean;
   isValid?: (status: boolean) => void;
+  isFocus?: Boolean;
   validate?: (value: any) => void;
 }
 
@@ -57,6 +59,7 @@ export default observer((props: FieldProps) => {
   const {
     value,
     setValue,
+    onChange,
     label,
     iconStart,
     iconEnd,
@@ -66,7 +69,8 @@ export default observer((props: FieldProps) => {
     validate,
     isLabel,
     isValidate,
-    isValid
+    isValid,
+    isFocus
   } = props;
   let field = props.field;
   const dim = useDimensions().window;
@@ -89,7 +93,7 @@ export default observer((props: FieldProps) => {
   const placeholder =
     !meta.error && !meta.focus ? _.get(children, "props.placeholder", "") : "";
 
-  const onChange = value => {
+  const onChangeValue = value => {
     switch (_.get(children, "props.type", "text")) {
       case "decimal":
         value = !!value ? value * 1 : value;
@@ -97,6 +101,7 @@ export default observer((props: FieldProps) => {
     }
     validation(value);
     setValue && setValue(value);
+    onChange && onChange(value);
   };
   const validation = value => {
     if (isRequired && !value) {
@@ -129,7 +134,7 @@ export default observer((props: FieldProps) => {
       childProps = {
         style: childStyle,
         value: value,
-        onChangeText: onChange,
+        onChangeText: onChangeValue,
         placeholder: placeholder,
         onFocus: () => (meta.focus = true),
         onBlur: () => (meta.focus = false)
@@ -141,7 +146,7 @@ export default observer((props: FieldProps) => {
         value: value,
         placeholder: placeholder,
         onSelect: value =>
-          onChange(
+          onChangeValue(
             typeof value === "string" ? value : value.value || value.text
           ),
         onFocus: (e: any) => (meta.focus = e)
@@ -151,33 +156,33 @@ export default observer((props: FieldProps) => {
       childProps = {
         style: childStyle,
         value: value,
-        onChange: value => onChange(value),
+        onChange: value => onChangeValue(value),
         onFocus: (e: any) => (meta.focus = e)
       };
       break;
     case RadioGroup:
       childProps = {
-        onChange: onChange,
+        onChange: onChangeValue,
         value: value,
         children: children.props.children
       };
       break;
     case "checkbox-group":
       childProps = {
-        onChange: onChange,
+        onChange: onChangeValue,
         value: value,
         children: children.props.children
       };
       break;
     case "camera":
       childProps = {
-        onCapture: onChange,
+        onCapture: onChangeValue,
         value: value
       };
       break;
     case "location":
       childProps = {
-        onCapture: onChange,
+        onCapture: onChangeValue,
         value: value
       };
       break;
@@ -231,7 +236,7 @@ export default observer((props: FieldProps) => {
           borderStyle: "solid",
           borderColor: meta.error
             ? theme.danger
-            : meta.focus
+            : meta.focus && isFocus
             ? theme.primary
             : theme.light,
           borderBottomWidth: 1,

@@ -46,7 +46,6 @@ export default observer((props: DateTimeProps) => {
   };
   const onChangeDateString = (v, p) => {
     if (p === "dd") {
-      console.log(v);
       v = v > 31 ? 31 : v < 0 ? 0 : v;
       meta.dateString[p] = v == 0 ? "" : ("0" + v).slice(-2);
     } else if (p === "mm") {

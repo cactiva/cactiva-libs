@@ -18,7 +18,7 @@ export interface CarouselProps {
   children?: any;
   style?: any;
   loop?: boolean;
-  onSnapToItem?: any;
+  onSnapToItem?: (index) => void;
   enableMomentum?: boolean;
   enableSnap?: boolean;
   firstItem?: number;
@@ -74,8 +74,8 @@ export default observer((props: CarouselProps) => {
 });
 
 export interface PaginationProps {
-  activeDotIndex: number;
-  dotsLength: number;
+  activeDotIndex?: number;
+  dotsLength?: number;
   activeOpacity?: number;
   carouselRef?: any;
   containerStyle?: ViewStyle;

@@ -112,27 +112,33 @@ export default observer((props: UIHeaderProps) => {
           minHeight: 45
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            padding: 5
-          }}
-        >
-          {typeof title === "string" ? (
-            <Text
-              style={{
-                color: theme.primary,
-                fontSize: 16,
-                fontWeight: "bold",
-                ...(styles ? styles.title : {})
-              }}
-            >
-              {title}
-            </Text>
-          ) : (
-            typeof title === "object" && React.isValidElement(title) && title
-          )}
-        </View>
+        {title && (
+          <View
+            style={{
+              flex: 1,
+              padding: 5
+            }}
+          >
+            {typeof title === "string" ? (
+              <Text
+                style={{
+                  color: theme.primary,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  overflow: "hidden",
+                  flexWrap: "nowrap",
+                  ...(styles ? styles.title : {})
+                }}
+                ellipsizeMode={"tail"}
+                numberOfLines={1}
+              >
+                {title}
+              </Text>
+            ) : (
+              typeof title === "object" && React.isValidElement(title) && title
+            )}
+          </View>
+        )}
         {children}
       </View>
     </View>

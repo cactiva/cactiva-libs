@@ -13,6 +13,7 @@ import Modal from "../Modal";
 import FlatList from "../FlatList";
 import _ from "lodash";
 import { processData } from "./index.web";
+import Button from "../Button";
 
 export interface SelectItemProps {
   text: any;
@@ -52,7 +53,7 @@ export default observer((props: SelectProps) => {
     ...Theme.colors
   };
 
-  const tStyle = textStyle(props.style);
+  const tStyle: any = textStyle(props.style);
   const style = { ...props.style };
   if (!!style)
     Object.keys(style).map(k => {
@@ -68,12 +69,14 @@ export default observer((props: SelectProps) => {
 
   return (
     <>
-      <TouchableOpacity
+      <Button
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "stretch",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
+          backgroundColor: "transparent",
+          padding: 0,
           ...style
         }}
         disabled={readonly}
@@ -84,13 +87,17 @@ export default observer((props: SelectProps) => {
         <Text
           style={{
             flex: 1,
+            minHeight: 22,
             paddingLeft: 5,
-            marginTop: Platform.OS === "ios" ? 6 : 5,
-            marginBottom: Platform.OS === "ios" ? 7 : 5,
+            marginTop: Platform.OS === "ios" ? 5 : 4,
+            marginBottom: Platform.OS === "ios" ? 5 : 3,
             fontSize: Theme.fontSize,
             color: value ? "#3a3a3a" : "#757575",
+            overflow: "hidden",
             ...tStyle
           }}
+          ellipsizeMode={"tail"}
+          numberOfLines={1}
         >
           {meta.value
             ? typeof meta.value === "string"
@@ -111,12 +118,12 @@ export default observer((props: SelectProps) => {
             <Icon
               source="Entypo"
               name={meta.isShown ? "chevron-up" : "chevron-down"}
-              color={theme.dark}
-              size={24}
+              color={tStyle.color || theme.dark}
+              size={20}
             />
           </View>
         )}
-      </TouchableOpacity>
+      </Button>
       <ModalItems meta={meta} {...props} items={items} theme={theme} />
     </>
   );
@@ -170,7 +177,13 @@ const ModalItems = observer((props: any) => {
 const RenderItem = observer((props: any) => {
   const { meta, items, value, onSelect, theme } = props;
   return (
-    <View type={"ScrollView"} keyboardShouldPersistTaps="handled">
+    <View
+      type={"ScrollView"}
+      style={{
+        flexGrow: 1,
+        flexShrink: 1
+      }}
+    >
       <FlatList
         data={items.filter((item: any) => {
           if (meta.filter.length > 0)
@@ -228,7 +241,7 @@ const RenderItemRow = observer((props: any) => {
     active = value.value === textValue && !!textValue;
   }
   return (
-    <TouchableOpacity
+    <Button
       onPress={() => {
         onSelect(item);
         meta.isShown = false;
@@ -240,6 +253,7 @@ const RenderItemRow = observer((props: any) => {
         minHeight: 40,
         display: "flex",
         justifyContent: "center",
+        alignItems: "flex-start",
         backgroundColor: active ? theme.primary : "#fff"
       }}
     >
@@ -250,6 +264,6 @@ const RenderItemRow = observer((props: any) => {
       >
         {textLabel}
       </Text>
-    </TouchableOpacity>
+    </Button>
   );
 });
