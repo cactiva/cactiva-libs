@@ -34,7 +34,10 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
     });
 
     if (res && res.data) {
-      return res.data;
+      const keys = Object.keys(res.data);
+      if (keys.length === 1) {
+            return res.data[keys[0]];
+      } return res.data;
     } else {
       return res;
     }
