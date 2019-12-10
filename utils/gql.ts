@@ -52,6 +52,9 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
 export const querySingle = async (q: string, options: QueryOptions = {}) => {
   const res = await queryAll(q, options);
   if (res) {
+    if (Array.isArray(res)) {
+      return res[0];
+    }
     const table = Object.keys(res);
     if (table.length > 0 && res[table[0]] && res[table[0]].length > 0) {
       return res[table[0]][0];
