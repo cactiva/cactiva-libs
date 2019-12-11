@@ -27,4 +27,5 @@ export { default as Modal } from "./Modal";
 export { default as FormJson } from "./FormJson";
 export { default as Table } from "./Table";
 export { default as SimpleTable } from "./SimpleTable";
+export { default as SimpleTableColumn } from "./SimpleTable/SimpleTableColumn";
 export { default as Crud } from "./Crud";
