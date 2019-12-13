@@ -6,7 +6,7 @@ export default observer((props: FlatListProps<any>) => {
   return (
     <FlatList
       initialNumToRender={20}
-      maxToRenderPerBatch={10}
+      maxToRenderPerBatch={20}
       windowSize={5}
       removeClippedSubviews={true}
       updateCellsBatchingPeriod={500}

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { observer, useObservable } from "mobx-react-lite";
 import View from "../View";
-import Table, { TableProps, TableFieldProps } from "../Table";
+import Table, { TableProps, TableFieldProps } from "../HardTable";
 import { ViewStyle } from "react-native";
 import FormJson, { FormFieldProps } from "../FormJson";
 import Text from "../Text";

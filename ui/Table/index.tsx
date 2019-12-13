@@ -1,607 +1,461 @@
+import { toJS } from "mobx";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { ViewStyle } from "react-native";
+import { Text, View, ViewStyle, TouchableOpacity } from "react-native";
 import FlatList from "../FlatList";
-import Text from "../Text";
-import View from "../View";
+import TableHead, { IHeadProps } from "./TableHead";
+import TableRow, { IRowProps } from "./TableRow";
+import TableColumn, { IColumnProps } from "./TableColumn";
 import _ from "lodash";
 import Icon from "../Icon";
-import Button from "../Button";
-import Spinner from "../Spinner";
-import Input from "../Input";
-import { fuzzyMatch } from "../../utils";
-import Modal from "../Modal";
-import FormJson, { FieldType, FormFieldProps } from "../FormJson";
 
-export interface TableFieldProps extends FormFieldProps {
-  name: string;
-  order?: number;
+interface IColumn {
+  title: string;
+  path: string;
   width?: number;
-  height?: number;
-  onPress?: () => void;
-  component?: (item) => void;
+  onPress?: (item, path) => void;
 }
 
-export interface ConfigTableProps {
-  primary: string;
-  fields: TableFieldProps[];
-}
-
-export interface TableProps {
-  data: any[];
-  config: ConfigTableProps;
+interface IRows {
   style?: ViewStyle;
-  loading?: boolean;
-  onScrollEnd?: () => void;
-  onFilter?: (filter) => void;
-  onSearch?: (text) => void;
-  onSelect?: (item) => void;
+  onPress?: (item) => void;
 }
 
-export default observer((props: TableProps) => {
+interface IMeta {
+  cells: any[];
+  headerProps: IHeadProps;
+  rowProps: IRowProps;
+  headerCells: any[];
+  custom: any;
+}
+
+export interface ITableProps {
+  data: any[];
+  columnMode: "auto" | "manual";
+  keyPath: string;
+  style?: ViewStyle;
+  children?: any;
+  onEndReached?: () => void;
+  onSort?: (path, sort) => void;
+}
+
+export default observer((props: ITableProps) => {
   const {
     data,
-    config,
+    columnMode,
+    keyPath,
     style,
-    loading,
-    onScrollEnd,
-    onFilter,
-    onSearch,
-    onSelect
+    children,
+    onEndReached,
+    onSort
   } = props;
-  const meta = useObservable({
-    width: 0,
-    tableWidth: 600,
-    sort: null,
-    sortField: null,
-    loading: false,
-    data: [],
-    search: "",
-    isShownFilter: false,
-    filter: {}
+  const generateColumns = () => {
+    return Object.keys(data[0]).map(e => ({
+      title: e,
+      path: e
+    }));
+  };
+  const meta: IMeta = useObservable({
+    headerProps: {} as IHeadProps,
+    rowProps: {} as IRowProps,
+    headerCells: [] as any[],
+    cells: [] as any[],
+    custom: [] as any
   });
-  const fields = config.fields;
-
-  const filtering = () => {
-    const filter = Object.keys(meta.filter);
-    if (onFilter) {
-      onFilter(meta.filter);
-    } else if (filter.length > 0) {
-      const ndata = [...meta.data];
-      meta.data = ndata.filter((item: any) => {
-        let res = true;
-        for (let k in meta.filter) {
-          if (
-            !fuzzyMatch(meta.filter[k].toLowerCase(), item[k].toLowerCase())
-          ) {
-            res = false;
-            break;
-          }
-        }
-        return res;
-      });
+  const config = useObservable({
+    mode: "manual",
+    width: 0,
+    tableWidth: 0,
+    sortField: "",
+    sortMode: "asc"
+  });
+  const length = data && data.length;
+  const watchChild = children => {
+    if (children.type === TableHead) {
+      let props = { ...children.props };
+      if (children) delete props.children;
+      meta.headerProps = props;
+      meta.headerCells = _.get(children, "props.children", []);
+    } else if (children.type === TableRow) {
+      let props = { ...children.props };
+      if (children) delete props.children;
+      meta.rowProps = props;
+      meta.cells = _.get(children, "props.children", []);
+    } else if (children.type === TableColumn) {
+      meta.cells.push(children);
     }
   };
 
-  const sorting = () => {
-    const field = meta.sortField;
-    if (field) {
-      const ndata = [...meta.data];
-      ndata.sort((a, b) => {
-        let vA = a[field];
-        let vB = b[field];
-        if (!isNaN(parseFloat(vA)) && !isNaN(parseFloat(vB))) {
-          vA = parseFloat(vA);
-          vB = parseFloat(vB);
-        } else {
-          vA = vA.toLowerCase();
-          vB = vB.toLowerCase();
-        }
-        if (vA < vB) {
-          return -1;
-        }
-        if (vA > vB) {
-          return 1;
-        }
-        return 0;
-      });
-      if (meta.sort === "desc") {
-        ndata.reverse();
+  useEffect(() => {
+    if (meta.cells.length > 0) meta.cells = [];
+    if (!columnMode || columnMode === "auto" || !children) {
+      meta.cells = ((length > 0
+        ? generateColumns()
+        : []) as unknown) as IColumn[];
+      config.mode = "auto";
+    } else {
+      if (Array.isArray(children)) {
+        (children || []).map((child: any) => {
+          watchChild(child);
+        });
+      } else {
+        watchChild(children);
       }
-      meta.data = ndata;
     }
-  };
-
-  useEffect(() => {
-    meta.loading = loading;
-  }, [loading]);
-
-  useEffect(() => {
-    meta.data = [...data];
-    filtering();
-    sorting();
-  }, [data]);
-
-  useEffect(() => {
-    sorting();
-  }, [meta.sort, meta.sortField]);
-
-  useEffect(() => {
-    filtering();
-  }, [meta.filter]);
-  const dataList = [...meta.data];
+  }, [data, length]);
 
   return (
     <View
       style={{
-        width: 600,
+        flexGrow: 1,
+        borderStyle: "solid",
+        borderColor: "#f7f7f7",
+        borderWidth: 1,
         ...style
       }}
       onLayout={ev => {
         const { width } = ev.nativeEvent.layout;
-        const colLength = fields.length;
-        meta.width = width / colLength;
-        meta.tableWidth = width;
+        const colLength = meta.cells.length;
+        config.width = width / colLength;
+        config.tableWidth = width;
       }}
     >
-      {meta.width > 0 && (
-        <>
-          <HeaderTable
-            meta={meta}
-            config={config}
-            onSearch={onSearch}
-          ></HeaderTable>
-
-          {meta.width > 0 && dataList.length > 0 && (
-            <FlatList
-              stickyHeaderIndices={[0]}
-              ListHeaderComponent={() => {
-                return (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      backgroundColor: "#f3f4fb"
-                    }}
-                  >
-                    {fields.map((field, index) => {
-                      return (
-                        <RenderHead
-                          key={field.name}
-                          field={field.name}
-                          column={field}
-                          meta={meta}
-                        ></RenderHead>
-                      );
-                    })}
-                  </View>
-                );
-              }}
-              data={dataList.filter((item: any) => {
-                if (meta.search.length > 0) {
-                  let res = false;
-                  for (let k in item) {
-                    if (
-                      fuzzyMatch(
-                        meta.search.toLowerCase(),
-                        item[k].toLowerCase()
-                      )
-                    ) {
-                      res = true;
-                      break;
-                    }
-                  }
-                  return res;
-                }
-                return true;
-              })}
-              renderItem={({ item, index, separators }) => (
-                <RenderRows
-                  item={item}
-                  config={config}
-                  meta={meta}
-                  rowType={index % 2 === 0 ? "odd" : "even"}
-                  onSelect={onSelect}
-                ></RenderRows>
-              )}
-              ItemSeparatorComponent={() => (
-                <View
-                  style={{
-                    borderStyle: "solid",
-                    borderColor: "#f7f7f7",
-                    borderBottomWidth: 1
-                  }}
-                ></View>
-              )}
-              ListEmptyComponent={() => {
-                return (
-                  <View
-                    style={{
-                      margin: 20,
-                      alignItems: "center",
-                      justifyContent: "center"
-                    }}
-                  >
-                    {meta.search ? (
-                      <Text
-                        style={{
-                          fontSize: 16
-                        }}
-                      >
-                        No matching records found
-                      </Text>
-                    ) : (
-                      <Text
-                        style={{
-                          fontSize: 16
-                        }}
-                      >
-                        No item to display
-                      </Text>
-                    )}
-                  </View>
-                );
-              }}
-              keyExtractor={item => {
-                if (item.header) return "header";
-                return typeof item[config.primary] === "string"
-                  ? item[config.primary]
-                  : item[config.primary].toString();
-              }}
-              onEndReached={() => {
-                if (!meta.search) onScrollEnd();
-              }}
-            ></FlatList>
+      {config.width > 0 ? (
+        <FlatList
+          data={data}
+          stickyHeaderIndices={[0, data.length]}
+          ListHeaderComponent={() => (
+            <RenderHeader
+              meta={meta}
+              config={config}
+              onSort={onSort}
+            ></RenderHeader>
           )}
-          {meta.loading && (
-            <Spinner size={"large"} style={{ flexGrow: 1, margin: 20 }} />
-          )}
-        </>
-      )}
-    </View>
-  );
-});
-
-const HeaderTable = observer((props: any) => {
-  const { meta, config, onSearch } = props;
-  const fields = config.fields;
-  const filter = meta.filter ? Object.keys(meta.filter) : [];
-
-  return (
-    <View
-      style={{
-        marginBottom: 10,
-        marginTop: 10
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "stretch",
-          justifyContent: "space-between",
-          marginBottom: 10
-        }}
-      >
-        <Button
-          style={{
-            flexDirection: "row",
-            backgroundColor: "#f3f4fb",
-            borderColor: "#f7f7f7",
-            borderStyle: "solid",
-            borderWidth: 1,
-            borderRadius: 4,
-            minWidth: 160,
-            padding: 8
-          }}
-          onPress={() => (meta.isShownFilter = true)}
-        >
-          <Icon
-            source={"AntDesign"}
-            name={"filter"}
-            size={18}
-            color={"#828282"}
-          />
-          <Text
-            style={{
-              marginLeft: 5,
-              color: "#828282"
-            }}
-          >
-            Filter
-          </Text>
-        </Button>
-        <Input
-          onChangeText={text => {
-            meta.search = text;
-            onSearch && onSearch(meta.search);
-          }}
-          value={meta.search}
-          type={"text"}
-          placeholder={"Search..."}
-          style={{
-            backgroundColor: "#fafafc",
-            borderColor: "#f7f7f7",
-            borderStyle: "solid",
-            borderWidth: 1,
-            borderRadius: 4,
-            paddingLeft: 5,
-            paddingRight: 5,
-            flexGrow: 1,
-            marginLeft: 10
-          }}
-        />
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          flexWrap: "wrap"
-        }}
-      >
-        {filter.length > 0 &&
-          filter.map(k => {
-            const field = fields.find(f => f.name === k);
+          renderItem={({ item, index, separators }) => {
             return (
-              <View
-                key={k}
-                style={{
-                  borderRadius: 100,
-                  borderStyle: "solid",
-                  borderColor: "#f3f4fb",
-                  borderWidth: 1,
-                  backgroundColor: "#fafafc",
-                  flexDirection: "row",
-                  marginRight: 5,
-                  justifyContent: "center",
-                  alignItems: "center"
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    paddingLeft: 10,
-                    paddingBottom: 1
-                  }}
-                >
-                  <Text>{field.label}:</Text>
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      marginLeft: 4
-                    }}
-                  >
-                    {meta.filter[k]}
-                  </Text>
-                </View>
-                <Button
-                  style={{
-                    backgroundColor: "transparent",
-                    padding: 0
-                  }}
-                  onPress={() => {
-                    const filter = meta.filter;
-                    delete filter[k];
-                    meta.filter = { ...filter };
-                  }}
-                >
-                  <Icon source={"Ionicons"} name={"ios-close"} size={20} />
-                </Button>
-              </View>
+              <RenderItem item={item} meta={meta} config={config}></RenderItem>
             );
-          })}
-      </View>
-      <Filter meta={meta} config={config}></Filter>
-    </View>
-  );
-});
-
-const Filter = observer((props: any) => {
-  const { meta, config } = props;
-  const fields = config.fields;
-  const filterField = [];
-  fields.map(field => {
-    field.path = field.name;
-    filterField.push(field);
-  });
-
-  return (
-    <Modal
-      visible={meta.isShownFilter}
-      onRequestClose={() => (meta.isShownFilter = false)}
-    >
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.7)",
-          justifyContent: "center",
-          alignItems: "center"
-        }}
-      >
-        <Button
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: "trasnparent"
           }}
-          onPress={() => (meta.isShownFilter = false)}
-        ></Button>
-        <View
-          style={{
-            backgroundColor: "#fff",
-            minWidth: 500,
-            minHeight: 400,
-            borderRadius: 8,
-            overflow: "hidden"
-          }}
-        >
-          <Text
-            style={{
-              backgroundColor: "#fafafc",
-              padding: 10,
-              borderColor: "#f7f7f7",
-              borderStyle: "solid",
-              borderBottomWidth: 1
-            }}
-          >
-            Filter
-          </Text>
-          <FormJson
-            data={meta.filter}
-            field={filterField}
-            style={{
-              margin: 10
-            }}
-            onSubmit={data => {
-              meta.filter = { ...data };
-              meta.isShownFilter = false;
-            }}
-          >
-            <Button
-              type={"submit"}
+          ItemSeparatorComponent={() => (
+            <View
               style={{
-                backgroundColor: "#f3f4fb",
-                borderColor: "#f1f1f1",
                 borderStyle: "solid",
+                borderColor: "#f7f7f7",
                 borderBottomWidth: 1
               }}
-            >
-              <Text>Submit</Text>
-            </Button>
-          </FormJson>
-        </View>
-      </View>
-    </Modal>
-  );
-});
-
-const RenderRows = observer((props: any) => {
-  const { config, item, meta, rowType, onSelect } = props;
-  const fields = config.fields;
-  const bgColor = rowType === "even" ? "#fff" : "#fafafc";
-
-  return (
-    <Button
-      style={{
-        flexDirection: "row",
-        backgroundColor: bgColor,
-        padding: 0
-      }}
-      onPress={() => {
-        onSelect && onSelect(item);
-      }}
-    >
-      {fields.map((field, index) => {
-        return (
-          <RenderColumn
-            key={field.name}
-            field={field.name}
-            column={item}
-            option={field}
-            meta={meta}
-          ></RenderColumn>
-        );
-      })}
-    </Button>
-  );
-});
-
-const RenderHead = observer((props: any) => {
-  const { column, field, meta } = props;
-  const customWidth = column.width;
-  const width = column.width ? column.width : meta.width;
-  const sortField = meta.sortField === field && meta.sort;
-
-  return (
-    <Button
-      style={{
-        padding: 8,
-        flexGrow: customWidth ? 0 : 1,
-        flexBasis: width,
-        flexDirection: "row",
-        borderRadius: 0,
-        backgroundColor: "transparent",
-        justifyContent: "flex-start"
-      }}
-      onPress={() => {
-        meta.sort =
-          meta.sortField === field && meta.sort === "asc" ? "desc" : "asc";
-        meta.sortField = field;
-      }}
-    >
-      {typeof column.label !== "string" ? (
-        column.label
+            ></View>
+          )}
+          ListEmptyComponent={() => {
+            return (
+              <View
+                style={{
+                  margin: 20,
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16
+                  }}
+                >
+                  No item to display
+                </Text>
+              </View>
+            );
+          }}
+          keyExtractor={item => item[keyPath]}
+          onEndReached={() => {
+            if (onEndReached) onEndReached();
+          }}
+        ></FlatList>
       ) : (
-        <Text
-          style={{
-            fontSize: 12,
-            color: "#9c9eaf",
-            fontFamily: "SourceSansPro-Bold"
-          }}
-        >
-          {column.label}
-        </Text>
-      )}
-      <View
-        style={{
-          marginLeft: 5
-        }}
-      >
-        <Icon
-          source={"Ionicons"}
-          name={"md-arrow-dropup"}
-          color={sortField === "asc" ? "#44424b" : "#9c9eaf"}
-          style={{
-            height: 5,
-            marginTop: -5
-          }}
-        />
-        <Icon
-          source={"Ionicons"}
-          name={"md-arrow-dropdown"}
-          color={sortField === "desc" ? "#44424b" : "#9c9eaf"}
-          style={{
-            height: 5
-          }}
-        />
-      </View>
-    </Button>
-  );
-});
-
-const RenderColumn = observer((props: any) => {
-  const { column, option, field, meta } = props;
-  const customWidth = !!option.width;
-  const width = customWidth ? option.width : meta.width;
-
-  return (
-    <View
-      style={{
-        padding: 5,
-        paddingBottom: 8,
-        paddingTop: 8,
-        justifyContent: "center",
-        flexGrow: customWidth ? 0 : 1,
-        flexBasis: width
-      }}
-    >
-      {!!option.component ? (
-        option.component(column)
-      ) : (
-        <Text
-          style={{
-            color: "#3e3c46"
-          }}
-        >
-          {column[field]}
-        </Text>
+        <View />
       )}
     </View>
+  );
+});
+
+const RenderHeader = observer((props: any) => {
+  const { meta, config, onSort } = props;
+  const headerStyle = {
+    flexDirection: "row",
+    backgroundColor: "#f3f4fb",
+    ..._.get(meta, "headerProps.style", {})
+  };
+  return (
+    <TableHead {..._.get(meta, "headerProps", {})} style={headerStyle}>
+      {meta.headerCells.length > 0
+        ? meta.headerCells.map((child, key: number) => {
+            return (
+              <RenderHeaderCell
+                key={key}
+                component={child}
+                config={config}
+                onSort={onSort}
+              ></RenderHeaderCell>
+            );
+          })
+        : meta.cells.map((child, key: number) => {
+            return (
+              <RenderHeaderCell
+                key={key}
+                component={child}
+                config={config}
+                onSort={onSort}
+              ></RenderHeaderCell>
+            );
+          })}
+    </TableHead>
+  );
+});
+
+const RenderHeaderCell = observer((props: any) => {
+  const { component, config, onSort } = props;
+  let onPress;
+  if (config.mode === "manual") {
+    if (onSort)
+      onPress = () => {
+        const cell = component.props;
+        if (config.sortField === cell.path) {
+          config.sortMode = config.sortMode === "asc" ? "desc" : "asc";
+        } else {
+          config.sortMode = "asc";
+          config.sortField = cell.path;
+        }
+        onSort(config.sortField, config.sortMode);
+      };
+    const compProps = component.props;
+    const children = compProps.children ? toJS(compProps.children) : undefined;
+    const customWidth = compProps.width;
+    const cellStyle = {
+      padding: children ? 0 : 8,
+      flexGrow: customWidth ? 0 : 1,
+      flexBasis: _.get(compProps, "width", config.width),
+      flexDirection: "row",
+      borderRadius: 0,
+      backgroundColor: "transparent",
+      justifyContent: "flex-start",
+      ..._.get(compProps, "style", {})
+    };
+    return (
+      <TableColumn {...component.props} style={cellStyle}>
+        <DefaultHeaderCell
+          cell={compProps}
+          onSort={onSort}
+          config={config}
+          onPress={onPress}
+          compProps={compProps}
+        ></DefaultHeaderCell>
+      </TableColumn>
+    );
+  } else {
+    const cell = component;
+    if (onSort)
+      onPress = () => {
+        if (config.sortField === cell.path) {
+          config.sortMode = config.sortMode === "asc" ? "desc" : "asc";
+        } else {
+          config.sortMode = "asc";
+          config.sortField = cell.path;
+        }
+        onSort(config.sortField, config.sortMode);
+      };
+    const cellStyle = {
+      padding: 8,
+      flexGrow: 1,
+      flexBasis: config.width,
+      flexDirection: "row",
+      borderRadius: 0,
+      backgroundColor: "transparent",
+      justifyContent: "flex-start"
+    };
+    return (
+      <TableColumn {...component.props} style={cellStyle}>
+        <DefaultHeaderCell
+          cell={cell}
+          onSort={onSort}
+          config={config}
+          onPress={onPress}
+        ></DefaultHeaderCell>
+      </TableColumn>
+    );
+  }
+});
+
+const DefaultHeaderCell = observer((props: any) => {
+  const { cell, onSort, config, onPress, compProps } = props;
+
+  if (onSort) {
+    return (
+      <TouchableOpacity
+        style={{
+          flexGrow: 1,
+          flexDirection: "row"
+        }}
+        onPress={onPress}
+      >
+        <View
+          style={{
+            marginRight: 5,
+            justifyContent: "center"
+          }}
+        >
+          <Icon
+            source={"Ionicons"}
+            name={"md-arrow-dropup"}
+            color={
+              config.sortField === cell.path && config.sortMode === "asc"
+                ? "#44424b"
+                : "#9c9eaf"
+            }
+            style={{
+              height: 5,
+              marginTop: -8
+            }}
+          />
+          <Icon
+            source={"Ionicons"}
+            name={"md-arrow-dropdown"}
+            color={
+              config.sortField === cell.path && config.sortMode === "desc"
+                ? "#44424b"
+                : "#9c9eaf"
+            }
+            style={{
+              height: 5
+            }}
+          />
+        </View>
+        {compProps && compProps.children ? (
+          React.cloneElement(compProps.children, {
+            ...compProps.children.props,
+            item: { title: compProps.title },
+            path: "title"
+          })
+        ) : (
+          <Text>{cell.title}</Text>
+        )}
+      </TouchableOpacity>
+    );
+  }
+  return (
+    <>
+      {compProps && compProps.children ? (
+        React.cloneElement(compProps.children, {
+          ...compProps.children.props,
+          item: { title: compProps.title },
+          path: "title"
+        })
+      ) : (
+        <Text>{cell.title}</Text>
+      )}
+    </>
+  );
+});
+
+const RenderItem = observer((props: any) => {
+  const { meta, item, config } = props;
+  const rowProps = toJS(_.get(meta, "rowProps", {}));
+  const rowStyle = {
+    flexDirection: "row",
+    ..._.get(rowProps, "style", {})
+  };
+  let onPress;
+  if (rowProps.onPress)
+    onPress = () => {
+      rowProps.onPress(toJS(item));
+    };
+  return (
+    <TableRow {...rowProps} onPress={onPress} style={rowStyle}>
+      {meta.rows
+        ? meta.rows.map((child, key: number) => {
+            return (
+              <RenderCell
+                key={key}
+                item={item}
+                component={child}
+                config={config}
+              ></RenderCell>
+            );
+          })
+        : meta.cells.map((child, key: number) => {
+            return (
+              <RenderCell
+                key={key}
+                item={item}
+                component={child}
+                config={config}
+              ></RenderCell>
+            );
+          })}
+    </TableRow>
+  );
+});
+
+const RenderCell = observer((props: any) => {
+  const { item, component, config } = props;
+  if (config.mode === "manual") {
+    const compProps = component.props;
+    const customWidth = compProps.width;
+    const cellStyle = {
+      justifyContent: "center",
+      flexGrow: customWidth ? 0 : 1,
+      flexBasis: _.get(compProps, "width", config.width),
+      ..._.get(compProps, "style", {})
+    };
+    let onPress;
+    if (compProps.onPress)
+      onPress = () => {
+        compProps.onPress(toJS(item), compProps.path);
+      };
+    return (
+      <TableColumn {...component.props} style={cellStyle}>
+        <DefaultCell
+          compProps={compProps}
+          onPress={onPress}
+          item={item}
+        ></DefaultCell>
+      </TableColumn>
+    );
+  } else {
+    const cell = component;
+    const cellStyle = {
+      padding: 8,
+      justifyContent: "center",
+      flexGrow: 1,
+      flexBasis: config.width
+    } as ViewStyle;
+    return (
+      <TableColumn style={cellStyle}>
+        <Text>{item[cell.path]}</Text>
+      </TableColumn>
+    );
+  }
+});
+
+const DefaultCell = observer((props: any) => {
+  const { compProps, item, onPress } = props;
+  const children =
+    compProps && compProps.children ? toJS(compProps.children) : undefined;
+  let Component: any = View;
+  if (onPress) Component = TouchableOpacity;
+  return (
+    <Component
+      onPress={onPress}
+      style={{
+        padding: children ? 0 : 8
+      }}
+    >
+      {children ? (
+        React.cloneElement(children, {
+          ...children.props,
+          item,
+          path: compProps.path
+        })
+      ) : (
+        <Text>{item[compProps.path]}</Text>
+      )}
+    </Component>
   );
 });
