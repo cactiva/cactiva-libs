@@ -73,7 +73,7 @@ const genOrderBy = (orderBy: ITableOrderBy[], level = 0): string => {
             result.push(`${w.name}: ${value}`);
             return;
         } else if (w.valueType === 'StringValue') {
-            value = JSON.stringify(w.value);
+            value = w.value;
         }
         result.push(`${w.name}: ${value}`)
     })
@@ -94,11 +94,6 @@ export const genCounts = (table: ITable, options?: {
         if (table.where) {
             const where = genWhere(table.where);
             if (where) args.push(where);
-        }
-
-        if (table.orderBy) {
-            const orderBy = genOrderBy(table.orderBy);
-            if (orderBy) args.push(orderBy);
         }
     }
 

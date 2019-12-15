@@ -1,20 +1,19 @@
+import { generateDeleteString } from '@src/libs/utils/genDeleteString';
+import { generateInsertString } from '@src/libs/utils/genInsertString';
 import { generateQueryString } from '@src/libs/utils/genQueryString';
+import { generateUpdateString } from '@src/libs/utils/genUpdateString';
 import { queryAll } from '@src/libs/utils/gql';
 import _ from 'lodash';
+import { toJS } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
 import React from 'react';
 import useAsyncEffect from "use-async-effect";
-import Form from '../Form';
 import Table from '../Table';
+import TableHead from '../Table/TableHead';
+import TableRow from '../Table/TableRow';
+import Text from '../Text';
 import View from '../View';
 import BaseTemplate from './BaseTemplate';
-import Text from '../Text';
-import TableRow from '../Table/TableRow';
-import TableHead from '../Table/TableHead';
-import { generateInsertString } from '@src/libs/utils/genInsertString';
-import { generateUpdateString } from '@src/libs/utils/genUpdateString';
-import { toJS } from 'mobx';
-import { generateDeleteString } from '@src/libs/utils/genDeleteString';
 
 
 export default observer(({ data, children, template, idKey = "id", itemPerPage = 25 }: any) => {
@@ -49,7 +48,20 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
     children.map((e) => {
         if (e.type === Table) {
-            props.table.root = { ...e.props };
+            props.table.root = {
+                ...e.props, onSort: (r, mode) => {
+                    if (mode) {
+                        structure.orderBy = [{
+                            name: r,
+                            value: mode,
+                            valueType: 'StringValue'
+                        }]
+                    } else {
+                        structure.orderBy = []
+                    }
+                    reloadList();
+                }
+            };
             _.castArray(e.props.children).map(c => {
                 if (c.type === TableRow) {
                     props.table.row = {
@@ -79,7 +91,11 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             meta.loading.list = true;
             const currentPage = _.get(paging, 'current', 1)
             const query = generateQueryString({
-                ...structure, options: {
+                ...structure, orderBy: Object.keys(structure.orderBy).length > 0 ? structure.orderBy : [{
+                    name: idKey,
+                    value: 'desc',
+                    valueType: 'StringValue'
+                }], options: {
                     ...structure.options,
                     limit: itemPerPage,
                     offset: (currentPage - 1) * itemPerPage

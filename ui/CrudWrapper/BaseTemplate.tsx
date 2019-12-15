@@ -63,37 +63,45 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                         borderRadius: 4,
                         backgroundColor: theme.light
                     }}>
+                        {paging.total > 1 && <>
+                            <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>
+                                {paging.current} / {paging.total}
+                            </Text>
+                            <View style={style.actionSeparator} />
+                        </>
+                        }
+
                         <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>
-                            {paging.current} / {paging.total}
+                            {paging.count} item{paging.count > 1 ? 's' : ''}
                         </Text>
-                        <View style={style.actionSeparator} />
-                        <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>
-                            {paging.count} items
-                        </Text>
-                        <View style={style.actionSeparator} />
-                        <TouchableOpacity onPress={actions.prevPage}>
-                            <Icon
-                                source={"Feather"}
-                                name={"chevron-left"}
-                                color={paging.current - 1 > 0 ? theme.primary : theme.dark}
-                                size={18}
-                                style={{
-                                    margin: 5
-                                }}
-                            ></Icon>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={actions.nextPage}>
-                            <Icon
-                                source={"Feather"}
-                                name={"chevron-right"}
-                                color={paging.current + 1 <= paging.total ? theme.primary : theme.dark}
-                                size={18}
-                                style={{
-                                    margin: 5,
-                                    marginRight: 0,
-                                }}
-                            ></Icon>
-                        </TouchableOpacity>
+
+                        {paging.total > 1 && <>
+                            <View style={style.actionSeparator} />
+                            <TouchableOpacity onPress={actions.prevPage}>
+                                <Icon
+                                    source={"Feather"}
+                                    name={"chevron-left"}
+                                    color={paging.current - 1 > 0 ? theme.primary : theme.dark}
+                                    size={18}
+                                    style={{
+                                        margin: 5
+                                    }}
+                                ></Icon>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={actions.nextPage}>
+                                <Icon
+                                    source={"Feather"}
+                                    name={"chevron-right"}
+                                    color={paging.current + 1 <= paging.total ? theme.primary : theme.dark}
+                                    size={18}
+                                    style={{
+                                        margin: 5,
+                                        marginRight: 0,
+                                    }}
+                                ></Icon>
+                            </TouchableOpacity>
+                        </>
+                        }
                     </View>
                     }
                     {
@@ -128,12 +136,12 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                 </View>
             }
         </View>
-        {mode === '' ? <Table {...props.table.root} data={list}>
+        {mode === '' ? (loading.list && list.length === 0 ? null : <Table {...props.table.root} data={list}>
             <TableHead {...props.table.head} />
             <TableRow {...props.table.row} onPress={(e) => {
                 actions.edit(e);
             }} />
-        </Table> : <BaseForm
+        </Table>) : <BaseForm
                 idKey={idKey}
                 props={props.form(mode).props}
                 mode={mode}

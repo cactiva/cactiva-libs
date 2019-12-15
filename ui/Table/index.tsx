@@ -239,7 +239,14 @@ const RenderHeaderCell = observer((props: any) => {
       onPress = () => {
         const cell = component.props;
         if (config.sortField === cell.path) {
-          config.sortMode = config.sortMode === "asc" ? "desc" : "asc";
+          if (config.sortMode === 'asc') {
+            config.sortMode = 'desc';
+          } else if (config.sortMode === 'desc') {
+            config.sortMode = '';
+            config.sortField = '';
+          } else {
+            config.sortMode = 'asc';
+          }
         } else {
           config.sortMode = "asc";
           config.sortField = cell.path;
@@ -316,38 +323,40 @@ const DefaultHeaderCell = observer((props: any) => {
         }}
         onPress={onPress}
       >
-        <View
-          style={{
-            marginRight: 5,
-            justifyContent: "center"
-          }}
-        >
-          <Icon
-            source={"Ionicons"}
-            name={"md-arrow-dropup"}
-            color={
-              config.sortField === cell.path && config.sortMode === "asc"
-                ? "#44424b"
-                : "#9c9eaf"
-            }
+        {cell.path === config.sortField &&
+          <View
             style={{
-              height: 5,
-              marginTop: -8
+              marginRight: 5,
+              justifyContent: "center"
             }}
-          />
-          <Icon
-            source={"Ionicons"}
-            name={"md-arrow-dropdown"}
-            color={
-              config.sortField === cell.path && config.sortMode === "desc"
-                ? "#44424b"
-                : "#9c9eaf"
-            }
-            style={{
-              height: 5
-            }}
-          />
-        </View>
+          >
+            <Icon
+              source={"Ionicons"}
+              name={"md-arrow-dropup"}
+              color={
+                config.sortField === cell.path && config.sortMode === "asc"
+                  ? "#44424b"
+                  : "#9c9eaf"
+              }
+              style={{
+                height: 5,
+                marginTop: -8
+              }}
+            />
+            <Icon
+              source={"Ionicons"}
+              name={"md-arrow-dropdown"}
+              color={
+                config.sortField === cell.path && config.sortMode === "desc"
+                  ? "#44424b"
+                  : "#9c9eaf"
+              }
+              style={{
+                height: 5
+              }}
+            />
+          </View>
+        }
         {compProps && compProps.children ? (
           React.cloneElement(compProps.children, {
             ...compProps.children.props,
