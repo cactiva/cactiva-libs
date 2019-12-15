@@ -12,7 +12,7 @@ interface ButtonStyles {
 
 export interface ButtonProps extends TouchableOpacityProps {
   shadow?: Boolean;
-  type?: "submit";
+  type?: "submit" | string;
   children?: any;
 }
 

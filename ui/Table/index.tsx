@@ -30,9 +30,9 @@ interface IMeta {
 }
 
 export interface ITableProps {
-  data: any[];
-  columnMode: "auto" | "manual";
-  keyPath: string;
+  data?: any[];
+  columnMode?: "auto" | "manual";
+  keyPath?: string;
   style?: ViewStyle;
   children?: any;
   onEndReached?: () => void;
@@ -40,7 +40,7 @@ export interface ITableProps {
 }
 
 export default observer((props: ITableProps) => {
-  const {
+  let {
     data,
     columnMode,
     keyPath,
@@ -49,6 +49,11 @@ export default observer((props: ITableProps) => {
     onEndReached,
     onSort
   } = props;
+
+  if (!keyPath) keyPath = 'id';
+  if (!data) data = [];
+  if (!columnMode) columnMode = 'auto';
+
   const generateColumns = () => {
     return Object.keys(data[0]).map(e => ({
       title: e,
@@ -164,14 +169,30 @@ export default observer((props: ITableProps) => {
               </View>
             );
           }}
-          keyExtractor={item => item[keyPath]}
+          keyExtractor={(item, index) => {
+            if (!item[keyPath]) {
+              try {
+                const firstItem = item[Object.keys(item)[0]];
+                if (firstItem) {
+                  return firstItem;
+                }
+              } catch (e) {
+                return index;
+              }
+            }
+
+            if (typeof item[keyPath] !== 'string') {
+              return item[keyPath].toString();
+            }
+            return item[keyPath];
+          }}
           onEndReached={() => {
             if (onEndReached) onEndReached();
           }}
         ></FlatList>
       ) : (
-        <View />
-      )}
+          <View />
+        )}
     </View>
   );
 });
@@ -187,25 +208,25 @@ const RenderHeader = observer((props: any) => {
     <TableHead {..._.get(meta, "headerProps", {})} style={headerStyle}>
       {meta.headerCells.length > 0
         ? meta.headerCells.map((child, key: number) => {
-            return (
-              <RenderHeaderCell
-                key={key}
-                component={child}
-                config={config}
-                onSort={onSort}
-              ></RenderHeaderCell>
-            );
-          })
+          return (
+            <RenderHeaderCell
+              key={key}
+              component={child}
+              config={config}
+              onSort={onSort}
+            ></RenderHeaderCell>
+          );
+        })
         : meta.cells.map((child, key: number) => {
-            return (
-              <RenderHeaderCell
-                key={key}
-                component={child}
-                config={config}
-                onSort={onSort}
-              ></RenderHeaderCell>
-            );
-          })}
+          return (
+            <RenderHeaderCell
+              key={key}
+              component={child}
+              config={config}
+              onSort={onSort}
+            ></RenderHeaderCell>
+          );
+        })}
     </TableHead>
   );
 });
@@ -334,8 +355,8 @@ const DefaultHeaderCell = observer((props: any) => {
             path: "title"
           })
         ) : (
-          <Text>{cell.title}</Text>
-        )}
+            <Text>{cell.title}</Text>
+          )}
       </TouchableOpacity>
     );
   }
@@ -348,8 +369,8 @@ const DefaultHeaderCell = observer((props: any) => {
           path: "title"
         })
       ) : (
-        <Text>{cell.title}</Text>
-      )}
+          <Text>{cell.title}</Text>
+        )}
     </>
   );
 });
@@ -370,25 +391,25 @@ const RenderItem = observer((props: any) => {
     <TableRow {...rowProps} onPress={onPress} style={rowStyle}>
       {meta.rows
         ? meta.rows.map((child, key: number) => {
-            return (
-              <RenderCell
-                key={key}
-                item={item}
-                component={child}
-                config={config}
-              ></RenderCell>
-            );
-          })
+          return (
+            <RenderCell
+              key={key}
+              item={item}
+              component={child}
+              config={config}
+            ></RenderCell>
+          );
+        })
         : meta.cells.map((child, key: number) => {
-            return (
-              <RenderCell
-                key={key}
-                item={item}
-                component={child}
-                config={config}
-              ></RenderCell>
-            );
-          })}
+          return (
+            <RenderCell
+              key={key}
+              item={item}
+              component={child}
+              config={config}
+            ></RenderCell>
+          );
+        })}
     </TableRow>
   );
 });
@@ -454,8 +475,8 @@ const DefaultCell = observer((props: any) => {
           path: compProps.path
         })
       ) : (
-        <Text>{item[compProps.path]}</Text>
-      )}
+          <Text>{item[compProps.path]}</Text>
+        )}
     </Component>
   );
 });

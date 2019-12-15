@@ -27,7 +27,7 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
       method: "post",
       headers,
       data: {
-        operationName: _.get(options, "operationName", "MyQuery"),
+        operationName: _.get(options, "operationName"),
         query: q,
         variables: _.get(options, "variables", {})
       }
