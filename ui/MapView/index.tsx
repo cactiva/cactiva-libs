@@ -6,6 +6,7 @@ import MapViewNative, {
   MarkerProps
 } from "react-native-maps";
 import View from "../View";
+import { toJS } from "mobx";
 
 export interface MapViewProps extends MapViewPropsOrigin {
   style?: any;
@@ -20,9 +21,17 @@ export interface MapViewProps extends MapViewPropsOrigin {
   markerIds?: string[];
   children?: any;
   fitToSuppliedMarkers?: boolean;
+  onMapViewReady?: (status: boolean) => void;
 }
 export default observer((props: MapViewProps) => {
-  const { style, children, location, fitToSuppliedMarkers, markerIds } = props;
+  const {
+    style,
+    children,
+    location,
+    fitToSuppliedMarkers,
+    markerIds,
+    onMapViewReady
+  } = props;
   const mapProps = { ...props };
   delete mapProps.markers;
   delete mapProps.location;
@@ -39,13 +48,13 @@ export default observer((props: MapViewProps) => {
     ref: null
   });
   const mapRef = useRef(null);
-  let region = { ...meta.region };
 
   useEffect(() => {
     if (
       fitToSuppliedMarkers !== false &&
       mapRef.current !== null &&
       meta.mapReady &&
+      markerIds &&
       markerIds.length > 0
     ) {
       setTimeout(() => {
@@ -74,24 +83,20 @@ export default observer((props: MapViewProps) => {
         const { width, height } = event.nativeEvent.layout;
         meta.defaultLongitudeDelta =
           (meta.defaultLatitudeDelta + width / height) * 10;
+        meta.mapReady = true;
+        onMapViewReady && onMapViewReady(meta.mapReady);
       }}
     >
       <MapViewNative
         ref={mapRef}
-        onMapReady={() => {
-          meta.mapReady = true;
-        }}
         style={{
-          flexGrow: 1
+          flexGrow: 1,
+          minWidth: 200,
+          minHeight: 200
         }}
-        region={region}
+        region={toJS(meta.region)}
         {...mapProps}
-      >
-        {children}
-        {/* {markers &&
-          markers.length > 0 &&
-          markers.map(marker => <Marker key={uuid()} {...marker} />)} */}
-      </MapViewNative>
+      ></MapViewNative>
     </View>
   );
 });

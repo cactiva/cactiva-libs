@@ -29,7 +29,7 @@ export default observer((props: FormProps) => {
   };
 
   useEffect(() => {
-    if (!meta.initError) {
+    if (meta.initError) {
       let valid = true;
       Object.keys(meta.validate).map(e => {
         if (!meta.validate[e]) valid = false;

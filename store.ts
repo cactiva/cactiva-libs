@@ -5,18 +5,15 @@ const storage = AsyncStorage;
 
 export default (name: string, data: any) => {
   const initData = data;
-  // Object.keys(data).map(k => {
-  //   initData[k] = observable(data[k]);
-  // });
+  const obs = observable(initData);
   const vname = `store.${name}`;
-  const sData = storage.getItem(vname);
-  let obs = observable(initData);
-  sData
+  storage
+    .getItem(vname)
     .then(res => {
       if (res) {
         let newData = JSON.parse(res);
         for (let i in newData) {
-          obs[i] = observable(newData[i]);
+          obs[i] = newData[i];
         }
       } else {
         storage.setItem(vname, JSON.stringify(obs));

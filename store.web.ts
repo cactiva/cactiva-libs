@@ -6,11 +6,12 @@ export default (name: string, data: any) => {
   const initData = data;
   const vname = `store.${name}`;
   const sData = storage.getItem(vname);
-  let obs = null;
+  let obs = observable(initData);
   if (sData) {
-    obs = observable(JSON.parse(sData));
-  } else {
-    obs = observable(initData);
+    let newData = JSON.parse(sData);
+    for (let i in newData) {
+      obs[i] = newData[i];
+    }
   }
 
   observe(obs, () => {

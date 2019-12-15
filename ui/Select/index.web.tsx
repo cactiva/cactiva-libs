@@ -12,6 +12,7 @@ import Input from "../Input";
 import Text from "../Text";
 import View from "../View";
 import _ from "lodash";
+import { toJS } from "mobx";
 
 export const processData = (props: SelectProps) => {
   const textPath = _.get(props, "textPath", "text");

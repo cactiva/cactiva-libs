@@ -14,6 +14,7 @@ import FlatList from "../FlatList";
 import _ from "lodash";
 import { processData } from "./index.web";
 import Button from "../Button";
+import { toJS } from "mobx";
 
 export interface SelectItemProps {
   text: any;
