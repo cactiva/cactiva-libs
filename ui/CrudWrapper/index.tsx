@@ -49,7 +49,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     children.map((e) => {
         if (e.type === Table) {
             props.table.root = {
-                ...e.props, onSort: (r, mode) => {
+                ...e.props,
+                onSort: (r, mode) => {
                     if (mode) {
                         structure.orderBy = [{
                             name: r,
@@ -62,6 +63,14 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                     reloadList();
                 }
             };
+            if (structure && structure.orderBy.length > 0) {
+                props.table.root.config = {
+                    sortMode: _.get(structure, 'orderBy.0.value'),
+                    sortField: _.get(structure, 'orderBy.0.name'),
+                }
+                console.log(props.table.root);
+            }
+
             _.castArray(e.props.children).map(c => {
                 if (c.type === TableRow) {
                     props.table.row = {
@@ -90,12 +99,13 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         if (structure) {
             meta.loading.list = true;
             const currentPage = _.get(paging, 'current', 1)
+            const orderBy = structure.orderBy.length > 0 ? structure.orderBy : [{
+                name: idKey,
+                value: 'desc',
+                valueType: 'StringValue'
+            }];
             const query = generateQueryString({
-                ...structure, orderBy: Object.keys(structure.orderBy).length > 0 ? structure.orderBy : [{
-                    name: idKey,
-                    value: 'desc',
-                    valueType: 'StringValue'
-                }], options: {
+                ...structure, orderBy, options: {
                     ...structure.options,
                     limit: itemPerPage,
                     offset: (currentPage - 1) * itemPerPage

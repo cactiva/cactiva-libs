@@ -35,6 +35,7 @@ export interface ITableProps {
   keyPath?: string;
   style?: ViewStyle;
   children?: any;
+  config?: any;
   onEndReached?: () => void;
   onSort?: (path, sort) => void;
 }
@@ -47,8 +48,9 @@ export default observer((props: ITableProps) => {
     style,
     children,
     onEndReached,
-    onSort
+    onSort,
   } = props;
+  const propsConfig = props.config;
 
   if (!keyPath) keyPath = 'id';
   if (!data) data = [];
@@ -72,7 +74,8 @@ export default observer((props: ITableProps) => {
     width: 0,
     tableWidth: 0,
     sortField: "",
-    sortMode: "asc"
+    sortMode: "asc",
+    ...propsConfig,
   });
   const length = data && data.length;
   const watchChild = children => {
