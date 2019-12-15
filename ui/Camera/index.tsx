@@ -2,19 +2,28 @@ import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useRef } from "react";
-import { Image, Modal, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+  Platform
+} from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon from "../Icon";
 import Spinner from "../Spinner";
+import Axios from "backend/node_modules/axios";
+import api from "@src/libs/utils/api";
+import { toJS } from "mobx";
 
 export interface CameraProps {
   value?: any;
   option?: any;
-  onCapture?: (value: any) => void;
   style?: any;
   theme?: ThemeProps;
-  relativePath: string;
+  onCapture?: (value: any) => void;
 }
 
 export default observer((props: CameraProps) => {
@@ -32,11 +41,14 @@ export default observer((props: CameraProps) => {
     resnap: false
   });
   const dim = useDimensions().window;
+  const width = (style && style.width) || 150;
+  const height = (style && style.height) || dim.width;
   useEffect(() => {
     Permissions.askAsync(Permissions.CAMERA).then((res: any) => {
       meta.hasCameraPermission = res.status === "granted";
     });
   }, []);
+
   const camera = useRef(null);
   const theme = {
     ...DefaultTheme,
@@ -62,16 +74,15 @@ export default observer((props: CameraProps) => {
             ...style
           }}
         >
-          {meta.photo && (
+          {(meta.photo || value) && (
             <Image
-              source={{ uri: meta.photo.uri }}
+              source={{ uri: meta.photo ? meta.photo.uri : value }}
               resizeMode="cover"
               style={{
-                height: 100,
-                width: dim.width,
+                height: height,
+                width: width,
                 flexGrow: 1,
-                flexShrink: 1,
-                flexBasis: 0
+                flexShrink: 1
               }}
             />
           )}

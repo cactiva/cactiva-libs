@@ -13,7 +13,7 @@ export default observer((props: CameraProps) => {
     ...DefaultTheme,
     ...props.theme
   };
-  const { style } = props;
+  const { style, value } = props;
   const dim = useDimensions().window;
   const webcamRef = React.useRef(null);
   const meta = useObservable({

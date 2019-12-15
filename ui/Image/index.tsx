@@ -1,11 +1,14 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Image, ImageProps } from "react-native";
+import { Image, ImageProps as ImagePropsOrigin } from "react-native";
 import Spinner from "../Spinner";
 import View from "../View";
 
 const errorSource = require("@src/assets/images/404.png");
+export interface ImageProps extends ImagePropsOrigin {
+  loadingSize?: "small" | "large";
+}
 
 export default observer((props: ImageProps) => {
   const meta = useObservable({
@@ -55,7 +58,9 @@ const RenderImage = observer((props: any) => {
             top: 0
           }}
         >
-          <Spinner size={"large"} />
+          <Spinner
+            size={imgProps.loadingSize ? imgProps.loadingSize : "large"}
+          />
         </View>
       ) : (
         <View
