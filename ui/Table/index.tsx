@@ -476,7 +476,7 @@ const RenderCell = observer((props: any) => {
       } as ViewStyle;
       return (
         <TableColumn style={cellStyle}>
-          <Text>{item[compProps.path]}</Text>
+          <Text>{value}</Text>
         </TableColumn>
       );
     }
