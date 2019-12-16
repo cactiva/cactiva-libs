@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { View, ViewStyle } from "react-native";
+import { View as ViewNative, ViewStyle } from "react-native";
+import { View } from '../index';
 
 export interface IColumnProps {
   title?: string;
@@ -8,8 +9,8 @@ export interface IColumnProps {
   path?: string;
   style?: ViewStyle;
   onPress?: (item, path) => void;
-  children?: React.ReactElement;
+  children?: any;
 }
 export default observer((props: IColumnProps) => {
-  return <View {...props}></View>;
+  return <ViewNative {...props}></ViewNative>;
 });

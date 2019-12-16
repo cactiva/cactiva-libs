@@ -13,10 +13,11 @@ import TableHead from '../Table/TableHead';
 import TableRow from '../Table/TableRow';
 import Text from '../Text';
 import View from '../View';
+import { View as ViewNative } from 'react-native';
 import BaseTemplate from './BaseTemplate';
 
 
-export default observer(({ data, children, template, idKey = "id", itemPerPage = 25 }: any) => {
+export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style }: any) => {
     const structure = _.get(data, 'structure', null);
     const paging = _.get(data, 'paging', {
         total: 1,
@@ -68,15 +69,18 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                     sortMode: _.get(structure, 'orderBy.0.value'),
                     sortField: _.get(structure, 'orderBy.0.name'),
                 }
-                console.log(props.table.root);
             }
 
             _.castArray(e.props.children).map(c => {
                 if (c.type === TableRow) {
                     props.table.row = {
-                        ...c.props, children: _.castArray(c.props.children).filter(r => {
-                            return r.props.path !== idKey;
-                        })
+                        ...c.props, children: _.castArray(c.props.children)
+                            .filter(r => {
+                                return r.props.path !== idKey;
+                            })
+                            .map(r => {
+                                return r;
+                            })
                     };
                 } else if (c.type === TableHead) {
                     props.table.head = {
@@ -88,7 +92,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             })
         } else if (e.type === Text) {
             props.title = { ...e.props };
-        } else if (e.type === View) {
+        } else if (e.type === View || e.type === ViewNative) {
             props.actions = { ...e.props };
         } else {
             props.form = e;
@@ -130,6 +134,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
     return <Template {...data}
         paging={paging}
+        style={style}
         props={props} idKey={idKey} mode={meta.mode} loading={meta.loading} actions={{
             edit: (input) => {
                 meta.mode = 'edit';

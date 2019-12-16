@@ -177,6 +177,9 @@ export default observer((props: ITableProps) => {
               try {
                 const firstItem = item[Object.keys(item)[0]];
                 if (firstItem) {
+                  if (typeof firstItem !== "string") {
+                    return firstItem.toString();
+                  }
                   return firstItem;
                 }
               } catch (e) {
@@ -399,6 +402,7 @@ const RenderItem = observer((props: any) => {
     onPress = () => {
       rowProps.onPress(toJS(item));
     };
+
   return (
     <TableRow {...rowProps} onPress={onPress} style={rowStyle}>
       {meta.rows
@@ -425,7 +429,6 @@ const RenderItem = observer((props: any) => {
     </TableRow>
   );
 });
-
 const RenderCell = observer((props: any) => {
   const { item, component, config } = props;
   if (config.mode === "manual") {
@@ -437,58 +440,32 @@ const RenderCell = observer((props: any) => {
       flexBasis: _.get(compProps, "width", config.width),
       ..._.get(compProps, "style", {})
     };
-    let onPress;
-    if (compProps.onPress)
-      onPress = () => {
-        compProps.onPress(toJS(item), compProps.path);
-      };
-    return (
-      <TableColumn {...component.props} style={cellStyle}>
-        <DefaultCell
-          compProps={compProps}
-          onPress={onPress}
-          item={item}
-        ></DefaultCell>
+    if (compProps.children) {
+      return <TableColumn style={cellStyle}>
+        <TouchableOpacity onPress={compProps.onPress}>
+          {typeof compProps.children === 'function' ? compProps.children(item[compProps.path], { ...compProps, item }) : compProps.children}
+        </TouchableOpacity>
       </TableColumn>
-    );
-  } else {
-    const cell = component;
-    const cellStyle = {
-      padding: 8,
-      justifyContent: "center",
-      flexGrow: 1,
-      flexBasis: config.width
-    } as ViewStyle;
-    return (
-      <TableColumn style={cellStyle}>
-        <Text>{item[cell.path]}</Text>
-      </TableColumn>
-    );
-  }
-});
-
-const DefaultCell = observer((props: any) => {
-  const { compProps, item, onPress } = props;
-  const children =
-    compProps && compProps.children ? toJS(compProps.children) : undefined;
-  let Component: any = View;
-  if (onPress) Component = TouchableOpacity;
-  return (
-    <Component
-      onPress={onPress}
-      style={{
-        padding: children ? 0 : 8
-      }}
-    >
-      {children ? (
-        React.cloneElement(children, {
-          ...children.props,
-          item,
-          path: compProps.path
-        })
-      ) : (
+    } else if (compProps.onPress) {
+      return (
+        <TableColumn {...compProps} style={cellStyle}>
+          <TouchableOpacity onPress={compProps.onPress}>
+            <Text>{item[compProps.path]}</Text>
+          </TouchableOpacity>
+        </TableColumn>
+      );
+    } else {
+      const cellStyle = {
+        padding: 8,
+        justifyContent: "center",
+        flexGrow: 1,
+        flexBasis: config.width
+      } as ViewStyle;
+      return (
+        <TableColumn style={cellStyle}>
           <Text>{item[compProps.path]}</Text>
-        )}
-    </Component>
-  );
+        </TableColumn>
+      );
+    }
+  }
 });

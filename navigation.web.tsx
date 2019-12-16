@@ -2,13 +2,15 @@ import { createBrowserApp } from "@react-navigation/web";
 import { createStackNavigator } from "react-navigation-stack";
 import { useDimensions } from "react-native-hooks";
 import React from "react";
+import { initialRouteName } from "@src/components";
 
 const theme = require("../theme.json");
 
 export const AppContainer = () => {
   const App = createBrowserApp(
     createStackNavigator(routes(), {
-      headerMode: "none"
+      headerMode: "none",
+      initialRouteName: initialRouteName
     })
   );
 

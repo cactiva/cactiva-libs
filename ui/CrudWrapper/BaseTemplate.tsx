@@ -21,18 +21,18 @@ const theme = {
 };
 
 const ActionButton = ({ onPress, text }: any) => {
-    return <TouchableOpacity onPress={onPress} style={style.button}>
-        <NativeText style={style.buttonText}>
+    return <TouchableOpacity onPress={onPress} style={styles.button}>
+        <NativeText style={styles.buttonText}>
             {text}
         </NativeText>
     </TouchableOpacity>;
 
 }
-export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading }: any) => {
+export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
-    return <View>
-        <View style={style.head}>
+    return <View style={style}>
+        <View style={styles.head}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {['create', 'edit'].indexOf(mode) >= 0 && <TouchableOpacity onPress={actions.cancel}>
                     <Icon
@@ -55,7 +55,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                 </Text>
             </View>
             {loading.form ? <Spinner style={{ margin: 10 }} /> :
-                <View {...props.actions} style={style.actions} >
+                <View {...props.actions} style={styles.actions} >
                     {mode === '' && paging.count > 0 && <View style={{
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -67,7 +67,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                             <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>
                                 {paging.current} / {paging.total}
                             </Text>
-                            <View style={style.actionSeparator} />
+                            <View style={styles.actionSeparator} />
                         </>
                         }
 
@@ -76,7 +76,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                         </Text>
 
                         {paging.total > 1 && <>
-                            <View style={style.actionSeparator} />
+                            <View style={styles.actionSeparator} />
                             <TouchableOpacity onPress={actions.prevPage}>
                                 <Icon
                                     source={"Feather"}
@@ -116,7 +116,6 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                             } else if (mode === 'create' || mode === 'edit') {
                                 switch (type) {
                                     case "delete":
-                                        console.log(mode);
                                         if (mode === 'edit') {
                                             return <ActionButton key={index} onPress={() => {
                                                 if (confirm('Are you sure ?')) {
@@ -138,7 +137,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
         </View>
         {mode === '' ? (loading.list && list.length === 0 ? null : <Table {...props.table.root} data={list}>
             <TableHead {...props.table.head} />
-            <TableRow {...props.table.row} onPress={(e) => {
+            <TableRow {...props.table.row} onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
                 actions.edit(e);
             }} />
         </Table>) : <BaseForm
@@ -165,9 +164,7 @@ const BaseForm = observer(({ idKey, props, mode, form, filter }: any) => {
         return true;
     })
 
-    return <View style={{ padding: 10 }}>
-        <Form {...props} children={fieldsWithoutID} data={data} />
-    </View>
+    return <Form {...props} style={{ flex: 1, margin: 10 }} children={fieldsWithoutID} data={data} />
 })
 
 
@@ -179,7 +176,7 @@ const getTextColor = function (bgColor: string, lightColor: string, darkColor: s
     return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? darkColor : lightColor;
 }
 const textColor = getTextColor(Theme.colors.primary, '#fff', '#000');
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
     head: {
         justifyContent: 'space-between',
         flexDirection: 'row',
