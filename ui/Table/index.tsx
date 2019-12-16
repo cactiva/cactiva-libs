@@ -83,7 +83,17 @@ export default observer((props: ITableProps) => {
       let props = { ...children.props };
       if (children) delete props.children;
       meta.headerProps = props;
-      meta.headerCells = _.get(children, "props.children", []);
+      meta.headerCells = _.castArray(_.get(children, "props.children", [])).map(e => {
+        return {
+          ...e, props: {
+            style: {
+              ...e.props.style,
+              overflow: 'hidden'
+            },
+            ...e.props
+          }
+        }
+      });
     } else if (children.type === TableRow) {
       let props = { ...children.props };
       if (children) delete props.children;
