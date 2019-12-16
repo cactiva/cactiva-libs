@@ -6,7 +6,7 @@ import TableColumn from "./TableColumn";
 export interface IRowProps {
   style?: ViewStyle;
   children: any;
-  onPress?: (item) => void;
+  onPress?: ((item, path) => void) | false;
 }
 export default observer((props: IRowProps) => {
   const { onPress } = props;

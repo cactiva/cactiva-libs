@@ -8,7 +8,7 @@ export interface IColumnProps {
   width?: number;
   path?: string;
   style?: ViewStyle;
-  onPress?: (item, path) => void;
+  onPress?: ((item, path) => void) | false;
   children?: any;
 }
 export default observer((props: IColumnProps) => {

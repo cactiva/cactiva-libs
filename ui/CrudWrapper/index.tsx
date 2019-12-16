@@ -52,16 +52,18 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             props.table.root = {
                 ...e.props,
                 onSort: (r, mode) => {
-                    if (mode) {
-                        structure.orderBy = [{
-                            name: r,
-                            value: mode,
-                            valueType: 'StringValue'
-                        }]
-                    } else {
-                        structure.orderBy = []
+                    if (r) {
+                        if (mode) {
+                            structure.orderBy = [{
+                                name: r,
+                                value: mode,
+                                valueType: 'StringValue'
+                            }]
+                        } else {
+                            structure.orderBy = []
+                        }
+                        reloadList();
                     }
-                    reloadList();
                 }
             };
             if (structure && structure.orderBy.length > 0) {

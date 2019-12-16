@@ -8,6 +8,7 @@ import TableRow, { IRowProps } from "./TableRow";
 import TableColumn, { IColumnProps } from "./TableColumn";
 import _ from "lodash";
 import Icon from "../Icon";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 interface IColumn {
   title: string;
@@ -443,6 +444,7 @@ const RenderCell = observer((props: any) => {
   const { item, component, config } = props;
   if (config.mode === "manual") {
     const compProps = component.props;
+    const value = _.get(item, compProps.path);
     const customWidth = compProps.width;
     const cellStyle = {
       justifyContent: "center",
@@ -451,16 +453,17 @@ const RenderCell = observer((props: any) => {
       ..._.get(compProps, "style", {})
     };
     if (compProps.children) {
+      const child = typeof compProps.children === 'function' ? compProps.children(value, { ...compProps, item }) : compProps.children;
       return <TableColumn style={cellStyle}>
-        <TouchableOpacity onPress={compProps.onPress}>
-          {typeof compProps.children === 'function' ? compProps.children(item[compProps.path], { ...compProps, item }) : compProps.children}
-        </TouchableOpacity>
+        {compProps.onPress ? <TouchableOpacity onPress={compProps.onPress}>
+          {child}
+        </TouchableOpacity> : child}
       </TableColumn>
     } else if (compProps.onPress) {
       return (
         <TableColumn {...compProps} style={cellStyle}>
           <TouchableOpacity onPress={compProps.onPress}>
-            <Text>{item[compProps.path]}</Text>
+            <Text>{value}</Text>
           </TouchableOpacity>
         </TableColumn>
       );
