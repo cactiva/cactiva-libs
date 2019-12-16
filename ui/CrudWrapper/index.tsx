@@ -126,7 +126,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         data.paging.current = 1;
                     data.paging.total = Math.ceil(count / itemPerPage);
                 } else {
-                    data.list = e;
+                    data.list = e || [];
                 }
             });
             meta.loading.list = false;

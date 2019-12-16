@@ -35,18 +35,39 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
 
     if (res && res.data) {
       const keys = Object.keys(res.data);
+
       if (keys.length === 1) {
         return res.data[keys[0]];
       }
+
+      const mutate = keys.filter(e => e.indexOf('insert_') === 0 || e.indexOf('update_') === 0);
+      if (mutate.length > 0) {
+        if (res.data[mutate[0]].returning) {
+          return res.data[mutate[0]].returning[0];
+        } else {
+          return res.data[mutate[0]];
+        }
+      }
+
       return res.data;
     } else {
-      return res;
+      if (res.error) {
+        if (options && options.onError) {
+          options.onError(res.error);
+        }
+        return res.error;
+      } else {
+        if (options && options.onError) {
+          options.onError(res);
+        }
+        return res;
+      }
     }
   } catch (e) {
     if (options && options.onError) {
       options.onError(e);
     }
-    return false;
+    return [];
   }
 };
 

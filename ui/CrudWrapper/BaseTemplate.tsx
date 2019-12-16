@@ -162,6 +162,9 @@ const BaseForm = observer(({ idKey, props, mode, form, filter }: any) => {
     const fieldsWithoutID = _.castArray(props.children).filter(e => {
         if (e.props.path === idKey) return false;
         return true;
+    }).map(e => {
+        console.log(e);
+        return e;
     })
 
     return <Form {...props} style={{ flex: 1, margin: 10 }} children={fieldsWithoutID} data={data} />
