@@ -26,7 +26,6 @@ const ActionButton = ({ onPress, text }: any) => {
             {text}
         </NativeText>
     </TouchableOpacity>;
-
 }
 export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style }: any) => {
     const actionsChildren = _.castArray(props.actions.children);

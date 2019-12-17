@@ -51,17 +51,10 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
 
       return res.data;
     } else {
-      if (res.error) {
-        if (options && options.onError) {
-          options.onError(res.error);
-        }
-        return res.error;
-      } else {
-        if (options && options.onError) {
-          options.onError(res);
-        }
-        return res;
+      if (options && options.onError) {
+        options.onError(res);
       }
+      return [];
     }
   } catch (e) {
     if (options && options.onError) {
