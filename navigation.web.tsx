@@ -21,7 +21,9 @@ export const AppContainer = () => {
         return <div className="mobile-root"><App /></div>
     }
 
-    return <App />;
+    return <div className="web-root">
+      <App />
+    </div>;
   };
 };
 

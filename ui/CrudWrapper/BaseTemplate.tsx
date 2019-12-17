@@ -30,7 +30,7 @@ const ActionButton = ({ onPress, text }: any) => {
 export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
-    return <View style={style}>
+    return <View style={{ position: 'relative', flex: 1, ...style }}>
         <View style={styles.head}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {['create', 'edit'].indexOf(mode) >= 0 && <TouchableOpacity onPress={actions.cancel}>
@@ -162,11 +162,17 @@ const BaseForm = observer(({ idKey, props, mode, form, filter }: any) => {
         if (e.props.path === idKey) return false;
         return true;
     }).map(e => {
-        console.log(e);
         return e;
     })
 
-    return <Form {...props} style={{ flex: 1, margin: 10 }} children={fieldsWithoutID} data={data} />
+    return <Form {...props} style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+        padding: 10,
+    }} children={fieldsWithoutID} data={data} />
 })
 
 

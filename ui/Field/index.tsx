@@ -11,7 +11,7 @@ import { CheckboxProps } from "../Checkbox";
 import { CheckboxGroupProps } from "../CheckboxGroup";
 import DatePicker, { DateTimeProps } from "../DatePicker";
 import Icon, { IconProps } from "../Icon";
-import { InputProps } from "../Input";
+import Input, { InputProps } from "../Input";
 import { LocationProps } from "../Location";
 import { RadioProps } from "../Radio";
 import RadioGroup, { RadioGroupProps } from "../RadioGroup";
@@ -30,15 +30,15 @@ export interface FieldProps {
   isLabel?: boolean;
   path?: string;
   field?:
-    | InputProps
-    | SelectProps
-    | DateTimeProps
-    | RadioGroupProps
-    | RadioProps
-    | CheckboxGroupProps
-    | CheckboxProps
-    | CameraProps
-    | LocationProps;
+  | InputProps
+  | SelectProps
+  | DateTimeProps
+  | RadioGroupProps
+  | RadioProps
+  | CheckboxGroupProps
+  | CheckboxProps
+  | CameraProps
+  | LocationProps;
   value?: any;
   setValue?: (value: any) => void;
   onChange?: (value: any) => void;
@@ -56,6 +56,8 @@ export interface FieldProps {
 }
 
 export default observer((props: FieldProps) => {
+  if (!props.children) return null;
+
   const {
     value,
     setValue,
@@ -126,11 +128,12 @@ export default observer((props: FieldProps) => {
     isValid && isValid(!meta.error);
   };
 
+
   const fieldType = children.type;
   const childStyle = { ..._.get(children, "props.style", {}), flex: 1 };
   let childProps;
   switch (fieldType) {
-    default:
+    case Input:
       childProps = {
         style: childStyle,
         value: value,
@@ -187,6 +190,8 @@ export default observer((props: FieldProps) => {
       };
       break;
   }
+
+
   const childrenWithProps = React.Children.map(children, child =>
     React.cloneElement(child, {
       ...child.props,
@@ -237,8 +242,8 @@ export default observer((props: FieldProps) => {
           borderColor: meta.error
             ? theme.danger
             : meta.focus && isFocus
-            ? theme.primary
-            : theme.light,
+              ? theme.primary
+              : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",

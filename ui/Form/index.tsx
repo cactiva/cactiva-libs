@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform, ViewProps } from "react-native";
+import { Platform, ViewProps, Text } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import { uuid } from "../../utils";
@@ -77,22 +77,22 @@ export default observer((props: FormProps) => {
           );
         })
       ) : (
-        <RenderChild
-          data={data}
-          setValue={setValue}
-          child={children}
-          key={uuid()}
-          meta={meta}
-          onSubmit={onSubmit}
-        />
-      )}
+          <RenderChild
+            data={data}
+            setValue={setValue}
+            child={children}
+            key={uuid()}
+            meta={meta}
+            onSubmit={onSubmit}
+          />
+        )}
     </View>
   );
 });
 
 const RenderChild = observer((props: any) => {
   const { data, child, setValue, meta, onSubmit } = props;
-  if (!child) {
+  if (!child || !child.type || !child.props) {
     return null;
   }
   const onPress = e => {
@@ -105,7 +105,14 @@ const RenderChild = observer((props: any) => {
       onSubmit(data);
     }
   };
-  if (child.type === Field) {
+
+
+  if (typeof child.props.children === 'function') {
+    return React.cloneElement(child, {
+      ...child.props,
+      children: child.props.children(_.get(data, child.props.path))
+    });
+  } else if (child.type === Field) {
     let custProps: any;
     const isValid = value => {
       meta.validate[child.props.path] = value;
@@ -149,7 +156,7 @@ const RenderChild = observer((props: any) => {
     const hasChildren = !!childrenRaw;
     if (!hasChildren) {
       return child;
-    } else {
+    } else if (child.props) {
       const children = Array.isArray(childrenRaw) ? childrenRaw : [childrenRaw];
       const props = { ...child.props };
       if (child.props.type === "submit") {

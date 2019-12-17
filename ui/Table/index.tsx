@@ -444,7 +444,9 @@ const RenderCell = observer((props: any) => {
   const { item, component, config } = props;
   if (config.mode === "manual") {
     const compProps = component.props;
-    const value = _.get(item, compProps.path);
+    const rawValue = _.get(item, compProps.path);
+    let value = typeof rawValue === 'object' ? JSON.stringify(rawValue) : rawValue;
+
     const customWidth = compProps.width;
     const cellStyle = {
       justifyContent: "center",
@@ -453,7 +455,9 @@ const RenderCell = observer((props: any) => {
       ..._.get(compProps, "style", {})
     };
     if (compProps.children) {
-      const child = typeof compProps.children === 'function' ? compProps.children(value, { ...compProps, item }) : compProps.children;
+      const child = typeof compProps.children === 'function' ?
+        compProps.children(rawValue, { ...compProps, item }) :
+        compProps.children;
       return <TableColumn style={cellStyle}>
         {compProps.onPress ? <TouchableOpacity onPress={compProps.onPress}>
           {child}

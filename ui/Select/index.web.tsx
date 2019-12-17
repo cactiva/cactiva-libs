@@ -1,18 +1,18 @@
 import Theme from "@src/theme.json";
-import { observer, useObservable } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { TouchableOpacity } from "react-native";
-import { SelectProps } from "./index";
-import { DefaultTheme } from "../../theme";
-import { textStyle, uuid } from "../../utils";
-import FlatList from "../FlatList";
-import Icon from "../Icon";
-import Input from "../Input";
-import Text from "../Text";
-import View from "../View";
 import _ from "lodash";
-import { toJS } from "mobx";
+import { observer, useObservable } from "mobx-react-lite";
+import React, { useEffect } from "react";
+import Select from 'react-select';
+import { DefaultTheme } from "../../theme";
+import { SelectProps } from "./index";
+
+const parsePath = (item, path) => {
+  if (typeof path === 'function') {
+    return path(item);
+  } else if (typeof path === 'string') {
+    return _.get(item, path)
+  }
+}
 
 export const processData = (props: SelectProps) => {
   const textPath = _.get(props, "textPath", "text");
@@ -20,18 +20,13 @@ export const processData = (props: SelectProps) => {
 
   return (props.items || []).map(item => {
     return {
-      text: _.get(item, textPath),
-      value: _.get(item, valuePath)
+      label: parsePath(item, textPath),
+      value: parsePath(item, valuePath)
     };
   });
 };
 
 export default observer((props: SelectProps) => {
-  const { value, placeholder, onFocus, readonly } = props;
-  const theme = {
-    ...DefaultTheme,
-    ...Theme.colors
-  };
   const meta = useObservable({
     isShown: false,
     value: null,
@@ -39,317 +34,91 @@ export default observer((props: SelectProps) => {
     scrollH: 0,
     dimensions: null,
     contentHeight: 0,
-    items: props.items as any
+    items: [] as any
   });
 
   useEffect(() => {
     const res = processData(props);
     meta.items = res;
   }, [props.items]);
-  const items = meta.items;
 
-  const onSearch = value => {
-    meta.filter = value || "";
-  };
-
-  const tStyle: any = textStyle(props.style);
-  const style = { ...props.style };
-  if (!!style)
-    Object.keys(style).map(k => {
-      if (Object.keys(tStyle).indexOf(k) > -1) delete style[k];
-    });
-
-  useEffect(() => {
-    if (value && Array.isArray(items))
-      meta.value = items.find(x =>
-        typeof x === "string" ? x === value : x.value === value
-      );
-  }, [value, items]);
-
-  useEffect(() => {
-    onFocus && onFocus(meta.isShown as any);
-  }, [meta.isShown]);
 
   return (
-    <>
-      <div
-        style={{
-          position: "initial",
-          zIndex: meta.isShown ? 9 : 0,
-          minHeight: 30,
-          display: "flex",
-          flex: 1
-        }}
-        ref={(ref: any) => {
-          if (ref) {
-            const parentDimension = ref.parentElement.getBoundingClientRect();
-            meta.dimensions = parentDimension;
-            meta.scrollH = parentDimension.bottom;
-          }
-        }}
-      >
-        {meta.isShown && items && items.length > 5 ? (
-          <View
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "stretch",
-              justifyContent: "space-between",
-              ...style
-            }}
-          >
-            <Input
-              value={meta.filter}
-              onChangeText={onSearch}
-              placeholder={
-                meta.value ? meta.value.text : placeholder || "Search"
-              }
-              autoFocus={true}
-              style={{
-                backgroundColor: theme.light,
-                minHeight: 27,
-                maxHeight: 27,
-                marginTop: 0,
-                flexGrow: 1
-              }}
-            />
-            <TouchableOpacity
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingLeft: 5,
-                paddingRight: 5
-              }}
-              onPress={e => {
-                e.stopPropagation();
-                e.preventDefault();
-                if (items && items.length > 0) meta.isShown = !meta.isShown;
-              }}
-            >
-              <Icon
-                source="Entypo"
-                name={meta.isShown ? "chevron-up" : "chevron-down"}
-                color={theme.dark}
-                size={20}
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "stretch",
-              justifyContent: "space-between",
-              ...style
-            }}
-            disabled={readonly}
-            onPress={e => {
-              e.stopPropagation();
-              e.preventDefault();
-              meta.isShown = !meta.isShown;
-            }}
-          >
-            <View
-              style={{
-                flex: 1
-              }}
-            >
-              <Text
-                style={{
-                  flex: 1,
-                  marginTop: 4,
-                  marginBottom: 4,
-                  fontSize: Theme.fontSize,
-                  color: value ? "#3a3a3a" : "#757575",
-                  ...tStyle
-                }}
-              >
-                {meta.value
-                  ? typeof meta.value === "string"
-                    ? meta.value
-                    : meta.value.text
-                  : placeholder}
-              </Text>
-            </View>
-            <View
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                paddingLeft: 5,
-                paddingRight: 5
-              }}
-            >
-              {!readonly && (
-                <Icon
-                  source="Entypo"
-                  name={meta.isShown ? "chevron-up" : "chevron-down"}
-                  color={tStyle.color || Theme.colors.dark}
-                  size={20}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        )}
-        <ModalItems meta={meta} {...props} items={items} theme={theme} />
-      </div>
-      {meta.isShown && (
-        <div
-          onClickCapture={e => {
-            e.stopPropagation();
-            e.preventDefault();
-            meta.isShown = false;
-          }}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 2,
-            bottom: 0,
-            height: meta.scrollH,
-            display: "flex"
-          }}
-        />
-      )}
-    </>
+    <Select menuShouldBlockScroll={true}
+      menuPortalTarget={document.body}
+      styles={customStyles} options={meta.items} />
   );
 });
 
-const ModalItems = observer((props: any) => {
-  const { meta, theme } = props;
-  const [loaded, setLoaded] = useState(false);
-  const rootPortal = document.getElementById("root-portal");
-  useEffect(() => {
-    const iv = setInterval(() => {
-      const rootPortal = document.getElementById("root-portal");
-      if (rootPortal) {
-        setLoaded(true);
-        clearInterval(iv);
+const defaultFont = (provided, state) => ({
+  ...provided,
+  fontFamily: _.get(Theme, "fontFamily", undefined),
+})
+const customStyles = {
+  container: (provided, state) => ({
+    ...provided,
+    flex: 1,
+  }),
+  control: (provided, state) => ({
+    ...provided,
+    borderColor: theme.primary,
+    boxShadow: `0 0 0 1px ${theme.primary}`,
+  }),
+  option: (provided, state) => {
+    let bg = '#fff';
+    if (state.isFocused) {
+      bg = lightenPrimary;
+    }
+    if (state.isSelected) {
+      bg = theme.primary;
+    }
+    return {
+      ...provided,
+      backgroundColor: bg,
+      ":active": {
+        backgroundColor: lightenPrimary
       }
-    }, 100);
-  }, []);
-  if (!loaded! || !meta.isShown) return null;
-  return createPortal(
-    <div
-      style={{
-        position: "absolute",
-        top: meta.dimensions.top,
-        left: meta.dimensions.left,
-        minHeight: 40,
-        marginTop: 28,
-        maxHeight: 250,
-        backgroundColor: "#fff",
-        width: meta.dimensions.width,
-        zIndex: 9,
-        display: "flex",
-        alignItems: "stretch",
-        justifyContent: "flex-start",
-        borderWidth: 1,
-        borderColor: theme.light,
-        borderStyle: "solid",
-        boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.16)"
-      }}
-    >
-      <RenderItem {...props} meta={meta} theme={theme} />
-    </div>,
-    rootPortal
-  );
-});
+    }
+  },
+  menuList: defaultFont,
+  singleValue: defaultFont,
+  placeholder: defaultFont,
+  menu: (provided, state) => {
+    return {
+      ...provided,
+      zIndex: 99,
+      position: 'absolute'
+    }
+  },
+}
 
-const RenderItem = observer((props: any) => {
-  const { meta, items, value, onSelect, theme } = props;
-
-  return (
-    <View
-      type={"ScrollView"}
-      keyboardShouldPersistTaps="handled"
-      style={{ width: meta.dimensions.width }}
-    >
-      <FlatList
-        data={(items || []).filter((item: any) => {
-          if (meta.filter && meta.filter.length > 0)
-            return (
-              meta.filter
-                .toLowerCase()
-                .indexOf(
-                  (typeof item === "string" ? item : item.text).toLowerCase()
-                ) >= 0
-            );
-          return true;
-        })}
-        keyExtractor={(item: any) => {
-          return `${uuid()}-${typeof item === "string" ? item : item.value}`;
-        }}
-        ItemSeparatorComponent={() => (
-          <View
-            style={{
-              borderBottomWidth: 1,
-              borderStyle: "solid",
-              borderColor: theme.light,
-              borderWidth: 0
-            }}
-          />
-        )}
-        ListEmptyComponent={() => (
-          <Text
-            style={{
-              margin: 10,
-              textAlign: "center",
-              fontSize: 12
-            }}
-          >
-            No item to display.
-          </Text>
-        )}
-        renderItem={({ item }) => {
-          return (
-            <RenderItemRow
-              item={item}
-              value={value}
-              meta={meta}
-              onSelect={onSelect}
-              theme={theme}
-            ></RenderItemRow>
-          );
-        }}
-      />
-    </View>
-  );
-});
-
-const RenderItemRow = observer((props: any) => {
-  const { item, value, meta, onSelect, theme } = props;
-  const textLabel = typeof item === "string" ? item : item.text;
-  const textValue = typeof item === "string" ? item : item.value;
-  const active = value === textValue && !!textValue;
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        onSelect(item);
-        meta.isShown = false;
-        meta.value = item;
-      }}
-      style={{
-        paddingRight: 5,
-        paddingLeft: 5,
-        minHeight: 40,
-        display: "flex",
-        justifyContent: "center",
-        backgroundColor: active ? theme.primary : "#fff"
-      }}
-    >
-      <Text
-        style={{
-          color: active ? "#fff" : theme.dark
-        }}
-      >
-        {textLabel}
-      </Text>
-    </TouchableOpacity>
-  );
-});
+const pSBC = function (p: any, c0: any, c1?: any, l?: any) {
+  let r, g, b, P, f, t, h, i = parseInt, m = Math.round, a: any = typeof (c1) == "string";
+  if (typeof (p) != "number" || p < -1 || p > 1 || typeof (c0) != "string" || (c0[0] != 'r' && c0[0] != '#') || (c1 && !a)) return null;
+  const pSBCr = (d) => {
+    let n = d.length, x = {} as any;
+    if (n > 9) {
+      [r, g, b, a] = d = d.split(","), n = d.length;
+      if (n < 3 || n > 4) return null;
+      x.r = i(r[3] == "a" ? r.slice(5) : r.slice(4)), x.g = i(g), x.b = i(b), x.a = a ? parseFloat(a) : -1
+    } else {
+      if (n == 8 || n == 6 || n < 4) return null;
+      if (n < 6) d = "#" + d[1] + d[1] + d[2] + d[2] + d[3] + d[3] + (n > 4 ? d[4] + d[4] : "");
+      d = i(d.slice(1), 16);
+      if (n == 9 || n == 5) x.r = d >> 24 & 255, x.g = d >> 16 & 255, x.b = d >> 8 & 255, x.a = m((d & 255) / 0.255) / 1000;
+      else x.r = d >> 16, x.g = d >> 8 & 255, x.b = d & 255, x.a = -1
+    } return x
+  };
+  h = c0.length > 9, h = a ? c1.length > 9 ? true : c1 == "c" ? !h : false : h, f = pSBCr(c0), P = p < 0, t = c1 && c1 != "c" ? pSBCr(c1) : P ? { r: 0, g: 0, b: 0, a: -1 } : { r: 255, g: 255, b: 255, a: -1 }, p = P ? p * -1 : p, P = 1 - p;
+  if (!f || !t) return null;
+  if (l) r = m(P * f.r + p * t.r), g = m(P * f.g + p * t.g), b = m(P * f.b + p * t.b);
+  else r = m((P * f.r ** 2 + p * t.r ** 2) ** 0.5), g = m((P * f.g ** 2 + p * t.g ** 2) ** 0.5), b = m((P * f.b ** 2 + p * t.b ** 2) ** 0.5);
+  a = f.a, t = t.a, f = a >= 0 || t >= 0, a = f ? a < 0 ? t : t < 0 ? a : a * P + t * p : 0;
+  if (h) return "rgb" + (f ? "a(" : "(") + r + "," + g + "," + b + (f ? "," + m(a * 1000) / 1000 : "") + ")";
+  else return "#" + (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0)).toString(16).slice(1, f ? undefined : -2)
+}
+const theme = {
+  ...DefaultTheme,
+  ...Theme.colors
+};
+const lightenPrimary = pSBC(0.82, theme.primary);

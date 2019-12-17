@@ -133,7 +133,6 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         }
     };
     useAsyncEffect(reloadList, [structure]);
-
     return <Template {...data}
         paging={paging}
         style={style}
