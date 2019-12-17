@@ -6,7 +6,9 @@ export default (props: WebViewProps) => {
     <WebView
       originWhitelist={["*"]}
       scalesPageToFit={true}
-      textZoom={250}
+      textZoom={100}
+      javaScriptEnabled={true}
+      domStorageEnabled={true}
       {...props}
     />
   );

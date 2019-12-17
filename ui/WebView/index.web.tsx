@@ -4,7 +4,7 @@ import { WebViewProps } from "react-native-webview";
 
 export default (props: WebViewProps) => {
   const { source, style }: any = props;
-  let src = source.html || source.uri;
+  let src = source.uri;
   if (source.html) {
     src = "data:text/html," + encodeURIComponent(src);
   }
