@@ -150,7 +150,7 @@ export default observer((props: FieldProps) => {
         placeholder: placeholder,
         onSelect: value =>
           onChangeValue(
-            typeof value === "string" ? value : value.value || value.text
+            typeof value !== "object" ? value : value.value || value.label
           ),
         onFocus: (e: any) => (meta.focus = e)
       };

@@ -7,6 +7,14 @@ export const generateUpdateString = (table: ITable, data: any, options: {
 }): { query: string, variables: any } => {
 
     const where = genWhere(options.where) || `where: {}`;
+
+    const dataWithoutChildren = {};
+    Object.keys(data).map(key => {
+        const d = data[key];
+        if (typeof d !== 'object') {
+            dataWithoutChildren[key] = d;
+        }
+    })
     return {
         query: `mutation Update($data:${table.name}_set_input) {
     update_${table.name}(_set: $data, ${where}) {
@@ -17,7 +25,7 @@ ${genFields(table, { showArgs: false, withFirstTable: false }, 2)}
     }  
 }`,
         variables: {
-            data
+            data: dataWithoutChildren
         }
     };
 }

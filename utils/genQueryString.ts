@@ -109,6 +109,7 @@ ${tabs(level)}}`;
 export const genFields = (table: ITable, options?: {
     showArgs?: boolean
     withFirstTable?: boolean
+    depth?: -1
 }, level = 1): string => {
     const fields = _.get(table, "fields", []) as ITable[];
 

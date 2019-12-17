@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import Select from 'react-select';
 import { DefaultTheme } from "../../theme";
 import { SelectProps } from "./index";
+import { toJS } from "mobx";
 
 const parsePath = (item, path) => {
   if (typeof path === 'function') {
@@ -39,12 +40,24 @@ export default observer((props: SelectProps) => {
 
   useEffect(() => {
     const res = processData(props);
-    meta.items = res;
-  }, [props.items]);
 
+
+    meta.items = res;
+  }, [props.items, props.value]);
+
+  let idx = -1;
+  meta.items.map((e, key) => {
+    if (e.value === props.value) {
+      idx = key;
+    }
+  })
 
   return (
     <Select menuShouldBlockScroll={true}
+      value={meta.items[idx]}
+      onChange={(e) => {
+        props.onSelect(e.value)
+      }}
       menuPortalTarget={document.body}
       styles={customStyles} options={meta.items} />
   );
