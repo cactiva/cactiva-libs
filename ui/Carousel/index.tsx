@@ -25,6 +25,10 @@ export interface CarouselProps {
   inactiveSlideOpacity?: number;
   inactiveSlideScale?: number;
   slideStyle?: any;
+  autoplay?: boolean;
+  lockScrollWhileSnapping?: boolean;
+  layoutCardOffset?: number;
+  lockScrollTimeoutDuration?: number;
 }
 
 export default observer((props: CarouselProps) => {

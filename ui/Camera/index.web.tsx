@@ -49,9 +49,11 @@ export default observer((props: CameraProps) => {
           ...style
         }}
       >
-        {meta.photo && (
+        {(meta.photo || value) && (
           <Image
-            source={meta.photo}
+            source={{
+              uri: meta.photo ? meta.photo : value
+            }}
             resizeMode="cover"
             style={{
               height: 100,
