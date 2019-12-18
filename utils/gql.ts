@@ -40,7 +40,9 @@ export const queryAll = async (q: string, options?: QueryOptions) => {
         return res.data[keys[0]];
       }
 
-      const mutate = keys.filter(e => e.indexOf('insert_') === 0 || e.indexOf('update_') === 0);
+      const mutate = keys.filter(
+        e => e.indexOf("insert_") === 0 || e.indexOf("update_") === 0
+      );
       if (mutate.length > 0) {
         if (res.data[mutate[0]].returning) {
           return res.data[mutate[0]].returning[0];
