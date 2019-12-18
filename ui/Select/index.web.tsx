@@ -74,8 +74,9 @@ const customStyles = {
   }),
   control: (provided, state) => ({
     ...provided,
-    borderColor: theme.primary,
-    boxShadow: `0 0 0 1px ${theme.primary}`,
+    borderColor: undefined,
+    borderWidth: 0,
+    boxShadow: undefined,
   }),
   option: (provided, state) => {
     let bg = '#fff';

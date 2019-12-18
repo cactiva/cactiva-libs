@@ -59,7 +59,7 @@ export default observer((props: ITableProps) => {
 
   const generateColumns = () => {
     return Object.keys(data[0]).map(e => ({
-      title: e,
+      title: _.startCase(e),
       path: e
     }));
   };
@@ -69,7 +69,7 @@ export default observer((props: ITableProps) => {
     headerCells: [] as any[],
     cells: [] as any[],
     custom: [] as any
-  });
+  }); 
   const config = useObservable({
     mode: "manual",
     width: 0,
@@ -152,7 +152,7 @@ export default observer((props: ITableProps) => {
           )}
           renderItem={({ item, index, separators }) => {
             return (
-              <RenderItem item={item} meta={meta} config={config}></RenderItem>
+              <RenderItem item={item} rowNumber={index} meta={meta} config={config}></RenderItem>
             );
           }}
           ItemSeparatorComponent={() => (
@@ -402,7 +402,7 @@ const DefaultHeaderCell = observer((props: any) => {
 });
 
 const RenderItem = observer((props: any) => {
-  const { meta, item, config } = props;
+  const { meta, item, rowNumber, config } = props;
   const rowProps = toJS(_.get(meta, "rowProps", {}));
   const rowStyle = {
     flexDirection: "row",
@@ -442,11 +442,11 @@ const RenderItem = observer((props: any) => {
 });
 const RenderCell = observer((props: any) => {
   const { item, component, config } = props;
+
   if (config.mode === "manual") {
     const compProps = component.props;
     const rawValue = _.get(item, compProps.path);
     let value = typeof rawValue === 'object' ? JSON.stringify(rawValue) : rawValue;
-
     const customWidth = compProps.width;
     const cellStyle = {
       justifyContent: "center",
@@ -484,5 +484,16 @@ const RenderCell = observer((props: any) => {
         </TableColumn>
       );
     }
+  } else {
+    const cellStyle = {
+      padding: 8,
+      justifyContent: "center",
+      flexGrow: 1,
+      flexBasis: config.width
+    } as ViewStyle;
+    const value = typeof item[component.path] === 'object' ? JSON.stringify(item[component.path]) : item[component.path];
+    return <TableColumn style={cellStyle}>
+      <Text>{value}</Text>
+    </TableColumn>
   }
 });

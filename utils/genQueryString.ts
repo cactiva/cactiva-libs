@@ -21,6 +21,7 @@ export interface ITableOptions {
 
 export interface ITable {
     name: string,
+    cosntraint?: string,
     fields?: ITable[],
     where?: ITableWhere[],
     orderBy?: ITableOrderBy[]
