@@ -1,7 +1,7 @@
 import Theme from "@src/theme.json";
 import _ from 'lodash';
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { Children } from "react";
 import { StyleSheet, Text as NativeText, TouchableOpacity } from "react-native";
 import Form from "../Form";
 import Spinner from "../Spinner";
@@ -27,7 +27,7 @@ const ActionButton = ({ onPress, text }: any) => {
         </NativeText>
     </TouchableOpacity>;
 }
-export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style }: any) => {
+export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
     return <View style={{ position: 'relative', flex: 1, ...style }}>
@@ -145,11 +145,12 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                 mode={mode}
                 form={form}
                 filter={filter}
+                subCrudQueries={subCrudQueries}
             />}
     </View>
 })
 
-const BaseForm = observer(({ idKey, props, mode, form, filter }: any) => {
+const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }: any) => {
     let data = null;
     switch (mode) {
         case "filter": data = filter; break;
@@ -172,7 +173,9 @@ const BaseForm = observer(({ idKey, props, mode, form, filter }: any) => {
         bottom: 0,
         right: 0,
         padding: 10,
-    }} children={fieldsWithoutID} data={data} />
+    }} children={fieldsWithoutID} data={data} onFieldFunction={(fc, data) => {
+        return fc({list: data, queries: subCrudQueries});
+    }} />
 })
 
 

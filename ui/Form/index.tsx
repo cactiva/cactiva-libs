@@ -7,6 +7,7 @@ import { ThemeProps } from "../../theme";
 import { uuid } from "../../utils";
 import Field from "../Field";
 import View from "../View";
+import { toJS } from "mobx";
 
 export interface FormProps extends ViewProps {
   data?: any;
@@ -14,10 +15,11 @@ export interface FormProps extends ViewProps {
   children?: any;
   theme?: ThemeProps;
   onSubmit?: (data?: any) => void;
+  onFieldFunction?: (data?: any) => void;
 }
 
 export default observer((props: FormProps) => {
-  const { children, data, setValue, onSubmit } = props;
+  const { children, data, setValue, onSubmit, onFieldFunction } = props;
   const dim = useDimensions().window;
   const meta = useObservable({
     initError: false,
@@ -72,6 +74,7 @@ export default observer((props: FormProps) => {
               child={el}
               key={uuid()}
               meta={meta}
+              onFieldFunction={onFieldFunction}
               onSubmit={onSubmit}
             />
           );
@@ -83,6 +86,7 @@ export default observer((props: FormProps) => {
             child={children}
             key={uuid()}
             meta={meta}
+            onFieldFunction={onFieldFunction}
             onSubmit={onSubmit}
           />
         )}
@@ -91,7 +95,7 @@ export default observer((props: FormProps) => {
 });
 
 const RenderChild = observer((props: any) => {
-  const { data, child, setValue, meta, onSubmit } = props;
+  const { data, child, setValue, meta, onSubmit, onFieldFunction } = props;
   if (!child || !child.type || !child.props) {
     return null;
   }
@@ -108,9 +112,17 @@ const RenderChild = observer((props: any) => {
 
 
   if (typeof child.props.children === 'function') {
+    let fc = null;
+
+    if (onFieldFunction) {
+      fc = onFieldFunction(child.props.children, _.get(data, child.props.path));
+    } else {
+      fc = child.props.children(_.get(data, child.props.path))
+    }
+
     return React.cloneElement(child, {
       ...child.props,
-      children: child.props.children(_.get(data, child.props.path))
+      children: fc
     });
   } else if (child.type === Field) {
     let custProps: any;

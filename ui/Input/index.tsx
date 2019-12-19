@@ -1,9 +1,10 @@
-import { observer } from "mobx-react-lite";
+import Theme from "@src/theme.json";
+import _ from "lodash";
+import { observer, useObservable } from "mobx-react-lite";
 import React from "react";
 import { TextInput, TextInputProps } from "react-native";
-import _ from "lodash";
 import { DefaultTheme } from "../../theme";
-import Theme from "@src/theme.json";
+import Text from "../Text";
 
 export type InputType =
   | "text"
@@ -17,7 +18,7 @@ export interface InputProps extends TextInputProps {
 }
 
 export default observer((props: InputProps) => {
-  const { type, onChangeText, value } = props;
+  let { type, onChangeText, value } = props;
   const setValue = (e: any) => {
     let v;
     switch (type) {
@@ -51,8 +52,18 @@ export default observer((props: InputProps) => {
     style,
     value: value || "",
     placeholder: _.get(cprops, "placeholder", ""),
-    onChangeText: setValue
+    onChange: (e:any) => {
+      setValue(e.target.value)
+    }
   };
+
+  if (typeof value === 'number') {
+    type = 'number';
+  }
+  if (typeof value === "object") {
+    return <Text>{JSON.stringify(value)}</Text>;
+  }
+
   switch (type) {
     case "password":
       ComponentProps = {

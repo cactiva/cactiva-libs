@@ -42,7 +42,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         loading: {
             list: false,
             form: false
-        }
+        },
+        subCrudQueries: []
     });
 
     const castedIdKey = _.startCase(idKey);
@@ -136,7 +137,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     return <Template {...data}
         paging={paging}
         style={style}
-        props={props} idKey={idKey} mode={meta.mode} loading={meta.loading} actions={{
+        props={props}
+        idKey={idKey}
+        mode={meta.mode}
+        loading={meta.loading}
+        subCrudQueries={meta.subCrudQueries}
+        actions={{
             edit: (input) => {
                 meta.mode = 'edit';
                 data.form = input;
@@ -185,6 +191,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         await queryAll(q.query, { variables: q.variables, auth });
                         meta.mode = '';
                         meta.loading.form = false;
+                        await executeSubCrudActions();
                         await reloadList();
                         break;
                     case 'edit':
@@ -203,6 +210,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         await queryAll(q.query, { variables: q.variables, auth });
                         meta.mode = '';
                         meta.loading.form = false;
+                        await executeSubCrudActions();
                         await reloadList();
                         break;
                     default:
@@ -218,3 +226,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             }
         }} />;
 });
+
+const executeSubCrudActions = async () => {
+    // execute all meta.subCrudQueries
+}

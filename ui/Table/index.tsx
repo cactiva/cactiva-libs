@@ -69,7 +69,7 @@ export default observer((props: ITableProps) => {
     headerCells: [] as any[],
     cells: [] as any[],
     custom: [] as any
-  }); 
+  });
   const config = useObservable({
     mode: "manual",
     width: 0,
@@ -189,7 +189,7 @@ export default observer((props: ITableProps) => {
                 const firstItem = item[Object.keys(item)[0]];
                 if (firstItem) {
                   if (typeof firstItem !== "string") {
-                    return firstItem.toString();
+                    return JSON.stringify(firstItem);
                   }
                   return firstItem;
                 }
@@ -411,7 +411,7 @@ const RenderItem = observer((props: any) => {
   let onPress;
   if (rowProps.onPress)
     onPress = () => {
-      rowProps.onPress(toJS(item));
+      rowProps.onPress(toJS(item), rowNumber);
     };
 
   return (
