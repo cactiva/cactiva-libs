@@ -16,12 +16,12 @@ const parsePath = (item, path) => {
 }
 
 export const processData = (props: SelectProps) => {
-  const textPath = _.get(props, "textPath", "text");
+  const labelPath = _.get(props, "labelPath", "text");
   const valuePath = _.get(props, "valuePath", "value");
 
   return (props.items || []).map(item => {
     return {
-      label: parsePath(item, textPath),
+      label: parsePath(item, labelPath),
       value: parsePath(item, valuePath)
     };
   });

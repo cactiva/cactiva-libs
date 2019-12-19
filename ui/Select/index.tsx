@@ -17,7 +17,7 @@ import Button from "../Button";
 import { toJS } from "mobx";
 
 export interface SelectItemProps {
-  text: any;
+  label: any;
   value: any;
 }
 
@@ -30,7 +30,7 @@ export interface SelectProps {
   theme?: ThemeProps;
   onFocus?: (e: any) => void;
   readonly?: boolean;
-  textPath?: string;
+  labelPath?: string;
   valuePath?: string;
 }
 
@@ -39,7 +39,7 @@ export default observer((props: SelectProps) => {
   const meta = useObservable({
     isShown: false,
     value: null,
-    items: props.items as any,
+    items: [],
     filter: ""
   });
 
@@ -103,7 +103,7 @@ export default observer((props: SelectProps) => {
           {meta.value
             ? typeof meta.value === "string"
               ? meta.value
-              : meta.value.text
+              : meta.value.label
             : placeholder}
         </Text>
         {!readonly && (
@@ -131,7 +131,7 @@ export default observer((props: SelectProps) => {
 });
 
 const ModalItems = observer((props: any) => {
-  const { meta, theme } = props;
+  const { meta, theme, items } = props;
   const onSearch = value => {
     meta.filter = value;
   };
@@ -170,7 +170,7 @@ const ModalItems = observer((props: any) => {
             paddingTop: 0
           }}
         ></Header>
-        <RenderItem {...props} meta={meta} theme={theme} />
+        <RenderItem {...props} meta={meta} theme={theme} items={items} />
       </View>
     </Modal>
   );
@@ -237,7 +237,7 @@ const RenderItem = observer((props: any) => {
 
 const RenderItemRow = observer((props: any) => {
   const { item, value, meta, onSelect, theme } = props;
-  const textLabel = typeof item === "string" ? item : item.text;
+  const textLabel = typeof item === "string" ? item : item.label;
   const textValue = typeof item === "string" ? item : item.value;
   let active = false;
   if (value && value.value) {

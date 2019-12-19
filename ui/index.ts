@@ -30,4 +30,8 @@ export { default as TableColumn } from "./Table/TableColumn";
 export { default as TableHead } from "./Table/TableHead";
 export { default as TableRow } from "./Table/TableRow";
 export { default as CrudWrapper } from "./CrudWrapper";
+<<<<<<< HEAD
 export { default as SubCrudWrapper } from "./SubCrudWrapper";
+=======
+export { default as TabView } from "./TabView";
+>>>>>>> d6d87d5a96ea69ba2f91b9f27bbae26d8a5c345e
