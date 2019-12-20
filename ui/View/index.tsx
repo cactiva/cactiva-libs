@@ -13,6 +13,7 @@ import {
   ViewProps
 } from "react-native";
 import { SafeAreaViewProps } from "react-navigation";
+import _ from "lodash";
 
 interface CustomViewProps
   extends ViewProps,
@@ -26,20 +27,34 @@ interface CustomViewProps
     | "ScrollView"
     | "KeyboardAvoidingView";
   source?: any;
+  shadow?: boolean;
 }
 
 export default (props: CustomViewProps) => {
-  const { type } = props;
+  const { type, shadow } = props;
   const statusbar = StatusBar.currentHeight || 0;
-  const safeAreaStyle = StyleSheet.flatten([
-    {
-      paddingTop: Platform.OS === "android" ? statusbar : 0
+  const styleShadow = {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3
     },
-    props.style
-  ]);
-  if (type === "SafeAreaView")
-    return <SafeAreaView {...props} style={safeAreaStyle} />;
-  if (type === "AnimatedView") return <Animated.View {...props} />;
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+
+    elevation: 6
+  };
+  const style = {
+    ...(_.get(props, "style", {}) as any),
+    ...(shadow ? styleShadow : {}),
+    paddingTop:
+      type === "SafeAreaView" && Platform.OS === "android"
+        ? statusbar
+        : _.get(props, "style.paddingTop", undefined)
+  };
+  if (type === "SafeAreaView") return <SafeAreaView {...props} style={style} />;
+  if (type === "AnimatedView")
+    return <Animated.View {...props} style={style} />;
   if (type === "ScrollView") {
     const style = props.style;
     const p = { ...props };
@@ -49,11 +64,19 @@ export default (props: CustomViewProps) => {
         {...p}
         keyboardShouldPersistTaps={"handled"}
         contentContainerStyle={style}
+        style={style}
       />
     );
   }
   if (type === "KeyboardAvoidingView") {
-    return <KeyboardAvoidingView behavior="padding" enabled {...props} />;
+    return (
+      <KeyboardAvoidingView
+        behavior="padding"
+        enabled
+        {...props}
+        style={style}
+      />
+    );
   }
-  return <View {...props} />;
+  return <View {...props} style={style} />;
 };

@@ -80,16 +80,16 @@ export default observer((props: FormProps) => {
           );
         })
       ) : (
-          <RenderChild
-            data={data}
-            setValue={setValue}
-            child={children}
-            key={uuid()}
-            meta={meta}
-            onFieldFunction={onFieldFunction}
-            onSubmit={onSubmit}
-          />
-        )}
+        <RenderChild
+          data={data}
+          setValue={setValue}
+          child={children}
+          key={uuid()}
+          meta={meta}
+          onFieldFunction={onFieldFunction}
+          onSubmit={onSubmit}
+        />
+      )}
     </View>
   );
 });
@@ -97,7 +97,7 @@ export default observer((props: FormProps) => {
 const RenderChild = observer((props: any) => {
   const { data, child, setValue, meta, onSubmit, onFieldFunction } = props;
   if (!child || !child.type || !child.props) {
-    return null;
+    return child;
   }
   const onPress = e => {
     meta.initError = true;
@@ -122,14 +122,18 @@ const RenderChild = observer((props: any) => {
     if (meta.initError) meta.initError = false;
   };
 
-
-  if (typeof child.props.children === 'function') {
+  if (typeof child.props.children === "function") {
     let fc = null;
 
     if (onFieldFunction) {
-      fc = onFieldFunction(child.props.children, _.get(data, child.props.path, []), defaultSetValue, child.props.path);
+      fc = onFieldFunction(
+        child.props.children,
+        _.get(data, child.props.path, []),
+        defaultSetValue,
+        child.props.path
+      );
     } else {
-      fc = child.props.children(_.get(data, child.props.path, []))
+      fc = child.props.children(_.get(data, child.props.path, []));
     }
 
     return React.cloneElement(child, {
