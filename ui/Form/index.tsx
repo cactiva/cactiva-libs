@@ -26,7 +26,7 @@ export default observer((props: FormProps) => {
     validate: {}
   });
   const style = {
-    zIndex: Platform.OS === "web" ? 9 : 1,
+    // zIndex: Platform.OS === "web" ? 9 : 1,
     ...(_.get(props, "style", {}) as any)
   };
 
@@ -110,14 +110,26 @@ const RenderChild = observer((props: any) => {
     }
   };
 
+  const defaultSetValue = (value: any, path: any) => {
+    if (setValue) setValue(value, path);
+    else {
+      if (data) {
+        _.set(data, path, value);
+      } else {
+        console.error("Failed to set value: Form data props is undefined");
+      }
+    }
+    if (meta.initError) meta.initError = false;
+  };
+
 
   if (typeof child.props.children === 'function') {
     let fc = null;
 
     if (onFieldFunction) {
-      fc = onFieldFunction(child.props.children, _.get(data, child.props.path));
+      fc = onFieldFunction(child.props.children, _.get(data, child.props.path, []), defaultSetValue, child.props.path);
     } else {
-      fc = child.props.children(_.get(data, child.props.path))
+      fc = child.props.children(_.get(data, child.props.path, []))
     }
 
     return React.cloneElement(child, {
@@ -128,17 +140,6 @@ const RenderChild = observer((props: any) => {
     let custProps: any;
     const isValid = value => {
       meta.validate[child.props.path] = value;
-    };
-    const defaultSetValue = (value: any, path: any) => {
-      if (setValue) setValue(value, path);
-      else {
-        if (data) {
-          _.set(data, path, value);
-        } else {
-          console.error("Failed to set value: Form data props is undefined");
-        }
-      }
-      if (meta.initError) meta.initError = false;
     };
     if (child.props.type === "submit") {
       custProps = {

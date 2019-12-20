@@ -39,11 +39,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     };
     const meta = useObservable({
         mode: '',
+        form: {},
         loading: {
             list: false,
             form: false
         },
-        subCrudQueries: []
+        subCrudQueries: {}
     });
 
     const castedIdKey = _.startCase(idKey);
@@ -149,6 +150,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             },
             create: () => {
                 meta.mode = 'create';
+                data.form = {};
             },
             prevPage: () => {
                 if (paging.current - 1 > 0) {
@@ -188,11 +190,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         q = generateInsertString(structure, toJS(data.form));
 
                         meta.loading.form = true;
-                        await queryAll(q.query, { variables: q.variables, auth });
-                        meta.mode = '';
-                        meta.loading.form = false;
-                        await executeSubCrudActions();
+                        const res = await queryAll(q.query, { variables: q.variables, auth });
+                        await executeSubCrudActions(meta, res.id);
                         await reloadList();
+                        meta.loading.form = false;
+                        data.form = {};
+                        meta.mode = '';
                         break;
                     case 'edit':
                         q = generateUpdateString(structure, toJS(data.form), {
@@ -208,10 +211,10 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
                         meta.loading.form = true;
                         await queryAll(q.query, { variables: q.variables, auth });
-                        meta.mode = '';
-                        meta.loading.form = false;
-                        await executeSubCrudActions();
+                        await executeSubCrudActions(meta, data.form[idKey]);
                         await reloadList();
+                        meta.loading.form = false;
+                        meta.mode = '';
                         break;
                     default:
                         meta.mode = '';
@@ -227,6 +230,42 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         }} />;
 });
 
-const executeSubCrudActions = async () => {
-    // execute all meta.subCrudQueries
+const executeSubCrudActions = async (meta: any, id: any) => {
+    await Promise.all(_.values(meta.subCrudQueries).map(async m => {
+        const insert = _.values(m.insert).map(s => {
+            const q = generateInsertString(s.structure.table, {
+                ...s.data,
+                [s.foreignKey]: id
+            })
+            return queryAll(q.query, { variables: q.variables, auth: s.structure.auth });
+        });
+        const update = _.values(m.update).map(s => {
+            const q = generateUpdateString(s.structure.table, s.foreignKey ? {
+                ...s.data,
+                [s.foreignKey]: id
+            } : s.data, {
+                where: [{
+                    name: s.idKey,
+                    operator: '_eq',
+                    value: s.data[s.idKey],
+                    valueType: 'IntVal'
+                }]
+            })
+            return queryAll(q.query, { variables: q.variables, auth: s.structure.auth });
+        });
+        const del = _.values(m.delete).map(s => {
+            const q = generateDeleteString(s.structure.table, {
+                where: [{
+                    name: s.idKey,
+                    operator: '_eq',
+                    value: s.data[s.idKey],
+                    valueType: 'IntVal'
+                }]
+            })
+            return queryAll(q.query, { auth: s.structure.auth });
+        });
+        return Promise.all([...insert, ...update, ...del]);
+    }));
+
+    meta.subCrudQueries = {};
 }

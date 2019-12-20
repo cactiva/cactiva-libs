@@ -1,61 +1,176 @@
-import _ from 'lodash';
-import { observer, useObservable } from 'mobx-react-lite';
-import React from 'react';
-import Table from '../Table';
-import TableRow from '../Table/TableRow';
-import TableHead from '../Table/TableHead';
-import Modal from '../Modal';
-import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
 import { DefaultTheme } from '@src/libs/theme';
 import Theme from "@src/theme.json";
+import _ from 'lodash';
+import { observer, useObservable } from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Form from '../Form';
+import Modal from '../Modal';
+import Table from '../Table';
+import TableHead from '../Table/TableHead';
+import TableRow from '../Table/TableRow';
 import Icon from '../Icon';
-export default observer(({ idKey = "id", data, children, structure }: any) => {
+import { toJS } from 'mobx';
+import { uuid } from '@src/libs/utils';
+export default observer(({ idKey = "id",
+    foreignKey,
+    itemPerPage,
+    data,
+    children,
+    onChange,
+    structure,
+    style }: any) => {
+    let { list, setValue, queries, path } = data;
     const table = generateTable(children, idKey, data);
     const formRaw = generateForm(children, idKey, data);
     const meta = useObservable({
+        action: "",
         currentIndex: -1,
         currentRow: null,
-        modalOpened: false
+        modalOpened: false,
+        bg: "transparent"
     });
+    if (!list) {
+        list = [];
+    }
+
+    useEffect(() => {
+        if (!queries[path]) {
+            queries[path] = {
+                'insert': {},
+                'update': {},
+                'delete': {},
+            }
+        }
+    }, [])
+
     const FormEl = formRaw('edit', meta.currentRow)
-    return <>
-        <Table {...table.props} data={data.list}>
+    return <View style={{ flex: 1, ...style }}>
+        <ActionButton onPress={() => {
+            meta.modalOpened = true;
+            meta.action = "insert";
+            meta.currentRow = {};
+            meta.currentIndex = list.length;
+
+            setTimeout(() => {
+                meta.bg = "rgba(0,0,0,.2)"
+            }, 100);
+        }} text="Add" style={{
+            position: 'absolute',
+            right: 0,
+            marginTop: -36
+        }} />
+        <Table {...table.props} data={list} style={{ flex: 1 }}>
             <TableHead {...table.headProps} />
             <TableRow {...table.rowProps} onPress={(e, idx) => {
                 meta.currentRow = e;
                 meta.currentIndex = idx;
                 meta.modalOpened = true;
+                meta.action = "update";
+                setTimeout(() => {
+                    meta.bg = "rgba(0,0,0,.2)"
+                }, 100);
             }} />
         </Table>
         {meta.modalOpened && <Modal>
-            <View style={styles.modal}>
-                <View style={styles.modalTitle}>
-                    <View style={styles.modalAction}>
-                        <TouchableOpacity onPress={() => {
-                            meta.modalOpened = false;
-                        }}>
-                            <Icon
-                                source={"AntDesign"}
-                                name={"arrowleft"}
-                                color={theme.primary}
-                                size={18}
-                            />
-                        </TouchableOpacity>
-                        <Text style={styles.modalTitleText}>Edit</Text>
-                    </View>
-                    <View style={styles.modalAction}>
-                        <ActionButton onPress={() => {
-                            data[meta.currentIndex] = meta.currentRow;
-                            meta.modalOpened = false;
-                        }} text="OK" />
-                    </View>
-                </View>
-                <Form {...FormEl.props} style={{ flex: 1 }} />
-            </View>
+            <View style={{ backgroundColor: meta.bg, flex: 1 }}>
+                <View style={[styles.modal]}>
+                    <View style={styles.modalTitle}>
+                        <View style={styles.modalAction}>
+                            <TouchableOpacity onPress={() => {
+                                meta.modalOpened = false;
+                                meta.bg = "transparent"
+                            }}>
+                                <Icon
+                                    source={"AntDesign"}
+                                    name={"arrowleft"}
+                                    color={theme.primary}
+                                    size={18}
+                                />
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitleText}>{_.startCase(meta.action)}</Text>
+                        </View>
+                        <View style={styles.modalAction}>
+                            {meta.action === 'update' && <ActionButton onPress={() => {
+                                if (confirm("Are you sure ?")) {
+                                    meta.modalOpened = false;
+                                    meta.bg = "transparent";
+                                    if (onChange) {
+                                        const res = onChange({
+                                            action: "delete",
+                                            data: meta.currentRow,
+                                            index: meta.currentIndex
+                                        });
+                                        if (typeof res !== 'object' || !res) {
+                                            return false;
+                                        } else {
+                                            meta.currentRow = res;
+                                        }
+                                    }
+                                    list.splice(meta.currentIndex, 1)
+                                    setValue(list, path);
 
+                                    if (meta.currentRow.__insertid) {
+                                        delete queries[path].insert[meta.currentRow.__insertid];
+                                    } else {
+                                        delete queries[path].update[meta.currentRow[idKey]];
+                                        queries[path].delete[meta.currentRow[idKey]] = {
+                                            structure,
+                                            idKey,
+                                            foreignKey,
+                                            data: toJS(meta.currentRow)
+                                        }
+                                    }
+                                    console.log(toJS(queries));
+                                }
+                            }} text="Delete" style={{ backgroundColor: theme.secondary }} />}
+                            <ActionButton onPress={() => {
+                                meta.modalOpened = false;
+                                meta.bg = "transparent";
+                                if (onChange) {
+                                    const res = onChange({
+                                        action: meta.action,
+                                        data: meta.currentRow,
+                                        index: meta.currentIndex
+                                    });
+                                    if (typeof res !== 'object' || !res) {
+                                        return false;
+                                    } else {
+                                        meta.currentRow = res;
+                                    }
+                                }
+
+                                if (meta.action === 'insert') {
+                                    meta.currentRow.__insertid = uuid();
+                                }
+
+                                const action = {
+                                    structure,
+                                    idKey,
+                                    foreignKey,
+                                    data: toJS(meta.currentRow)
+                                };
+                                if (meta.action === 'update') {
+                                    list[meta.currentIndex] = meta.currentRow;
+                                    if (meta.currentRow[idKey]) {
+                                        queries[path].update[meta.currentRow[idKey]] = action
+                                    } else {
+                                        queries[path].insert[meta.currentRow.__insertid] = action;
+                                    }
+                                } else {
+                                    list.push(meta.currentRow);
+                                    queries[path].insert[meta.currentRow.__insertid] = action;
+                                }
+                                setValue(list, path);
+                                console.log(toJS(queries));
+                            }} text="OK" />
+                        </View>
+                    </View>
+                    <Form {...FormEl.props} style={{ flex: 1 }} />
+                </View>
+            </View>
         </Modal>}
-    </>;
+    </View>;
 });
 
 const generateForm = (children, idKey, row) => {
@@ -102,8 +217,8 @@ const theme = {
     ...Theme.colors
 };
 
-const ActionButton = ({ onPress, text }: any) => {
-    return <TouchableOpacity onPress={onPress} style={styles.button}>
+const ActionButton = ({ onPress, text, style }: any) => {
+    return <TouchableOpacity onPress={onPress} style={[styles.button, style]}>
         <Text style={styles.buttonText}>
             {text}
         </Text>

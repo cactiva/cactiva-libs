@@ -8,7 +8,7 @@ export const generateDeleteString = (table: ITable, options: {
 
     const where = genWhere(options.where) || `where: {}`;
     return {
-        query: `mutation Delete($data:${table.name}_set_input) {
+        query: `mutation Delete {
     delete_${table.name}(${where}) {
         affected_rows
         ${_.get(options, 'returnData', true) ? `returning {

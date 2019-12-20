@@ -1,15 +1,21 @@
+import _ from "lodash";
 import { toJS } from "mobx";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Text, View, ViewStyle, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import FlatList from "../FlatList";
+import Icon from "../Icon";
+import TableColumn from "./TableColumn";
 import TableHead, { IHeadProps } from "./TableHead";
 import TableRow, { IRowProps } from "./TableRow";
-import TableColumn, { IColumnProps } from "./TableColumn";
-import _ from "lodash";
-import Icon from "../Icon";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { DefaultTheme } from "@src/libs/theme";
 
+import Theme from "@src/theme.json";
+import { uuid } from "@src/libs/utils";
+const theme = {
+  ...DefaultTheme,
+  ...Theme.colors
+};
 interface IColumn {
   title: string;
   path: string;
@@ -84,14 +90,14 @@ export default observer((props: ITableProps) => {
       let props = { ...children.props };
       if (children) delete props.children;
       meta.headerProps = props;
-      meta.headerCells = _.castArray(_.get(children, "props.children", [])).map(e => {
+      meta.headerCells = _.castArray(_.get(children, "props.children", [])).map((e) => {
         return {
           ...e, props: {
             style: {
               ...e.props.style,
               overflow: 'hidden'
             },
-            ...e.props
+            ...e.props,
           }
         }
       });
@@ -129,6 +135,7 @@ export default observer((props: ITableProps) => {
         flexGrow: 1,
         borderStyle: "solid",
         borderColor: "#f7f7f7",
+        height: 150,
         borderWidth: 1,
         ...style
       }}
@@ -142,7 +149,7 @@ export default observer((props: ITableProps) => {
       {config.width > 0 ? (
         <FlatList
           data={data}
-          stickyHeaderIndices={[0, data.length]}
+          stickyHeaderIndices={[0]}
           ListHeaderComponent={() => (
             <RenderHeader
               meta={meta}
@@ -184,7 +191,7 @@ export default observer((props: ITableProps) => {
             );
           }}
           keyExtractor={(item, index) => {
-            if (!item[keyPath]) {
+            if (!!item && !item[keyPath]) {
               try {
                 const firstItem = item[Object.keys(item)[0]];
                 if (firstItem) {
@@ -196,6 +203,8 @@ export default observer((props: ITableProps) => {
               } catch (e) {
                 return index;
               }
+            } else {
+              return uuid();
             }
 
             if (typeof item[keyPath] !== 'string') {
@@ -218,7 +227,7 @@ const RenderHeader = observer((props: any) => {
   const { meta, config, onSort } = props;
   const headerStyle = {
     flexDirection: "row",
-    backgroundColor: "#f3f4fb",
+    backgroundColor: theme.light,
     ..._.get(meta, "headerProps.style", {})
   };
   return (
@@ -280,6 +289,7 @@ const RenderHeaderCell = observer((props: any) => {
       flexDirection: "row",
       borderRadius: 0,
       backgroundColor: "transparent",
+      alignItems: 'center',
       justifyContent: "flex-start",
       ..._.get(compProps, "style", {})
     };
@@ -290,7 +300,7 @@ const RenderHeaderCell = observer((props: any) => {
           onSort={onSort}
           config={config}
           onPress={onPress}
-          compProps={compProps}
+          compProps={{ ...compProps, children }}
         ></DefaultHeaderCell>
       </TableColumn>
     );
@@ -332,6 +342,10 @@ const DefaultHeaderCell = observer((props: any) => {
   const { cell, onSort, config, onPress, compProps } = props;
 
   if (onSort) {
+    let children = <Text>{cell.title}</Text>
+    if (compProps && compProps.children) {
+      children = compProps.children;
+    }
     return (
       <TouchableOpacity
         style={{
@@ -344,6 +358,7 @@ const DefaultHeaderCell = observer((props: any) => {
           <View
             style={{
               marginRight: 5,
+              marginTop: 3,
               justifyContent: "center"
             }}
           >
@@ -374,15 +389,7 @@ const DefaultHeaderCell = observer((props: any) => {
             />
           </View>
         }
-        {compProps && compProps.children ? (
-          React.cloneElement(compProps.children, {
-            ...compProps.children.props,
-            item: { title: compProps.title },
-            path: "title"
-          })
-        ) : (
-            <Text>{cell.title}</Text>
-          )}
+        {children}
       </TouchableOpacity>
     );
   }
@@ -450,6 +457,7 @@ const RenderCell = observer((props: any) => {
     const customWidth = compProps.width;
     const cellStyle = {
       justifyContent: "center",
+      padding: 8,
       flexGrow: customWidth ? 0 : 1,
       flexBasis: _.get(compProps, "width", config.width),
       ..._.get(compProps, "style", {})

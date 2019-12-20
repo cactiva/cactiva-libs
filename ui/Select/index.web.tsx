@@ -8,11 +8,14 @@ import { SelectProps } from "./index";
 import { toJS } from "mobx";
 
 const parsePath = (item, path) => {
-  if (typeof path === 'function') {
-    return path(item);
-  } else if (typeof path === 'string') {
-    return _.get(item, path)
+  if (typeof item === 'object') {
+    if (typeof path === 'function') {
+      return path(item || {});
+    } else if (typeof path === 'string') {
+      return _.get(item, path)
+    }
   }
+  return item;
 }
 
 export const processData = (props: SelectProps) => {
@@ -40,25 +43,22 @@ export default observer((props: SelectProps) => {
 
   useEffect(() => {
     const res = processData(props);
-
-
     meta.items = res;
   }, [props.items, props.value]);
 
   let idx = -1;
   meta.items.map((e, key) => {
-    if (e.value === props.value) {
+    if (e.value === parsePath(props.value, props.valuePath)) {
       idx = key;
     }
   })
 
   return (
-    <Select menuShouldBlockScroll={true}
+    <Select 
       value={meta.items[idx]}
       onChange={(e) => {
         props.onSelect(e.value)
       }}
-      menuPortalTarget={document.body}
       styles={customStyles} options={meta.items} />
   );
 });
@@ -76,6 +76,8 @@ const customStyles = {
     ...provided,
     borderColor: undefined,
     borderWidth: 0,
+    backgroundColor: 'transparent',
+    marginLeft: -8,
     boxShadow: undefined,
   }),
   option: (provided, state) => {
@@ -100,8 +102,8 @@ const customStyles = {
   menu: (provided, state) => {
     return {
       ...provided,
-      zIndex: 99,
-      position: 'absolute'
+      // zIndex: 99,
+      // position: 'absolute'
     }
   },
 }

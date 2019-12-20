@@ -2,7 +2,7 @@ import Theme from "@src/theme.json";
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Text, View } from "react-native";
+import { Text, View as ViewNative, Platform } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { textStyle, uuid } from "../../utils";
@@ -16,6 +16,7 @@ import { LocationProps } from "../Location";
 import { RadioProps } from "../Radio";
 import RadioGroup, { RadioGroupProps } from "../RadioGroup";
 import Select, { SelectProps } from "../Select";
+import DateTime from "../DateTime";
 
 interface StylesFieldProps {
   root?: any;
@@ -24,6 +25,8 @@ interface StylesFieldProps {
   iconStart?: any;
   iconEnd?: any;
 }
+
+const View: any = Platform.OS === 'web' ? ((props: any) => <div {...props} />) : ViewNative;
 
 export interface FieldProps {
   label?: string;
@@ -95,15 +98,10 @@ export default observer((props: FieldProps) => {
   const placeholder =
     !meta.error && !meta.focus ? _.get(children, "props.placeholder", "") : "";
 
-  const onChangeValue = value => {
-    switch (_.get(children, "props.type", "text")) {
-      case "decimal":
-        value = !!value ? value * 1 : value;
-        break;
-    }
-    validation(value);
-    setValue && setValue(value);
-    onChange && onChange(value);
+  const onChangeValue = newValue => {
+    validation(newValue);
+    setValue && setValue(newValue);
+    onChange && onChange(newValue);
   };
   const validation = value => {
     if (isRequired && !value) {
@@ -133,6 +131,17 @@ export default observer((props: FieldProps) => {
   const childStyle = { ..._.get(children, "props.style", {}), flex: 1 };
   let childProps;
   switch (fieldType) {
+    case DateTime:
+      childProps = {
+        style: childStyle,
+        value: value,
+        onChange: (e: Date) => {
+          try {
+            onChangeValue(e.toISOString());
+          } catch (e) { }
+        },
+      };
+      break;
     case Input:
       childProps = {
         style: childStyle,
@@ -213,15 +222,15 @@ export default observer((props: FieldProps) => {
   return (
     <View
       style={{
-        zIndex:
-          ["select", "date"].indexOf(fieldType) > -1 && meta.focus ? 9 : 1,
+        // zIndex:
+        //   ["select", "date"].indexOf(fieldType) > -1 && meta.focus ? 9 : 1,
         marginBottom: 20,
         marginLeft: 0,
         marginRight: 0,
-        overflow: "hidden",
         ..._.get(styles, "root", {}),
         ...style
       }}
+      className={Platform.OS === 'web' ? 'cactiva-field' : undefined}
     >
       {!!labelText && (
         <Text
@@ -254,6 +263,7 @@ export default observer((props: FieldProps) => {
           display: "flex",
           ...((styles && styles.field) || {})
         }}
+        className={Platform.OS === 'web' ? 'cactiva-field-input' : undefined}
       >
         {!!isIconStart && (
           <View
@@ -291,7 +301,8 @@ export default observer((props: FieldProps) => {
           </View>
         )}
       </View>
-      {meta.error &&
+      {
+        meta.error &&
         meta.errorMessage.length > 0 &&
         meta.errorMessage.map(message => (
           <Text
@@ -304,7 +315,8 @@ export default observer((props: FieldProps) => {
           >
             *{message}
           </Text>
-        ))}
-    </View>
+        ))
+      }
+    </View >
   );
 });

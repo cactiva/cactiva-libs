@@ -30,8 +30,8 @@ export interface SelectProps {
   theme?: ThemeProps;
   onFocus?: (e: any) => void;
   readonly?: boolean;
-  labelPath?: string;
-  valuePath?: string;
+  labelPath?: ((item: any) => any) | string;
+  valuePath?: ((item: any) => any) | string;
 }
 
 export default observer((props: SelectProps) => {

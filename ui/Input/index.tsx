@@ -1,7 +1,7 @@
 import Theme from "@src/theme.json";
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
-import React from "react";
+import React, { useRef } from "react";
 import { TextInput, TextInputProps } from "react-native";
 import { DefaultTheme } from "../../theme";
 import Text from "../Text";
@@ -19,16 +19,21 @@ export interface InputProps extends TextInputProps {
 
 export default observer((props: InputProps) => {
   let { type, onChangeText, value } = props;
+  const originalType = useRef(type);
   const setValue = (e: any) => {
     let v;
-    switch (type) {
+    switch (originalType.current) {
       default:
         v = e;
         break;
       case "number":
-        v = e.replace(/\D/g, "");
+        v = parseInt(e);
+        break;
+      case "decimal":
+        v = parseFloat(e);
         break;
     }
+
     onChangeText && onChangeText(v);
   };
   const theme = {
@@ -45,21 +50,20 @@ export default observer((props: InputProps) => {
     ...(_.get(props, "style", {}) as any)
   };
 
-  const cprops = { ...props };
+  const cprops = { ...props, onChangeText: setValue };
+
+  if (typeof value === 'number' && type !== 'number' && type !== 'decimal') {
+    originalType.current = 'number';
+    value = String(value);
+  }
   let ComponentProps: TextInputProps = {
     returnKeyType: "next",
     ...cprops,
     style,
     value: value || "",
     placeholder: _.get(cprops, "placeholder", ""),
-    onChange: (e:any) => {
-      setValue(e.target.value)
-    }
   };
 
-  if (typeof value === 'number') {
-    type = 'number';
-  }
   if (typeof value === "object") {
     return <Text>{JSON.stringify(value)}</Text>;
   }
@@ -76,7 +80,7 @@ export default observer((props: InputProps) => {
       ComponentProps = {
         keyboardType: "number-pad",
         ...ComponentProps,
-        value: value ? `${value}` : ""
+        value: String(value)
       };
       break;
     case "multiline":

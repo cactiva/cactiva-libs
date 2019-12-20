@@ -20,8 +20,8 @@ const theme = {
     ...Theme.colors
 };
 
-const ActionButton = ({ onPress, text }: any) => {
-    return <TouchableOpacity onPress={onPress} style={styles.button}>
+const ActionButton = ({ onPress, text, style }: any) => {
+    return <TouchableOpacity onPress={onPress} style={[styles.button, style]}>
         <NativeText style={styles.buttonText}>
             {text}
         </NativeText>
@@ -120,7 +120,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                                                 if (confirm('Are you sure ?')) {
                                                     actions.delete()
                                                 }
-                                            }} text={text} />;
+                                            }} text={text} style={{ backgroundColor: theme.secondary }} />;
                                         }
                                         break;
                                     case "save":
@@ -173,8 +173,8 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
         bottom: 0,
         right: 0,
         padding: 10,
-    }} children={fieldsWithoutID} data={data} onFieldFunction={(fc, data) => {
-        return fc({list: data, queries: subCrudQueries});
+    }} children={fieldsWithoutID} data={data} onFieldFunction={(fc, list, setValue, path) => {
+        return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />
 })
 
