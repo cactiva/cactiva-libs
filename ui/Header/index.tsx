@@ -11,6 +11,7 @@ import {
 import { useNavigation } from "react-navigation-hooks";
 import { DefaultTheme } from "../../theme";
 import Icon from "../Icon";
+import _ from "lodash";
 
 export interface UIHeaderProps {
   backBtn?: boolean;
@@ -68,13 +69,13 @@ export default observer((props: UIHeaderProps) => {
         flexDirection: "row",
         alignItems: "stretch",
         justifyContent: "flex-start",
-        padding: 5,
-        backgroundColor: "#fff",
+        // padding: 5,
         marginTop: safeAreaView ? -statusbar : 0,
         paddingTop: safeAreaView ? statusbar : 5,
-        borderBottomWidth: 1,
-        borderColor: "#f0eff4",
-        borderStyle: "solid",
+        // borderBottomWidth: 1,
+        // backgroundColor: "#fff",
+        // borderColor: "#f0eff4",
+        // borderStyle: "solid",
         ...style,
         ...(styles ? styles.root : {}),
         ...(shadow ? styleShadow : {})
@@ -115,16 +116,17 @@ export default observer((props: UIHeaderProps) => {
         {title && (
           <View
             style={{
-              flex: 1,
-              padding: 5
+              flex: 1
             }}
           >
             {typeof title === "string" ? (
               <Text
                 style={{
-                  color: theme.primary,
+                  // color: theme.primary,
+                  margin: 0,
                   fontSize: 16,
                   fontWeight: "bold",
+                  fontFamily: _.get(Theme, "fontFamily", undefined),
                   overflow: "hidden",
                   flexWrap: "nowrap",
                   ...(styles ? styles.title : {})
@@ -135,8 +137,8 @@ export default observer((props: UIHeaderProps) => {
                 {title}
               </Text>
             ) : (
-              typeof title === "object" && React.isValidElement(title) && title
-            )}
+                typeof title === "object" && React.isValidElement(title) && title
+              )}
           </View>
         )}
         {children}

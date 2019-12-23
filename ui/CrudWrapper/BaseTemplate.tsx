@@ -45,7 +45,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                     ></Icon></TouchableOpacity>}
 
                 {loading.list && <Spinner style={{ marginRight: 5 }} />}
-                <Text {...props.title} style={{ ...textStyle, fontSize: 20 }}>
+                <Text {...props.title} style={{ ...textStyle, fontSize: 16, fontWeight: 'bold' }}>
                     {loading.list && 'Loading '}
                     {_.startCase(mode)}
                     {' '}
@@ -127,6 +127,10 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                                         return <ActionButton key={index} onPress={actions.save} text={text} />;
                                     // case "cancel":
                                     //     return <ActionButton key={index} onPress={actions.cancel} text={text} />;
+                                }
+
+                                if (mode === 'edit' && type === 'edit') {
+                                    return a;
                                 }
                             }
                         })

@@ -17,7 +17,7 @@ import { View as ViewNative } from 'react-native';
 import BaseTemplate from './BaseTemplate';
 
 
-export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style }: any) => {
+export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange }: any) => {
     const structure = _.get(data, 'structure', null);
     const paging = _.get(data, 'paging', {
         total: 1,
@@ -181,6 +181,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 meta.mode = '';
                 meta.loading.form = false;
                 await reloadList();
+                if (onChange) {
+                    onChange({
+                        action: 'delete',
+                        form: data.form,
+                    })
+                }
             },
             save: async () => {
                 let q = null;
@@ -191,11 +197,18 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
                         meta.loading.form = true;
                         const res = await queryAll(q.query, { variables: q.variables, auth });
-                        await executeSubCrudActions(meta, res.id);
+                        await executeSubCrudActions(meta, res[idKey]);
                         await reloadList();
                         meta.loading.form = false;
-                        data.form = {};
                         meta.mode = '';
+                        data.form[idKey] = res[idKey];
+                        if (onChange) {
+                            onChange({
+                                action: 'insert',
+                                form: data.form,
+                            })
+                        }
+
                         break;
                     case 'edit':
                         q = generateUpdateString(structure, toJS(data.form), {
@@ -215,6 +228,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         await reloadList();
                         meta.loading.form = false;
                         meta.mode = '';
+                        if (onChange) {
+                            onChange({
+                                action: 'update',
+                                form: data.form,
+                            })
+                        }
                         break;
                     default:
                         meta.mode = '';
