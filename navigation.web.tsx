@@ -3,6 +3,7 @@ import { createStackNavigator } from "react-navigation-stack";
 import { useDimensions } from "react-native-hooks";
 import React from "react";
 import { initialRouteName } from "@src/components";
+import { Animated, Easing } from "react-native";
 
 const theme = require("../theme.json");
 
@@ -10,7 +11,31 @@ export const AppContainer = () => {
   const App = createBrowserApp(
     createStackNavigator(routes(), {
       headerMode: "none",
-      initialRouteName: initialRouteName
+      initialRouteName: initialRouteName,
+      defaultNavigationOptions: {
+        gesturesEnabled: false
+      },
+      transitionConfig: () => ({
+        transitionSpec: {
+          duration: 0,
+          timing: Animated.timing,
+          easing: Easing.out(Easing.poly(4))
+        },
+        screenInterpolator: sceneProps => {
+          const { layout, position, scene } = sceneProps;
+          const { index } = scene;
+          const width = layout.initWidth;
+          const translateX = position.interpolate({
+            inputRange: [index - 1, index, index + 1],
+            outputRange: [width, 0, 0]
+          });
+          if (index <= 1) {
+            return {};
+          }
+
+          return { transform: [{ translateX }] };
+        }
+      })
     })
   );
 
@@ -18,12 +43,18 @@ export const AppContainer = () => {
     if (theme.device === "mobile") {
       const dim = useDimensions().window;
       if (dim.width > 460)
-        return <div className="mobile-root"><App /></div>
+        return (
+          <div className="mobile-root">
+            <App />
+          </div>
+        );
     }
 
-    return <div className="web-root">
-      <App />
-    </div>;
+    return (
+      <div className="web-root">
+        <App />
+      </div>
+    );
   };
 };
 
@@ -43,5 +74,5 @@ function importAllRoute(r, except) {
   });
   return routes;
 }
-export const routes = (except: string[] = ['libs', 'assets']) =>
+export const routes = (except: string[] = ["libs", "assets"]) =>
   importAllRoute(require.context("../", true, /\.(tsx)$/), except);
