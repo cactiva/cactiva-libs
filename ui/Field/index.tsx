@@ -6,7 +6,7 @@ import { Text, View as ViewNative, Platform } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { textStyle, uuid } from "../../utils";
-import { CameraProps } from "../Camera";
+import Camera, { CameraProps } from "../Camera";
 import { CheckboxProps } from "../Checkbox";
 import { CheckboxGroupProps } from "../CheckboxGroup";
 import DatePicker, { DateTimeProps } from "../DatePicker";
@@ -26,22 +26,23 @@ interface StylesFieldProps {
   iconEnd?: any;
 }
 
-const View: any = Platform.OS === 'web' ? ((props: any) => <div {...props} />) : ViewNative;
+const View: any =
+  Platform.OS === "web" ? (props: any) => <div {...props} /> : ViewNative;
 
 export interface FieldProps {
   label?: string;
   isLabel?: boolean;
   path?: string;
   field?:
-  | InputProps
-  | SelectProps
-  | DateTimeProps
-  | RadioGroupProps
-  | RadioProps
-  | CheckboxGroupProps
-  | CheckboxProps
-  | CameraProps
-  | LocationProps;
+    | InputProps
+    | SelectProps
+    | DateTimeProps
+    | RadioGroupProps
+    | RadioProps
+    | CheckboxGroupProps
+    | CheckboxProps
+    | CameraProps
+    | LocationProps;
   value?: any;
   setValue?: (value: any) => void;
   onChange?: (value: any) => void;
@@ -126,7 +127,6 @@ export default observer((props: FieldProps) => {
     isValid && isValid(!meta.error);
   };
 
-
   const fieldType = children.type;
   const childStyle = { ..._.get(children, "props.style", {}), flex: 1 };
   let childProps;
@@ -138,8 +138,8 @@ export default observer((props: FieldProps) => {
         onChange: (e: Date) => {
           try {
             onChangeValue(e.toISOString());
-          } catch (e) { }
-        },
+          } catch (e) {}
+        }
       };
       break;
     case Input:
@@ -186,7 +186,7 @@ export default observer((props: FieldProps) => {
         children: children.props.children
       };
       break;
-    case "camera":
+    case Camera:
       childProps = {
         onCapture: onChangeValue,
         value: value
@@ -199,7 +199,6 @@ export default observer((props: FieldProps) => {
       };
       break;
   }
-
 
   const childrenWithProps = React.Children.map(children, child =>
     React.cloneElement(child, {
@@ -230,7 +229,7 @@ export default observer((props: FieldProps) => {
         ..._.get(styles, "root", {}),
         ...style
       }}
-      className={Platform.OS === 'web' ? 'cactiva-field' : undefined}
+      className={Platform.OS === "web" ? "cactiva-field" : undefined}
     >
       {!!labelText && (
         <Text
@@ -251,8 +250,8 @@ export default observer((props: FieldProps) => {
           borderColor: meta.error
             ? theme.danger
             : meta.focus && isFocus
-              ? theme.primary
-              : theme.light,
+            ? theme.primary
+            : theme.light,
           borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",
@@ -263,7 +262,7 @@ export default observer((props: FieldProps) => {
           display: "flex",
           ...((styles && styles.field) || {})
         }}
-        className={Platform.OS === 'web' ? 'cactiva-field-input' : undefined}
+        className={Platform.OS === "web" ? "cactiva-field-input" : undefined}
       >
         {!!isIconStart && (
           <View
@@ -301,8 +300,7 @@ export default observer((props: FieldProps) => {
           </View>
         )}
       </View>
-      {
-        meta.error &&
+      {meta.error &&
         meta.errorMessage.length > 0 &&
         meta.errorMessage.map(message => (
           <Text
@@ -315,8 +313,7 @@ export default observer((props: FieldProps) => {
           >
             *{message}
           </Text>
-        ))
-      }
-    </View >
+        ))}
+    </View>
   );
 });

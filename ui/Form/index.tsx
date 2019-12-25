@@ -111,7 +111,7 @@ const RenderChild = observer((props: any) => {
   };
 
   const defaultSetValue = (value: any, path: any) => {
-    if (setValue) setValue(value, path);
+    if (!!setValue) setValue(value, path);
     else {
       if (data) {
         _.set(data, path, value);

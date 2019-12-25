@@ -52,19 +52,19 @@ export default observer((props: InputProps) => {
 
   const cprops = { ...props, onChangeText: setValue };
 
-  if (typeof value === 'number' && type !== 'number' && type !== 'decimal') {
-    originalType.current = 'number';
-    value = String(value);
+  if (typeof value === "number" && type !== "number" && type !== "decimal") {
+    originalType.current = "number";
+    value = !!value ? String(value) : "";
   }
   let ComponentProps: TextInputProps = {
     returnKeyType: "next",
     ...cprops,
     style,
-    value: value || "",
-    placeholder: _.get(cprops, "placeholder", ""),
+    value: !!value ? value : "",
+    placeholder: _.get(cprops, "placeholder", "")
   };
 
-  if (typeof value === "object") {
+  if (!!value && typeof value === "object") {
     return <Text>{JSON.stringify(value)}</Text>;
   }
 
@@ -80,7 +80,7 @@ export default observer((props: InputProps) => {
       ComponentProps = {
         keyboardType: "number-pad",
         ...ComponentProps,
-        value: String(value)
+        value: !!value ? String(value) : ""
       };
       break;
     case "multiline":
