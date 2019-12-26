@@ -17,15 +17,15 @@ import _ from "lodash";
 
 interface CustomViewProps
   extends ViewProps,
-    ScrollViewProps,
-    SafeAreaViewProps,
-    KeyboardAvoidingViewProps {
+  ScrollViewProps,
+  SafeAreaViewProps,
+  KeyboardAvoidingViewProps {
   type?:
-    | "View"
-    | "SafeAreaView"
-    | "AnimatedView"
-    | "ScrollView"
-    | "KeyboardAvoidingView";
+  | "View"
+  | "SafeAreaView"
+  | "AnimatedView"
+  | "ScrollView"
+  | "KeyboardAvoidingView";
   source?: any;
   shadow?: boolean;
 }
@@ -44,14 +44,21 @@ export default (props: CustomViewProps) => {
 
     elevation: 6
   };
-  const style = {
-    ...(_.get(props, "style", {}) as any),
-    ...(shadow ? styleShadow : {}),
-    paddingTop:
-      type === "SafeAreaView" && Platform.OS === "android"
-        ? statusbar
-        : _.get(props, "style.paddingTop", undefined)
-  };
+
+  let style = null;
+  if (typeof props.style === "number") {
+    style = props.style;
+  } else {
+    style = {
+      ...(_.get(props, "style", {}) as any),
+      ...(shadow ? styleShadow : {}),
+      paddingTop:
+        type === "SafeAreaView" && Platform.OS === "android"
+          ? statusbar
+          : _.get(props, "style.paddingTop", undefined)
+    };
+  }
+
   if (type === "SafeAreaView") return <SafeAreaView {...props} style={style} />;
   if (type === "AnimatedView")
     return <Animated.View {...props} style={style} />;
@@ -78,5 +85,6 @@ export default (props: CustomViewProps) => {
       />
     );
   }
+
   return <View {...props} style={style} />;
 };

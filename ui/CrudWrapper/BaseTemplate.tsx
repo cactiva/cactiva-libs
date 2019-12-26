@@ -1,19 +1,17 @@
+import { DefaultTheme } from "@src/libs/theme";
 import Theme from "@src/theme.json";
 import _ from 'lodash';
 import { observer } from "mobx-react-lite";
-import React, { Children } from "react";
+import React from "react";
 import { StyleSheet, Text as NativeText, TouchableOpacity } from "react-native";
 import Form from "../Form";
+import Icon from "../Icon";
 import Spinner from "../Spinner";
 import Table from "../Table";
 import TableHead from "../Table/TableHead";
 import TableRow from "../Table/TableRow";
 import Text from "../Text";
 import View from "../View";
-import { toJS } from "mobx";
-import Button from "../Button";
-import Icon from "../Icon";
-import { DefaultTheme } from "@src/libs/theme";
 
 const theme = {
     ...DefaultTheme,
@@ -171,12 +169,8 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
     })
 
     return <Form {...props} style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-        padding: 10,
+        paddingLeft: 7,
+        paddingRight: 0
     }} children={fieldsWithoutID} data={data} onFieldFunction={(fc, list, setValue, path) => {
         return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />
