@@ -252,7 +252,6 @@ export default observer((props: FieldProps) => {
             : meta.focus && isFocus
             ? theme.primary
             : theme.light,
-          borderBottomWidth: 1,
           flexDirection: "row",
           alignItems: "stretch",
           paddingRight: 2,

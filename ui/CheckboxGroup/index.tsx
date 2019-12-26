@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { View } from "react-native";
+import { View } from "@src/libs";
 import { uuid } from "../../utils";
 
 export interface CheckboxGroupProps {

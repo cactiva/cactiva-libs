@@ -28,10 +28,10 @@ const ActionButton = ({ onPress, text, style }: any) => {
 export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
-    return <View style={{ position: 'relative', flex: 1, ...style }}>
+    return <View style={{ position: 'relative', ...style, flex: 1, }}>
         <View style={styles.head}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {['create', 'edit'].indexOf(mode) >= 0 && <TouchableOpacity onPress={actions.cancel}>
+                {['create', 'edit'].indexOf(mode) >= 0 && !loading.list && <TouchableOpacity onPress={actions.cancel}>
                     <Icon
                         source={"AntDesign"}
                         name={"arrowleft"}

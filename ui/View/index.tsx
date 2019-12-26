@@ -63,14 +63,26 @@ export default (props: CustomViewProps) => {
   if (type === "AnimatedView")
     return <Animated.View {...props} style={style} />;
   if (type === "ScrollView") {
-    const style = props.style;
     const p = { ...props };
     delete p.style;
+    const cstyle = {} as any;
+    if (typeof style !== 'number') {
+      if (style.alignItems) {
+        cstyle.alignItems = style.alignItems;
+        delete style.alignItems;
+      }
+      if (style.justifyContent) {
+        cstyle.justifyContent = style.justifyContent;
+        delete style.justifyContent;
+      }
+    }
+
+
     return (
       <ScrollView
         {...p}
         keyboardShouldPersistTaps={"handled"}
-        contentContainerStyle={style}
+        contentContainerStyle={cstyle}
         style={style}
       />
     );
