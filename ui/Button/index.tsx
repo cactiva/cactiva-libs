@@ -48,8 +48,6 @@ export default observer((props: ButtonProps) => {
         ...(_.get(props, "style", {}) as any),
         ...(shadow ? styleShadow : {})
       }}
-    >
-      {children}
-    </TouchableOpacity>
+    ></TouchableOpacity>
   );
 });
