@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { View } from "@src/libs";
 import { uuid } from "../../utils";
+import View from "../View";
 
 export interface CheckboxGroupProps {
   value?: string[];

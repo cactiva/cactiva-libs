@@ -25,6 +25,7 @@ export interface DateTimeProps {
   theme?: ThemeProps;
   value?: any;
   onFocus?: (e: any) => void;
+  onBlur?: () => void;
   showPicker?: boolean;
   style?: ViewStyle;
 }
@@ -84,7 +85,7 @@ export default observer((props: DateTimeProps) => {
     }
   }, []);
   useEffect(() => {
-    meta.isShown = showPicker;
+    if (showPicker !== undefined) meta.isShown = showPicker;
   }, [showPicker]);
   return (
     <>
@@ -185,67 +186,83 @@ export default observer((props: DateTimeProps) => {
 });
 
 const DatePickerModal = observer((props: any) => {
-  const { meta, mode, onChangePicker, minDate, maxDate } = props;
-  if (meta.isShown && Platform.OS === "android") {
-    const loadPicker = async () => {
-      try {
-        const { action, year, month, day }: any = await DatePickerAndroid.open({
-          date: meta.value,
-          mode: mode || "calendar",
-          minDate: minDate && minDate,
-          maxDate: maxDate && maxDate
-        });
-        if (action !== DatePickerAndroid.dismissedAction) {
-          onChangePicker(new Date(year, month, day));
+  const { meta, mode, onChangePicker, minDate, maxDate, onBlur } = props;
+  if (Platform.OS === "android") {
+    if (meta.isShown) {
+      const loadPicker = async () => {
+        try {
+          const {
+            action,
+            year,
+            month,
+            day
+          }: any = await DatePickerAndroid.open({
+            date: meta.value,
+            mode: mode || "calendar",
+            minDate: minDate && minDate,
+            maxDate: maxDate && maxDate
+          });
+          if (action !== DatePickerAndroid.dismissedAction) {
+            onChangePicker(new Date(year, month, day));
+            onBlur && onBlur();
+          }
+        } catch ({ code, message }) {
+          console.warn("Cannot open date picker", message);
         }
-      } catch ({ code, message }) {
-        console.warn("Cannot open date picker", message);
-      }
-    };
-    loadPicker();
-    meta.isShown = false;
-    return null;
-  }
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={meta.isShown}
-      onRequestClose={() => {
-        meta.isShown = false;
-      }}
-    >
-      <View
-        style={{
-          bottom: 0,
-          left: 0,
-          right: 0,
-          position: "absolute",
-          height: 200,
-          backgroundColor: "#fff",
-          zIndex: 9
+      };
+      loadPicker();
+      meta.isShown = false;
+      return null;
+    }
+  } else {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={meta.isShown}
+        onRequestClose={() => {
+          meta.isShown = false;
+          onBlur && onBlur();
         }}
       >
-        <DatePickerIOS
-          date={meta.value}
-          onDateChange={onChangePicker}
-          mode={mode || "date"}
-          minimumDate={minDate && minDate}
-          maximumDate={maxDate && maxDate}
-        />
-      </View>
-      <TouchableWithoutFeedback onPress={() => (meta.isShown = false)}>
         <View
           style={{
-            position: "absolute",
-            top: 0,
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: "rgba(0,0,0,.3)"
+            position: "absolute",
+            height: 200,
+            backgroundColor: "#fff",
+            zIndex: 9
           }}
-        />
-      </TouchableWithoutFeedback>
-    </Modal>
-  );
+        >
+          <DatePickerIOS
+            date={meta.value}
+            onDateChange={onChangePicker}
+            mode={mode || "date"}
+            minimumDate={minDate && minDate}
+            maximumDate={maxDate && maxDate}
+          />
+        </View>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            meta.isShown = false;
+            onBlur && onBlur();
+          }}
+        >
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: "rgba(0,0,0,.3)"
+            }}
+          />
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  }
+  return null;
 });

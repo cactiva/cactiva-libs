@@ -79,7 +79,7 @@ export default observer((props: DateTimeProps) => {
           position: "initial",
           zIndex: meta.isShown ? 9 : 0,
           minWidth: 147,
-          ...style
+          ...(style as any)
         }}
         ref={(ref: any) => {
           if (ref && !meta.dimensions) {
@@ -190,31 +190,12 @@ export default observer((props: DateTimeProps) => {
           onDayPress={onDayPress}
         />
       </div>
-      {meta.isShown && (
-        <div
-          onClickCapture={e => {
-            e.stopPropagation();
-            e.preventDefault();
-            meta.isShown = false;
-          }}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 2,
-            bottom: 0,
-            height: meta.scrollH,
-            display: "flex"
-          }}
-        />
-      )}
     </>
   );
 });
 
 const CalendarDropdown = observer((props: any) => {
-  const { meta, theme, onDayPress, minDate, maxDate } = props;
+  const { meta, theme, onDayPress, minDate, maxDate, onBlur } = props;
   const [loaded, setLoaded] = useState(false);
   const rootPortal = document.getElementById("root-portal");
   useEffect(() => {
@@ -229,57 +210,76 @@ const CalendarDropdown = observer((props: any) => {
   if (!loaded! || !meta.isShown) return null;
   return createPortal(
     <div
+      onClickCapture={e => {
+        e.stopPropagation();
+        e.preventDefault();
+        meta.isShown = false;
+        onBlur && onBlur();
+      }}
       style={{
-        position: "absolute",
-        top: meta.dimensions.top,
-        left: meta.dimensions.left,
-        minHeight: 40,
-        maxHeight: 350,
-        backgroundColor: "#fff",
-        zIndex: 9,
-        display: "flex",
-        alignItems: "stretch",
-        justifyContent: "flex-start",
-        borderWidth: 1,
-        borderColor: theme.light,
-        borderStyle: "solid",
-        padding: 5,
-        boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.16)",
-        width: 260
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 999,
+        bottom: 0,
+        display: "flex"
       }}
     >
-      <Calendar
-        current={dateToString(meta.value)}
-        onDayPress={day => {
-          onDayPress(day.dateString);
-          meta.isShown = false;
+      <div
+        style={{
+          position: "absolute",
+          top: meta.dimensions.top,
+          left: meta.dimensions.left,
+          minHeight: 40,
+          maxHeight: 350,
+          backgroundColor: "#fff",
+          zIndex: 9,
+          display: "flex",
+          alignItems: "stretch",
+          justifyContent: "flex-start",
+          borderWidth: 1,
+          borderColor: theme.light,
+          borderStyle: "solid",
+          padding: 5,
+          boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.16)",
+          width: 260
         }}
-        style={styles.calendar}
-        markedDates={{
-          [dateToString(meta.value)]: {
-            selected: true,
-            selectedColor: theme.primary
-          }
-        }}
-        minDate={minDate && dateToString(minDate)}
-        maxDate={minDate && dateToString(maxDate)}
-        renderArrow={direction => (
-          <Icon
-            source="Entypo"
-            name={`chevron-${direction}`}
-            color={theme.primary}
-            size={24}
-          />
-        )}
-        theme={{
-          textDayFontWeight: "300",
-          textMonthFontWeight: "bold",
-          textDayHeaderFontWeight: "300",
-          textDayFontSize: 14,
-          textMonthFontSize: 14,
-          textDayHeaderFontSize: 14
-        }}
-      />
+      >
+        <Calendar
+          current={dateToString(meta.value)}
+          onDayPress={day => {
+            onDayPress(day.dateString);
+            meta.isShown = false;
+            onBlur && onBlur();
+          }}
+          style={styles.calendar}
+          markedDates={{
+            [dateToString(meta.value)]: {
+              selected: true,
+              selectedColor: theme.primary
+            }
+          }}
+          minDate={minDate && dateToString(minDate)}
+          maxDate={minDate && dateToString(maxDate)}
+          renderArrow={direction => (
+            <Icon
+              source="Entypo"
+              name={`chevron-${direction}`}
+              color={theme.primary}
+              size={24}
+            />
+          )}
+          theme={{
+            textDayFontWeight: "300",
+            textMonthFontWeight: "bold",
+            textDayHeaderFontWeight: "300",
+            textDayFontSize: 14,
+            textMonthFontSize: 14,
+            textDayHeaderFontSize: 14
+          }}
+        />
+      </div>
     </div>,
     rootPortal
   );

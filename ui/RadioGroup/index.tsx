@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { View } from "@src/libs";
+import View from "../View";
 import { uuid } from "../../utils";
 import Radio, { RadioModeType, RadioProps } from "../Radio";
 

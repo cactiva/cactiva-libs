@@ -2,21 +2,11 @@ import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect, useRef } from "react";
-import {
-  Image,
-  Modal,
-  Text,
-  TouchableOpacity,
-  View,
-  Platform
-} from "react-native";
+import { Image, Modal, Text, TouchableOpacity, View } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import Icon from "../Icon";
 import Spinner from "../Spinner";
-import Axios from "backend/node_modules/axios";
-import api from "@src/libs/utils/api";
-import { toJS } from "mobx";
 
 export interface CameraProps {
   value?: any;
