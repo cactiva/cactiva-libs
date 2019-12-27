@@ -25,7 +25,13 @@ export default ({ breadcrumbs, itemPerPage }: any) => {
                 flexDirection: 'row',
                 alignItems: 'center'
             }}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => {
+                    if (idx === 0) {
+                        breadcrumbs.path = [];
+                    } else if (idx !== lastIdx) {
+                        breadcrumbs.path = breadcrumbs.path.slice(0, idx + 1);
+                    }
+                }}>
                     <Text style={{ fontSize: 12, fontWeight: "bold", color: idx !== lastIdx ? "#999" : theme.primary }}>
                         {b.title}
                     </Text>
