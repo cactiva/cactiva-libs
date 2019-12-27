@@ -7,7 +7,7 @@ import TableColumn from "../Table/TableColumn";
 import Text from '../Text';
 import _ from "lodash";
 import { reloadList, isColumnForeign, declareActions } from ".";
-import { Spinner } from "..";
+import { Spinner, Button, Form, Field, Input } from "..";
 import { observable } from "mobx";
 
 const theme = {
@@ -90,7 +90,10 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                 idKey: bread.idKey,
                 itemPerPage,
                 data: bread.data,
-                meta: bread
+                meta: bread,
+                baseForm: {
+                    [where.name]: where.value
+                }
             })
 
             bread.props = {
@@ -103,7 +106,6 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                         children: cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
                             const fk = isColumnForeign(r.name, bread.fkeys)
                             if (fk) {
-                                console.log(fk);
                                 return <TableColumn path={r.name}>
                                     {
                                         (c, params) => {
@@ -125,6 +127,7 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                                                         valueType: 'Int'
                                                     }}
                                                 rootStructure={{
+                                                    ...rootStructure,
                                                     ...bread.structure,
                                                     title: `${rootTitle} (${firstKey}: ${firstCell})`
                                                 }}
@@ -137,14 +140,20 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                         })
                     },
                     head: {
-                        children: cstruct.fields.filter(r => (r.name !== idKey)).map(r => {
-                            return <TableColumn path={r.name} title={_.startCase(r.name)} />
+                        children: cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
+                            return <TableColumn key={rk} path={r.name} title={_.startCase(r.name)} />
                         })
                     }
                 },
-                form: (mode) => {
-                    return <div></div>;
-                },
+                form: rootStructure.forms[field] || ((mode: any) => {
+                    return <Form>
+                        {cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
+                            return <Field key={rk} label={_.startCase(r.name)} path={r.name}>
+                                <Input type={"text"}></Input>
+                            </Field>
+                        })}
+                    </Form>;
+                }),
                 title: {
                     children: title
                 },
@@ -152,7 +161,19 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                     style: {
                         flexDirection: 'row'
                     },
-                    children: []
+                    children: [
+                        <Button type={"create"}>
+                            <Text>Create</Text>
+                        </Button>,
+                        <Button type={"delete"}>
+                            <Text>Delete</Text>
+                        </Button>,
+                        <Button type={"save"}>
+                            <Text>Save</Text>
+                        </Button>,
+                        <Button type={"cancel"}>
+                            <Text>Cancel</Text>
+                        </Button>]
                 }
             };
             if (breadcrumbs.path.length === 0) {

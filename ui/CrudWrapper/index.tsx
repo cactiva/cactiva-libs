@@ -41,6 +41,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         title: null,
         actions: null
     };
+    const breadForms = {};
     const meta = useObservable({
         mode: '',
         form: {},
@@ -131,6 +132,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                                                         }}
                                                     rootStructure={{
                                                         ...structure,
+                                                        forms: breadForms,
                                                         title: `${rootTitle} (${firstKey}: ${firstCell})`
                                                     }}
                                                     fkeys={meta.fkeys} />;
@@ -154,23 +156,29 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         } else if (e.type === Text) {
             props.title = { ...e.props };
         } else if (e.type === View || e.type === ViewNative) {
-            props.actions = { ...e.props };
+            if (!e.props.type) {
+                props.actions = { ...e.props };
+            } else {
+                breadForms[e.props.type] = e.props.children;
+            }
         } else {
             props.form = e;
         }
     })
 
     useAsyncEffect(async () => {
-        await reloadList({
-            structure,
-            paging,
-            idKey,
-            itemPerPage,
-            data,
-            loading: meta.loading,
-            meta
-        });
-    }, [structure]);
+        if (meta.breadcrumbs.path.length === 0) {
+            await reloadList({
+                structure,
+                paging,
+                idKey,
+                itemPerPage,
+                data,
+                loading: meta.loading,
+                meta
+            });
+        }
+    }, [structure, meta.breadcrumbs.path]);
 
     if (!meta.fkeys) return <View
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 250, minWidth: 50 }}>
@@ -323,17 +331,27 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
     }
 };
 
-export const declareActions = (props: { data, meta, paging, structure, idKey, itemPerPage, auth, onChange }) => {
-    const { data, meta, paging, structure, idKey, itemPerPage, auth, onChange } = props;
+export const declareActions = (props: { data, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm?: any }) => {
+    const { data, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm } = props;
     return {
         edit: (input) => {
-            console.log(meta);
             meta.mode = 'edit';
             data.form = input;
+
+            if (baseForm) {
+                for (let i in baseForm) {
+                    data.form[i] = baseForm[i];
+                }
+            }
         },
         create: () => {
             meta.mode = 'create';
             data.form = {};
+            if (baseForm) {
+                for (let i in baseForm) {
+                    data.form[i] = baseForm[i];
+                }
+            }
         },
         prevPage: () => {
             if (paging.current - 1 > 0) {

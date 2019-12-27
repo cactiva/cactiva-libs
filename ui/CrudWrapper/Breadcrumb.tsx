@@ -4,6 +4,7 @@ import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import Icon from "../Icon";
 import Text from "../Text";
+import { reloadList } from ".";
 
 const theme = {
     ...DefaultTheme,
@@ -23,17 +24,31 @@ export default ({ breadcrumbs, itemPerPage }: any) => {
         {breadcrumbs.path.map((b, idx) => {
             return <View key={idx} style={{
                 paddingVertical: 5,
-                maxWidth: 300,
                 flexDirection: 'row',
                 alignItems: 'center'
             }}>
-                <TouchableOpacity onPress={() => {
-                    if (idx === 0) {
-                        breadcrumbs.path = [];
-                    } else if (idx !== lastIdx) {
-                        breadcrumbs.path = breadcrumbs.path.slice(0, idx + 1);
-                    }
-                }}>
+                <TouchableOpacity
+                    style={{
+                        maxWidth: 300,
+                        overflow: 'hidden',
+                    }}
+                    onPress={() => {
+                        if (idx === 0) {
+                            breadcrumbs.path = [];
+                        } else if (idx !== lastIdx) {
+                            breadcrumbs.path = breadcrumbs.path.slice(0, idx + 1);
+                            const bread = breadcrumbs.path[breadcrumbs.path.length - 1];
+                            reloadList({
+                                structure: bread.structure,
+                                paging: bread.data.paging,
+                                idKey: bread.idKey,
+                                itemPerPage,
+                                data: bread.data,
+                                loading: bread.loading,
+                                meta: bread
+                            });
+                        }
+                    }}>
                     <Text style={{ fontSize: 12, fontWeight: "bold", color: idx !== lastIdx ? "#999" : theme.primary }}>
                         {b.title}
                     </Text>

@@ -172,10 +172,10 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
         return e;
     })
 
-    return <Form {...props} style={{
+    return <Form {...props} data={data} style={{
         paddingLeft: 7,
         paddingRight: 0
-    }} children={fieldsWithoutID} data={data} onFieldFunction={(fc, list, setValue, path) => {
+    }} children={fieldsWithoutID} onFieldFunction={(fc, list, setValue, path) => {
         return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />
 })
