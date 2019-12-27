@@ -10,7 +10,7 @@ import Input from "../Input";
 import { createPortal } from "react-dom";
 
 export default observer((props: DateTimeProps) => {
-  const { value, style, mode, onFocus, onChange } = props;
+  const { value, style, mode, onFocus, onChange, showPicker } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -69,6 +69,9 @@ export default observer((props: DateTimeProps) => {
     onFocus && onFocus(meta.isShown as any);
   }, [meta.isShown]);
 
+  useEffect(() => {
+    meta.isShown = showPicker;
+  }, [showPicker]);
   return (
     <>
       <div
@@ -213,16 +216,16 @@ export default observer((props: DateTimeProps) => {
 const CalendarDropdown = observer((props: any) => {
   const { meta, theme, onDayPress, minDate, maxDate } = props;
   const [loaded, setLoaded] = useState(false);
-  const rootPortal = document.getElementById('root-portal');
+  const rootPortal = document.getElementById("root-portal");
   useEffect(() => {
     const iv = setInterval(() => {
-      const rootPortal = document.getElementById('root-portal');
+      const rootPortal = document.getElementById("root-portal");
       if (rootPortal) {
         setLoaded(true);
         clearInterval(iv);
       }
     }, 100);
-  }, [])
+  }, []);
   if (!loaded! || !meta.isShown) return null;
   return createPortal(
     <div
@@ -242,7 +245,7 @@ const CalendarDropdown = observer((props: any) => {
         borderStyle: "solid",
         padding: 5,
         boxShadow: "0px 4px 5px rgba(0, 0, 0, 0.16)",
-        width: 260,
+        width: 260
       }}
     >
       <Calendar
@@ -277,7 +280,8 @@ const CalendarDropdown = observer((props: any) => {
           textDayHeaderFontSize: 14
         }}
       />
-    </div>, rootPortal
+    </div>,
+    rootPortal
   );
 });
 

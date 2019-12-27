@@ -9,7 +9,8 @@ import {
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
+  ViewStyle
 } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { dateToString } from "../../utils";
@@ -22,13 +23,14 @@ export interface DateTimeProps {
   maxDate?: Date;
   minDate?: Date;
   theme?: ThemeProps;
-  style?: any;
   value?: any;
   onFocus?: (e: any) => void;
+  showPicker?: boolean;
+  style?: ViewStyle;
 }
 
 export default observer((props: DateTimeProps) => {
-  const { value, style, mode, onChange } = props;
+  const { value, style, mode, onChange, showPicker } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -81,6 +83,9 @@ export default observer((props: DateTimeProps) => {
       meta.dateString.yyyy = `${meta.value.getFullYear()}`;
     }
   }, []);
+  useEffect(() => {
+    meta.isShown = showPicker;
+  }, [showPicker]);
   return (
     <>
       <View

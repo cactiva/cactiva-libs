@@ -1,15 +1,14 @@
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { Platform, ViewProps, Text } from "react-native";
+import { ScrollViewProps } from "react-native";
 import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import { uuid } from "../../utils";
 import Field from "../Field";
 import View from "../View";
-import { toJS } from "mobx";
 
-export interface FormProps extends ViewProps {
+export interface FormProps extends ScrollViewProps {
   data?: any;
   setValue?: (value: any, path: any) => void;
   children?: any;
