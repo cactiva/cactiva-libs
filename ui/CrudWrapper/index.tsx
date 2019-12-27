@@ -13,8 +13,18 @@ import TableHead from '../Table/TableHead';
 import TableRow from '../Table/TableRow';
 import Text from '../Text';
 import View from '../View';
-import { View as ViewNative } from 'react-native';
+import { View as ViewNative, TouchableOpacity } from 'react-native';
 import BaseTemplate from './BaseTemplate';
+import api from '@src/libs/utils/api';
+import { Spinner } from '..';
+import { DefaultTheme } from "@src/libs/theme";
+import Theme from "@src/theme.json";
+import SubTable from './SubTable';
+
+const theme = {
+    ...DefaultTheme,
+    ...Theme.colors
+};
 
 
 export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange }: any) => {
@@ -44,17 +54,33 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             list: false,
             form: false
         },
+        fkeys: null as any,
         subCrudQueries: {}
     });
 
     const castedIdKey = _.startCase(idKey);
+    const fkeys = meta.fkeys ? Object.keys(meta.fkeys) : [];
+    const isColumnForeign = (col: string) => {
+        const res = fkeys.filter(f => {
+            if (col.replace(f, '').length <= 2) {
+                return true;
+            }
+            return false;
+        })
+
+        if (res.length > 0) {
+            return true;
+        }
+        return false;
+    }
 
     children.map((e) => {
         if (e.type === Table) {
+
             props.table.root = {
                 ...e.props,
                 onSort: (r, mode) => {
-                    if (r) {
+                    if (!isColumnForeign(r)) {
                         if (mode) {
                             structure.orderBy = [{
                                 name: r,
@@ -65,7 +91,9 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                             structure.orderBy = []
                         }
                         reloadList();
+                        return true;
                     }
+                    return false;
                 }
             };
             if (structure && structure.orderBy.length > 0) {
@@ -83,7 +111,23 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                                 return r.props.path !== idKey;
                             })
                             .map(r => {
-                                return r;
+                                let isfk = false;
+                                if (r.props && !r.props.children && r.props.path[r.props.path.length - 1] === 's') {
+                                    isfk = isColumnForeign(r.props.path);
+                                }
+                                if (isfk) {
+                                    return {
+                                        ...r, props: {
+                                            ...r.props,
+                                            children: (c) => {
+                                                return <SubTable data={c} structure={structure} fkeys={meta.fkeys} />;
+                                            }
+                                        }
+                                    };
+                                } else {
+
+                                    return r;
+                                }
                             })
                     };
                 } else if (c.type === TableHead) {
@@ -103,6 +147,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         }
     })
 
+
     const reloadList = async () => {
         if (structure) {
             meta.loading.list = true;
@@ -120,6 +165,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 }
             });
             const res = await queryAll(query, { auth: data.auth });
+
             _.map(res, (e) => {
                 if (e.aggregate) {
                     const count = e.aggregate.count
@@ -132,9 +178,34 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 }
             });
             meta.loading.list = false;
+
+            if (meta.fkeys === null) {
+                const res = await api({ url: `/api/db/structure?table=${structure.name}` }) as any[];
+                if (res) {
+                    const fkeys = {};
+                    res.forEach(e => {
+                        if (e.table_name === structure.name) {
+                            fkeys[e.column_name] = e;
+                        } else {
+                            if (!fkeys[e.table_name]) {
+                                fkeys[e.table_name] = {};
+                            }
+                            fkeys[e.table_name][e.column_name] = e;
+                        }
+                    })
+                    meta.fkeys = fkeys;
+                }
+            }
+
         }
     };
     useAsyncEffect(reloadList, [structure]);
+
+    if (!meta.fkeys) return <View
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 50, minWidth: 50 }}>
+        <Spinner />
+    </View>;
+
     return <Template {...data}
         paging={paging}
         style={style}
@@ -194,7 +265,6 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 switch (meta.mode) {
                     case 'create':
                         q = generateInsertString(structure, toJS(data.form));
-
                         meta.loading.form = true;
                         const res = await queryAll(q.query, { variables: q.variables, auth });
                         await executeSubCrudActions(meta, res[idKey]);

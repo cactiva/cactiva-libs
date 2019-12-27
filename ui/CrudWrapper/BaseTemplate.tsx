@@ -138,9 +138,12 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
         </View>
         {mode === '' ? (loading.list && list.length === 0 ? null : <Table {...props.table.root} data={list}>
             <TableHead {...props.table.head} />
-            <TableRow {...props.table.row} onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
-                actions.edit(e);
-            }} />
+            <TableRow
+                {...props.table.row}
+                style={{ borderBottomWidth: 1, borderBottomColor: theme.light }}
+                onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
+                    actions.edit(e);
+                }} />
         </Table>) : <BaseForm
                 idKey={idKey}
                 props={props.form(mode).props}
@@ -158,7 +161,8 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
         case "filter": data = filter; break;
         case "create":
         case "edit":
-            data = form; break;
+            data = form;
+            break;
     }
 
     const fieldsWithoutID = _.castArray(props.children).filter(e => {

@@ -135,7 +135,7 @@ export default observer((props: ITableProps) => {
         flexGrow: 1,
         borderStyle: "solid",
         borderColor: "#f7f7f7",
-        height: 150,
+        minHeight: 150,
         borderWidth: 1,
         ...style
       }}
@@ -257,6 +257,16 @@ const RenderHeader = observer((props: any) => {
   );
 });
 
+const baseCellStyle = {
+  padding: 8,
+  flexDirection: "row",
+  justifyContent: "flex-start",
+  alignItems: "center",
+  flex: 1,
+  // flexBasis: _.get(compProps, "width", config.width)
+  // flexGrow: 0,
+  // flexBasis: _.get(compProps, "width", config.width),
+}
 const RenderHeaderCell = observer((props: any) => {
   const { component, config, onSort } = props;
   let onPress;
@@ -264,33 +274,30 @@ const RenderHeaderCell = observer((props: any) => {
     if (onSort)
       onPress = () => {
         const cell = component.props;
-        if (config.sortField === cell.path) {
-          if (config.sortMode === 'asc') {
-            config.sortMode = 'desc';
-          } else if (config.sortMode === 'desc') {
-            config.sortMode = '';
-            config.sortField = '';
+        let sortMode = config.sortMode + '';
+        let sortField = config.sortField + '';
+        if (sortField === cell.path) {
+          if (sortMode === 'asc') {
+            sortMode = 'desc';
+          } else if (sortMode === 'desc') {
+            sortMode = '';
           } else {
-            config.sortMode = 'asc';
+            sortMode = 'asc';
           }
         } else {
-          config.sortMode = "asc";
-          config.sortField = cell.path;
+          sortMode = "asc";
+          sortField = cell.path;
         }
-        onSort(config.sortField, config.sortMode);
+
+        if (onSort(sortField, sortMode)) {
+          config.sortField = sortField;
+          config.sortMode = sortMode;
+        }
       };
     const compProps = component.props;
     const children = compProps.children ? toJS(compProps.children) : undefined;
-    const customWidth = compProps.width;
     const cellStyle = {
-      padding: children ? 0 : 8,
-      flexGrow: customWidth ? 0 : 1,
-      flexBasis: _.get(compProps, "width", config.width),
-      flexDirection: "row",
-      borderRadius: 0,
-      backgroundColor: "transparent",
-      alignItems: 'center',
-      justifyContent: "flex-start",
+      ...baseCellStyle,
       ..._.get(compProps, "style", {})
     };
     return (
@@ -354,8 +361,8 @@ const DefaultHeaderCell = observer((props: any) => {
         }}
         onPress={onPress}
       >
-        {cell.path === config.sortField &&
-          <View
+        {cell.path === config.sortField && config.sortMode !== '' &&
+          < View
             style={{
               marginRight: 5,
               marginTop: 3,
@@ -390,7 +397,7 @@ const DefaultHeaderCell = observer((props: any) => {
           </View>
         }
         {children}
-      </TouchableOpacity>
+      </TouchableOpacity >
     );
   }
   return (
@@ -454,12 +461,8 @@ const RenderCell = observer((props: any) => {
     const compProps = component.props;
     const rawValue = _.get(item, compProps.path);
     let value = typeof rawValue === 'object' ? JSON.stringify(rawValue) : rawValue;
-    const customWidth = compProps.width;
     const cellStyle = {
-      justifyContent: "center",
-      padding: 8,
-      flexGrow: customWidth ? 0 : 1,
-      flexBasis: _.get(compProps, "width", config.width),
+      ...baseCellStyle,
       ..._.get(compProps, "style", {})
     };
     if (compProps.children) {
@@ -481,10 +484,7 @@ const RenderCell = observer((props: any) => {
       );
     } else {
       const cellStyle = {
-        padding: 8,
-        justifyContent: "center",
-        flexGrow: 1,
-        flexBasis: config.width
+        ...baseCellStyle,
       } as ViewStyle;
       return (
         <TableColumn style={cellStyle}>
