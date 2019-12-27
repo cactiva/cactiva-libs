@@ -1,0 +1,159 @@
+import { DefaultTheme } from "@src/libs/theme";
+import Theme from "@src/theme.json";
+import { observer } from "mobx-react-lite";
+import React from 'react';
+import { TouchableOpacity } from 'react-native';
+import TableColumn from "../Table/TableColumn";
+import Text from '../Text';
+import _ from "lodash";
+import { reloadList, isColumnForeign } from ".";
+
+const theme = {
+    ...DefaultTheme,
+    ...Theme.colors
+};
+
+const idKey = 'id';
+const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStructure, breadcrumbs, where, tableName }: any) => {
+    return <TouchableOpacity
+        style={{
+            flex: 1,
+            borderRadius: 4,
+            padding: 3,
+            paddingVertical: 8,
+            marginRight: 5,
+            marginVertical: -8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: theme.light
+        }}
+        onPress={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const cstruct = _.cloneDeep(rootStructure.fields.filter(e => { return e.name === field })[0]);
+            let hasId = false;
+            cstruct.fields.forEach(e => {
+                if (e.name === idKey) { hasId = true }
+            })
+            cstruct.name = tableName;
+            if (!hasId) {
+                cstruct.fields.push({ name: idKey });
+            }
+            if (where)
+                cstruct.where.push(where);
+
+            const bread = {
+                field,
+                title,
+                mode: '',
+                loading: {
+                    list: false,
+                    form: false
+                },
+                idKey: idKey,
+                fkeys: null,
+                data: {
+                    paging: {
+                        total: 1,
+                        current: 1,
+                        itemPerPage,
+                        count: 0
+                    },
+                    form: {},
+                    list: [],
+                    auth: data.auth
+                },
+                props: null as any,
+                structure: cstruct,
+            };
+
+            await reloadList({
+                structure: bread.structure,
+                paging: bread.data.paging,
+                idKey: bread.idKey,
+                itemPerPage,
+                data: bread.data,
+                loading: bread.loading,
+                meta: bread
+            });
+            bread.props = {
+                table: {
+                    root: {
+                        columnMode: "manual",
+                        onSort: () => { },
+                    },
+                    row: {
+                        children: cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
+                            const fk = isColumnForeign(r.name, bread.fkeys)
+                            if (fk) {
+                                return <TableColumn path={r.name}>
+                                    {
+                                        (c, params) => {
+                                            const firstKey = _.get(bread.props, `table.head.children.0.props.path`);
+                                            const firstCell = (params.item[firstKey] || '').toString().trim();
+                                            const rootTitle = _.get(bread.props, 'title.children', '');
+                                            return <BreadcrumbTrigger
+                                                breadcrumbs={breadcrumbs}
+                                                data={c}
+                                                itemPerPage={itemPerPage}
+                                                tableName={fk.table_name}
+                                                title={_.get(bread.props, `table.head.children.${rk}.props.title`, r.name)}
+                                                field={r.name}
+                                                where={
+                                                    {
+                                                        name: fk.foreign_column,
+                                                        operator: '_eq',
+                                                        value: params.item[idKey],
+                                                        valueType: 'Int'
+                                                    }}
+                                                rootStructure={{
+                                                    ...bread.structure,
+                                                    title: `${rootTitle} (${firstKey}: ${firstCell})`
+                                                }}
+                                                fkeys={bread.fkeys} />;
+                                        }
+                                    }
+                                </TableColumn>;
+                            }
+                            return <TableColumn path={r.name} />
+                        })
+                    },
+                    head: {
+                        children: cstruct.fields.filter(r => (r.name !== idKey)).map(r => {
+                            return <TableColumn path={r.name} title={_.startCase(r.name)} />
+                        })
+                    }
+                },
+                form: (mode) => {
+                    return <div></div>;
+                },
+                title: {
+                    children: title
+                },
+                actions: {
+                    style: {
+                        flexDirection: 'row'
+                    },
+                    children: []
+                }
+            };
+            if (breadcrumbs.path.length === 0) {
+                const bcumbs = [];
+                bcumbs.push({
+                    title: rootStructure.title,
+                    mode: '',
+                    structure: rootStructure
+                })
+                bcumbs.push(bread);
+                breadcrumbs.path = bcumbs;
+            } else {
+                breadcrumbs.path.push(bread);
+            }
+        }}><Text style={{ color: '#000', fontSize: 12, }}>
+            {Array.isArray(data)
+                ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : '- Empty -'
+                : '- Empty -'}
+        </Text></TouchableOpacity>
+})
+
+export default BreadcrumbTrigger;

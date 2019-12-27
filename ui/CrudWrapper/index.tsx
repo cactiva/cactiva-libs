@@ -6,7 +6,7 @@ import { queryAll } from '@src/libs/utils/gql';
 import _ from 'lodash';
 import { toJS } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
-import React from 'react';
+import React, { useEffect } from 'react';
 import useAsyncEffect from "use-async-effect";
 import Table from '../Table';
 import TableHead from '../Table/TableHead';
@@ -19,13 +19,13 @@ import api from '@src/libs/utils/api';
 import { Spinner } from '..';
 import { DefaultTheme } from "@src/libs/theme";
 import Theme from "@src/theme.json";
-import SubTable from './SubTable';
+import BreadcrumbTrigger from './BreadcrumbTrigger';
+import Breadcrumb from './Breadcrumb';
 
 const theme = {
     ...DefaultTheme,
     ...Theme.colors
 };
-
 
 export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange }: any) => {
     const structure = _.get(data, 'structure', null);
@@ -54,33 +54,23 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             list: false,
             form: false
         },
+        breadcrumbs: {
+            path: [],
+            structure: {},
+        },
         fkeys: null as any,
         subCrudQueries: {}
     });
 
-    const castedIdKey = _.startCase(idKey);
-    const fkeys = meta.fkeys ? Object.keys(meta.fkeys) : [];
-    const isColumnForeign = (col: string) => {
-        const res = fkeys.filter(f => {
-            if (col.replace(f, '').length <= 2) {
-                return true;
-            }
-            return false;
-        })
 
-        if (res.length > 0) {
-            return true;
-        }
-        return false;
-    }
+    const castedIdKey = _.startCase(idKey);
 
     children.map((e) => {
         if (e.type === Table) {
-
             props.table.root = {
                 ...e.props,
                 onSort: (r, mode) => {
-                    if (!isColumnForeign(r)) {
+                    if (!isColumnForeign(r, meta.fkeys)) {
                         if (mode) {
                             structure.orderBy = [{
                                 name: r,
@@ -90,7 +80,15 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         } else {
                             structure.orderBy = []
                         }
-                        reloadList();
+                        reloadList({
+                            structure,
+                            paging,
+                            idKey,
+                            itemPerPage,
+                            data,
+                            loading: meta.loading,
+                            meta
+                        });
                         return true;
                     }
                     return false;
@@ -110,17 +108,38 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                             .filter(r => {
                                 return r.props.path !== idKey;
                             })
-                            .map(r => {
-                                let isfk = false;
+                            .map((r, rk) => {
+                                let fk = null;
                                 if (r.props && !r.props.children && r.props.path[r.props.path.length - 1] === 's') {
-                                    isfk = isColumnForeign(r.props.path);
+                                    fk = isColumnForeign(r.props.path, meta.fkeys);
                                 }
-                                if (isfk) {
+                                if (fk) {
                                     return {
                                         ...r, props: {
                                             ...r.props,
-                                            children: (c) => {
-                                                return <SubTable data={c} structure={structure} fkeys={meta.fkeys} />;
+                                            children: (c, params) => {
+                                                const firstKey = _.get(props, `table.head.children.0.props.path`);
+                                                const firstCell = (params.item[firstKey] || '').toString().trim();
+                                                const rootTitle = _.get(props, 'title.children', '');
+                                                return <BreadcrumbTrigger
+                                                    breadcrumbs={meta.breadcrumbs}
+                                                    data={c}
+                                                    itemPerPage={itemPerPage}
+                                                    tableName={fk.table_name}
+                                                    title={_.get(props, `table.head.children.${rk}.props.title`, r.props.path)}
+                                                    field={r.props.path}
+                                                    where={
+                                                        {
+                                                            name: fk.foreign_column,
+                                                            operator: '_eq',
+                                                            value: params.item[idKey],
+                                                            valueType: 'Int'
+                                                        }}
+                                                    rootStructure={{
+                                                        ...structure,
+                                                        title: `${rootTitle} (${firstKey}: ${firstCell})`
+                                                    }}
+                                                    fkeys={meta.fkeys} />;
                                             }
                                         }
                                     };
@@ -147,64 +166,42 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         }
     })
 
-
-    const reloadList = async () => {
-        if (structure) {
-            meta.loading.list = true;
-            const currentPage = _.get(paging, 'current', 1)
-            const orderBy = structure.orderBy.length > 0 ? structure.orderBy : [{
-                name: idKey,
-                value: 'desc',
-                valueType: 'StringValue'
-            }];
-            const query = generateQueryString({
-                ...structure, orderBy, options: {
-                    ...structure.options,
-                    limit: itemPerPage,
-                    offset: (currentPage - 1) * itemPerPage
-                }
-            });
-            const res = await queryAll(query, { auth: data.auth });
-
-            _.map(res, (e) => {
-                if (e.aggregate) {
-                    const count = e.aggregate.count
-                    data.paging.count = count;
-                    if (!data.paging.current)
-                        data.paging.current = 1;
-                    data.paging.total = Math.ceil(count / itemPerPage);
-                } else {
-                    data.list = e || [];
-                }
-            });
-            meta.loading.list = false;
-
-            if (meta.fkeys === null) {
-                const res = await api({ url: `/api/db/structure?table=${structure.name}` }) as any[];
-                if (res) {
-                    const fkeys = {};
-                    res.forEach(e => {
-                        if (e.table_name === structure.name) {
-                            fkeys[e.column_name] = e;
-                        } else {
-                            if (!fkeys[e.table_name]) {
-                                fkeys[e.table_name] = {};
-                            }
-                            fkeys[e.table_name][e.column_name] = e;
-                        }
-                    })
-                    meta.fkeys = fkeys;
-                }
-            }
-
-        }
-    };
-    useAsyncEffect(reloadList, [structure]);
+    useAsyncEffect(async () => {
+        await reloadList({
+            structure,
+            paging,
+            idKey,
+            itemPerPage,
+            data,
+            loading: meta.loading,
+            meta
+        });
+    }, [structure]);
 
     if (!meta.fkeys) return <View
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 50, minWidth: 50 }}>
         <Spinner />
     </View>;
+
+    if (meta.breadcrumbs.path.length > 0) {
+        const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
+        console.log(toJS(bread));
+        return <View>
+            <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
+            <Template
+                structure={bread.structure}
+                auth={structure.auth}
+                list={bread.data.list}
+                form={bread.data.form}
+                props={toJS(bread.props)}
+                paging={bread.data.paging}
+                loading={bread.loading}
+                idKey={idKey}
+                mode={bread.mode}
+                actions={bread.actions}
+            />
+        </View>;
+    }
 
     return <Template {...data}
         paging={paging}
@@ -213,6 +210,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         idKey={idKey}
         mode={meta.mode}
         loading={meta.loading}
+        structure={structure}
         subCrudQueries={meta.subCrudQueries}
         actions={{
             edit: (input) => {
@@ -226,13 +224,29 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             prevPage: () => {
                 if (paging.current - 1 > 0) {
                     paging.current--;
-                    reloadList();
+                    reloadList({
+                        structure,
+                        paging,
+                        idKey,
+                        itemPerPage,
+                        data,
+                        loading: meta.loading,
+                        meta
+                    });
                 }
             },
             nextPage: () => {
                 if (paging.current + 1 <= paging.total) {
                     paging.current++;
-                    reloadList();
+                    reloadList({
+                        structure,
+                        paging,
+                        idKey,
+                        itemPerPage,
+                        data,
+                        loading: meta.loading,
+                        meta
+                    });
                 }
             },
             delete: async () => {
@@ -251,7 +265,15 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 await queryAll(q.query, { auth });
                 meta.mode = '';
                 meta.loading.form = false;
-                await reloadList();
+                await reloadList({
+                    structure,
+                    paging,
+                    idKey,
+                    itemPerPage,
+                    data,
+                    loading: meta.loading,
+                    meta
+                });
                 if (onChange) {
                     onChange({
                         action: 'delete',
@@ -268,7 +290,15 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         meta.loading.form = true;
                         const res = await queryAll(q.query, { variables: q.variables, auth });
                         await executeSubCrudActions(meta, res[idKey]);
-                        await reloadList();
+                        await reloadList({
+                            structure,
+                            paging,
+                            idKey,
+                            itemPerPage,
+                            data,
+                            loading: meta.loading,
+                            meta
+                        });
                         meta.loading.form = false;
                         meta.mode = '';
                         data.form[idKey] = res[idKey];
@@ -295,7 +325,15 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                         meta.loading.form = true;
                         await queryAll(q.query, { variables: q.variables, auth });
                         await executeSubCrudActions(meta, data.form[idKey]);
-                        await reloadList();
+                        await reloadList({
+                            structure,
+                            paging,
+                            idKey,
+                            itemPerPage,
+                            data,
+                            loading: meta.loading,
+                            meta
+                        });
                         meta.loading.form = false;
                         meta.mode = '';
                         if (onChange) {
@@ -358,3 +396,73 @@ const executeSubCrudActions = async (meta: any, id: any) => {
 
     meta.subCrudQueries = {};
 }
+
+export const isColumnForeign = (col: string, fkeys) => {
+    const fcol = fkeys ? Object.keys(fkeys) : [];
+    const res = fcol.filter(f => {
+        if (col.replace(f, '').length <= 2) {
+            return true;
+        }
+        return false;
+    })
+
+    if (res.length > 0) {
+        const fcol = Object.keys(fkeys[res[0]]);
+        if (fcol.length > 0) {
+            return { ...fkeys[res[0]][fcol[0]], foreign_column: fcol[0] };
+        }
+    }
+    return false;
+}
+
+export const reloadList = async (params: { structure, loading, paging, idKey, itemPerPage, data, meta }) => {
+    let { structure, loading, paging, idKey, itemPerPage, data, meta } = params;
+    if (structure) {
+        loading.list = true;
+        const currentPage = _.get(paging, 'current', 1)
+        const orderBy = structure.orderBy.length > 0 ? structure.orderBy : [{
+            name: idKey,
+            value: 'desc',
+            valueType: 'StringValue'
+        }];
+        const query = generateQueryString({
+            ...structure, orderBy, options: {
+                ...structure.options,
+                limit: itemPerPage,
+                offset: (currentPage - 1) * itemPerPage
+            }
+        });
+        const res = await queryAll(query, { auth: data.auth });
+
+        _.map(res, (e) => {
+            if (e.aggregate) {
+                const count = e.aggregate.count
+                data.paging.count = count;
+                if (!data.paging.current)
+                    data.paging.current = 1;
+                data.paging.total = Math.ceil(count / itemPerPage);
+            } else {
+                data.list = e || [];
+            }
+        });
+        loading.list = false;
+
+        if (meta.fkeys === null) {
+            const res = await api({ url: `/api/db/structure?table=${structure.name}` }) as any[];
+            if (res) {
+                const tempfkeys = {};
+                res.forEach(e => {
+                    if (e.table_name === structure.name) {
+                        tempfkeys[e.column_name] = e;
+                    } else {
+                        if (!tempfkeys[e.table_name]) {
+                            tempfkeys[e.table_name] = {};
+                        }
+                        tempfkeys[e.table_name][e.column_name] = e;
+                    }
+                })
+                meta.fkeys = tempfkeys;
+            }
+        }
+    }
+};
