@@ -34,15 +34,15 @@ export interface FieldProps {
   isLabel?: boolean;
   path?: string;
   field?:
-    | InputProps
-    | SelectProps
-    | DateTimeProps
-    | RadioGroupProps
-    | RadioProps
-    | CheckboxGroupProps
-    | CheckboxProps
-    | CameraProps
-    | LocationProps;
+  | InputProps
+  | SelectProps
+  | DateTimeProps
+  | RadioGroupProps
+  | RadioProps
+  | CheckboxGroupProps
+  | CheckboxProps
+  | CameraProps
+  | LocationProps;
   value?: any;
   setValue?: (value: any) => void;
   onChange?: (value: any) => void;
@@ -138,7 +138,7 @@ export default observer((props: FieldProps) => {
         onChange: (e: Date) => {
           try {
             onChangeValue(e.toISOString());
-          } catch (e) {}
+          } catch (e) { }
         }
       };
       break;
@@ -250,8 +250,8 @@ export default observer((props: FieldProps) => {
           borderColor: meta.error
             ? theme.danger
             : meta.focus && isFocus
-            ? theme.primary
-            : theme.light,
+              ? theme.primary
+              : theme.light,
           flexDirection: "row",
           alignItems: "stretch",
           paddingRight: 2,
