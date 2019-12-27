@@ -1,11 +1,37 @@
+import { DefaultTheme } from "@src/libs/theme";
+import Theme from "@src/theme.json";
 import React from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import Icon from "../Icon";
 import Text from "../Text";
 
+const theme = {
+    ...DefaultTheme,
+    ...Theme.colors
+};
 export default ({ breadcrumbs, itemPerPage }: any) => {
-    return <View style={{ flexDirection: 'row', padding: 5, maxWidth: 200 }}>
+    const lastIdx = breadcrumbs.path.length - 1;
+    return <View style={{
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderColor: '#ececeb',
+        backgroundColor: '#fff',
+        paddingLeft: 10,
+    }}>
         {breadcrumbs.path.map((b, idx) => {
-            return <Text key={idx}>{b.title}</Text>
+            return <View key={idx} style={{
+                paddingVertical: 5,
+                maxWidth: 300,
+                flexDirection: 'row',
+                alignItems: 'center'
+            }}>
+                <TouchableOpacity>
+                    <Text style={{ fontSize: 12, fontWeight: "bold", color: idx !== lastIdx ? "#999" : theme.primary }}>
+                        {b.title}
+                    </Text>
+                </TouchableOpacity>
+                {idx !== lastIdx && <Icon source="Feather" name="chevron-right" size={20} color="#ccc" />}
+            </View>
         })}
     </View>
 }

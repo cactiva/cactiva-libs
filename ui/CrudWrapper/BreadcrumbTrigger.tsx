@@ -1,12 +1,13 @@
 import { DefaultTheme } from "@src/libs/theme";
 import Theme from "@src/theme.json";
-import { observer } from "mobx-react-lite";
+import { observer, useObservable } from "mobx-react-lite";
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 import TableColumn from "../Table/TableColumn";
 import Text from '../Text';
 import _ from "lodash";
 import { reloadList, isColumnForeign } from ".";
+import { Spinner } from "..";
 
 const theme = {
     ...DefaultTheme,
@@ -15,14 +16,15 @@ const theme = {
 
 const idKey = 'id';
 const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStructure, breadcrumbs, where, tableName }: any) => {
+    const meta = useObservable({ loading: false });
     return <TouchableOpacity
         style={{
             flex: 1,
             borderRadius: 4,
             padding: 3,
-            paddingVertical: 8,
+            paddingVertical: 5,
             marginRight: 5,
-            marginVertical: -8,
+            marginVertical: -5,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: theme.light
@@ -30,6 +32,7 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
         onPress={async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            meta.loading = true;
             const cstruct = _.cloneDeep(rootStructure.fields.filter(e => { return e.name === field })[0]);
             let hasId = false;
             cstruct.fields.forEach(e => {
@@ -149,11 +152,12 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
             } else {
                 breadcrumbs.path.push(bread);
             }
-        }}><Text style={{ color: '#000', fontSize: 12, }}>
+            meta.loading = false;
+        }}>{meta.loading ? <Spinner /> : <Text style={{ color: '#000', fontSize: 12, }}>
             {Array.isArray(data)
                 ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : '- Empty -'
                 : '- Empty -'}
-        </Text></TouchableOpacity>
+        </Text>}</TouchableOpacity>
 })
 
 export default BreadcrumbTrigger;
