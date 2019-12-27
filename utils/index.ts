@@ -1,7 +1,5 @@
 import { Dimensions } from "react-native";
 import _ from "lodash";
-import Theme from "@src/theme.json";
-const dtformat = require("dateformat");
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,13 +31,13 @@ const deepFind = (object: object, path: string, defaultValue?: any) =>
 const findLargestSmallest = (a: string, b: string) =>
   a.length > b.length
     ? {
-        largest: a,
-        smallest: b
-      }
+      largest: a,
+      smallest: b
+    }
     : {
-        largest: b,
-        smallest: a
-      };
+      largest: b,
+      smallest: a
+    };
 const fuzzyMatch = (strA: string, strB: string, fuzziness = 0) => {
   if (strA === "" || strB === "") {
     return false;
@@ -102,58 +100,7 @@ const truncateStr = (text: string, length: number) => {
   let string = text.replace(/(\r\n|\n|\r)/gm, "");
   return string.length > length ? string.substr(0, length - 1) + "..." : string;
 };
-const dateFormat = (date: Date, mask: string, utc = null, gmt = null) => {
-  if (Theme.lang === "id") {
-    dtformat.i18n = {
-      dayNames: [
-        "Min",
-        "Sen",
-        "Sel",
-        "Rab",
-        "Kam",
-        "Jum",
-        "Sab",
-        "Minggu",
-        "Senin",
-        "Selasa",
-        "Rabu",
-        "Kamis",
-        "Jumat",
-        "Sabtu"
-      ],
-      monthNames: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "Mei",
-        "Jun",
-        "Jul",
-        "Agu",
-        "Sep",
-        "Okt",
-        "Nov",
-        "Des",
-        "January",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember"
-      ],
-      timeNames: ["a", "p", "am", "pm", "A", "P", "AM", "PM"]
-    };
-  }
-  return dtformat(date, mask, utc, gmt);
-};
 export {
-  dateFormat,
   scale,
   verticalScale,
   moderateScale,
