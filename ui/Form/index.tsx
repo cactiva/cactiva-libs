@@ -79,16 +79,16 @@ export default observer((props: FormProps) => {
           );
         })
       ) : (
-        <RenderChild
-          data={data}
-          setValue={setValue}
-          child={children}
-          key={uuid()}
-          meta={meta}
-          onFieldFunction={onFieldFunction}
-          onSubmit={onSubmit}
-        />
-      )}
+          <RenderChild
+            data={data}
+            setValue={setValue}
+            child={children}
+            key={uuid()}
+            meta={meta}
+            onFieldFunction={onFieldFunction}
+            onSubmit={onSubmit}
+          />
+        )}
     </View>
   );
 });
@@ -120,6 +120,7 @@ const RenderChild = observer((props: any) => {
     }
     if (meta.initError) meta.initError = false;
   };
+
 
   if (typeof child.props.children === "function") {
     let fc = null;

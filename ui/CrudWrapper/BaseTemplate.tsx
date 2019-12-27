@@ -162,7 +162,7 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
     }
 
     const fieldsWithoutID = _.castArray(props.children).filter(e => {
-        if (e.props.path === idKey) return false;
+        if (_.get(e, "props.path") === idKey) return false;
         return true;
     }).map(e => {
         return e;
