@@ -13,8 +13,10 @@ export default ({ breadcrumbs, itemPerPage }: any) => {
     const lastIdx = breadcrumbs.path.length - 1;
     return <View style={{
         flexDirection: 'row',
+        borderBottomColor: '#ececeb',
         borderBottomWidth: 1,
-        borderColor: '#ececeb',
+        borderLeftWidth: 1,
+        borderLeftColor: '#FAFAFA',
         backgroundColor: '#fff',
         paddingLeft: 10,
     }}>

@@ -6,8 +6,9 @@ import { TouchableOpacity } from 'react-native';
 import TableColumn from "../Table/TableColumn";
 import Text from '../Text';
 import _ from "lodash";
-import { reloadList, isColumnForeign } from ".";
+import { reloadList, isColumnForeign, declareActions } from ".";
 import { Spinner } from "..";
+import { observable } from "mobx";
 
 const theme = {
     ...DefaultTheme,
@@ -45,7 +46,7 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
             if (where)
                 cstruct.where.push(where);
 
-            const bread = {
+            const bread = observable({
                 field,
                 title,
                 mode: '',
@@ -67,8 +68,9 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                     auth: data.auth
                 },
                 props: null as any,
+                actions: null as any,
                 structure: cstruct,
-            };
+            });
 
             await reloadList({
                 structure: bread.structure,
@@ -79,6 +81,18 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                 loading: bread.loading,
                 meta: bread
             });
+
+            bread.actions = declareActions({
+                auth: data.auth,
+                onChange: false,
+                structure: bread.structure,
+                paging: bread.data.paging,
+                idKey: bread.idKey,
+                itemPerPage,
+                data: bread.data,
+                meta: bread
+            })
+
             bread.props = {
                 table: {
                     root: {
@@ -89,6 +103,7 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                         children: cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
                             const fk = isColumnForeign(r.name, bread.fkeys)
                             if (fk) {
+                                console.log(fk);
                                 return <TableColumn path={r.name}>
                                     {
                                         (c, params) => {

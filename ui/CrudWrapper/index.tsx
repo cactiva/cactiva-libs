@@ -1,3 +1,4 @@
+import api from '@src/libs/utils/api';
 import { generateDeleteString } from '@src/libs/utils/genDeleteString';
 import { generateInsertString } from '@src/libs/utils/genInsertString';
 import { generateQueryString } from '@src/libs/utils/genQueryString';
@@ -6,26 +7,19 @@ import { queryAll } from '@src/libs/utils/gql';
 import _ from 'lodash';
 import { toJS } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
-import React, { useEffect } from 'react';
+import React from 'react';
+import { View as ViewNative } from 'react-native';
 import useAsyncEffect from "use-async-effect";
+import { Spinner } from '..';
 import Table from '../Table';
 import TableHead from '../Table/TableHead';
 import TableRow from '../Table/TableRow';
 import Text from '../Text';
 import View from '../View';
-import { View as ViewNative, TouchableOpacity } from 'react-native';
 import BaseTemplate from './BaseTemplate';
-import api from '@src/libs/utils/api';
-import { Spinner } from '..';
-import { DefaultTheme } from "@src/libs/theme";
-import Theme from "@src/theme.json";
-import BreadcrumbTrigger from './BreadcrumbTrigger';
 import Breadcrumb from './Breadcrumb';
+import BreadcrumbTrigger from './BreadcrumbTrigger';
 
-const theme = {
-    ...DefaultTheme,
-    ...Theme.colors
-};
 
 export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange }: any) => {
     const structure = _.get(data, 'structure', null);
@@ -179,13 +173,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     }, [structure]);
 
     if (!meta.fkeys) return <View
-        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 50, minWidth: 50 }}>
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 250, minWidth: 50 }}>
         <Spinner />
     </View>;
 
     if (meta.breadcrumbs.path.length > 0) {
         const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
-        console.log(toJS(bread));
         return <View>
             <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
             <Template
@@ -212,149 +205,9 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         loading={meta.loading}
         structure={structure}
         subCrudQueries={meta.subCrudQueries}
-        actions={{
-            edit: (input) => {
-                meta.mode = 'edit';
-                data.form = input;
-            },
-            create: () => {
-                meta.mode = 'create';
-                data.form = {};
-            },
-            prevPage: () => {
-                if (paging.current - 1 > 0) {
-                    paging.current--;
-                    reloadList({
-                        structure,
-                        paging,
-                        idKey,
-                        itemPerPage,
-                        data,
-                        loading: meta.loading,
-                        meta
-                    });
-                }
-            },
-            nextPage: () => {
-                if (paging.current + 1 <= paging.total) {
-                    paging.current++;
-                    reloadList({
-                        structure,
-                        paging,
-                        idKey,
-                        itemPerPage,
-                        data,
-                        loading: meta.loading,
-                        meta
-                    });
-                }
-            },
-            delete: async () => {
-                const q = generateDeleteString(structure, {
-                    where: [
-                        {
-                            name: idKey,
-                            operator: '_eq',
-                            value: data.form[idKey],
-                            valueType: 'Int'
-                        }
-                    ]
-                });
-
-                meta.loading.form = true;
-                await queryAll(q.query, { auth });
-                meta.mode = '';
-                meta.loading.form = false;
-                await reloadList({
-                    structure,
-                    paging,
-                    idKey,
-                    itemPerPage,
-                    data,
-                    loading: meta.loading,
-                    meta
-                });
-                if (onChange) {
-                    onChange({
-                        action: 'delete',
-                        form: data.form,
-                    })
-                }
-            },
-            save: async () => {
-                let q = null;
-
-                switch (meta.mode) {
-                    case 'create':
-                        q = generateInsertString(structure, toJS(data.form));
-                        meta.loading.form = true;
-                        const res = await queryAll(q.query, { variables: q.variables, auth });
-                        await executeSubCrudActions(meta, res[idKey]);
-                        await reloadList({
-                            structure,
-                            paging,
-                            idKey,
-                            itemPerPage,
-                            data,
-                            loading: meta.loading,
-                            meta
-                        });
-                        meta.loading.form = false;
-                        meta.mode = '';
-                        data.form[idKey] = res[idKey];
-                        if (onChange) {
-                            onChange({
-                                action: 'insert',
-                                form: data.form,
-                            })
-                        }
-
-                        break;
-                    case 'edit':
-                        q = generateUpdateString(structure, toJS(data.form), {
-                            where: [
-                                {
-                                    name: idKey,
-                                    operator: '_eq',
-                                    value: data.form[idKey],
-                                    valueType: 'Int'
-                                }
-                            ]
-                        });
-
-                        meta.loading.form = true;
-                        await queryAll(q.query, { variables: q.variables, auth });
-                        await executeSubCrudActions(meta, data.form[idKey]);
-                        await reloadList({
-                            structure,
-                            paging,
-                            idKey,
-                            itemPerPage,
-                            data,
-                            loading: meta.loading,
-                            meta
-                        });
-                        meta.loading.form = false;
-                        meta.mode = '';
-                        if (onChange) {
-                            onChange({
-                                action: 'update',
-                                form: data.form,
-                            })
-                        }
-                        break;
-                    default:
-                        meta.mode = '';
-                        break;
-                }
-
-                data.form = {};
-            },
-            cancel: async () => {
-                meta.mode = '';
-                data.form = {};
-            }
-        }} />;
+        actions={declareActions({
+            data, meta, paging, structure, idKey, itemPerPage, auth, onChange
+        })} />;
 });
 
 const executeSubCrudActions = async (meta: any, id: any) => {
@@ -409,7 +262,10 @@ export const isColumnForeign = (col: string, fkeys) => {
     if (res.length > 0) {
         const fcol = Object.keys(fkeys[res[0]]);
         if (fcol.length > 0) {
-            return { ...fkeys[res[0]][fcol[0]], foreign_column: fcol[0] };
+            const fk = fkeys[res[0]][fcol[0]];
+            if (typeof fk === 'object') {
+                return { ...fk, foreign_column: fcol[0] };
+            }
         }
     }
     return false;
@@ -466,3 +322,151 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
         }
     }
 };
+
+export const declareActions = (props: { data, meta, paging, structure, idKey, itemPerPage, auth, onChange }) => {
+    const { data, meta, paging, structure, idKey, itemPerPage, auth, onChange } = props;
+    return {
+        edit: (input) => {
+            console.log(meta);
+            meta.mode = 'edit';
+            data.form = input;
+        },
+        create: () => {
+            meta.mode = 'create';
+            data.form = {};
+        },
+        prevPage: () => {
+            if (paging.current - 1 > 0) {
+                paging.current--;
+                reloadList({
+                    structure,
+                    paging,
+                    idKey,
+                    itemPerPage,
+                    data,
+                    loading: meta.loading,
+                    meta
+                });
+            }
+        },
+        nextPage: () => {
+            if (paging.current + 1 <= paging.total) {
+                paging.current++;
+                reloadList({
+                    structure,
+                    paging,
+                    idKey,
+                    itemPerPage,
+                    data,
+                    loading: meta.loading,
+                    meta
+                });
+            }
+        },
+        delete: async () => {
+            const q = generateDeleteString(structure, {
+                where: [
+                    {
+                        name: idKey,
+                        operator: '_eq',
+                        value: data.form[idKey],
+                        valueType: 'Int'
+                    }
+                ]
+            });
+
+            meta.loading.form = true;
+            await queryAll(q.query, { auth });
+            meta.mode = '';
+            meta.loading.form = false;
+            await reloadList({
+                structure,
+                paging,
+                idKey,
+                itemPerPage,
+                data,
+                loading: meta.loading,
+                meta
+            });
+            if (onChange) {
+                onChange({
+                    action: 'delete',
+                    form: data.form,
+                })
+            }
+        },
+        save: async () => {
+            let q = null;
+
+            switch (meta.mode) {
+                case 'create':
+                    q = generateInsertString(structure, toJS(data.form));
+                    meta.loading.form = true;
+                    const res = await queryAll(q.query, { variables: q.variables, auth });
+                    await executeSubCrudActions(meta, res[idKey]);
+                    await reloadList({
+                        structure,
+                        paging,
+                        idKey,
+                        itemPerPage,
+                        data,
+                        loading: meta.loading,
+                        meta
+                    });
+                    meta.loading.form = false;
+                    meta.mode = '';
+                    data.form[idKey] = res[idKey];
+                    if (onChange) {
+                        onChange({
+                            action: 'insert',
+                            form: data.form,
+                        })
+                    }
+
+                    break;
+                case 'edit':
+                    q = generateUpdateString(structure, toJS(data.form), {
+                        where: [
+                            {
+                                name: idKey,
+                                operator: '_eq',
+                                value: data.form[idKey],
+                                valueType: 'Int'
+                            }
+                        ]
+                    });
+
+                    meta.loading.form = true;
+                    await queryAll(q.query, { variables: q.variables, auth });
+                    await executeSubCrudActions(meta, data.form[idKey]);
+                    await reloadList({
+                        structure,
+                        paging,
+                        idKey,
+                        itemPerPage,
+                        data,
+                        loading: meta.loading,
+                        meta
+                    });
+                    meta.loading.form = false;
+                    meta.mode = '';
+                    if (onChange) {
+                        onChange({
+                            action: 'update',
+                            form: data.form,
+                        })
+                    }
+                    break;
+                default:
+                    meta.mode = '';
+                    break;
+            }
+
+            data.form = {};
+        },
+        cancel: async () => {
+            meta.mode = '';
+            data.form = {};
+        }
+    }
+}
