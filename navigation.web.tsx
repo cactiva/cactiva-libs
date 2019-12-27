@@ -11,13 +11,13 @@ export const AppContainer = () => {
 
   const componentRoutes = {};
   Object.keys(components).forEach((key: string) => {
-    if (key.indexOf('/') < 0) {
+    // if (key.indexOf('/') < 0) {
       componentRoutes[key] = {
         screen: components[key],
         params: {},
         path: key
       }
-    }
+    // }
   })
 
   const App = createBrowserApp(

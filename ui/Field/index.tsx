@@ -202,8 +202,8 @@ export default observer((props: FieldProps) => {
 
   const childrenWithProps = React.Children.map(children, child =>
     React.cloneElement(child, {
+      ...childProps,
       ...child.props,
-      ...childProps
     })
   );
   const tStyle = textStyle(props.style);
