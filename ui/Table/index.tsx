@@ -12,6 +12,7 @@ import { DefaultTheme } from "@src/libs/theme";
 
 import Theme from "@src/theme.json";
 import { uuid } from "@src/libs/utils";
+import EmptyCell from "./EmptyCell";
 const theme = {
   ...DefaultTheme,
   ...Theme.colors
@@ -132,10 +133,10 @@ export default observer((props: ITableProps) => {
   return (
     <View
       style={{
-        flexGrow: 1,
         borderStyle: "solid",
         borderColor: "#f7f7f7",
         minHeight: 150,
+        position: 'relative',
         borderWidth: 1,
         ...style
       }}
@@ -146,8 +147,15 @@ export default observer((props: ITableProps) => {
         config.tableWidth = width;
       }}
     >
-      {config.width > 0 ? (
+      {config.width > 0 ? (<View style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}>
         <FlatList
+          style={{ flex: 1 }}
           data={data}
           stickyHeaderIndices={[0]}
           ListHeaderComponent={() => (
@@ -186,7 +194,7 @@ export default observer((props: ITableProps) => {
                   }}
                 >
                   No item to display
-                </Text>
+                  </Text>
               </View>
             );
           }}
@@ -216,6 +224,7 @@ export default observer((props: ITableProps) => {
             if (onEndReached) onEndReached();
           }}
         ></FlatList>
+      </View>
       ) : (
           <View />
         )}
@@ -457,10 +466,12 @@ const RenderItem = observer((props: any) => {
 const RenderCell = observer((props: any) => {
   const { item, component, config } = props;
 
+  let rawValue = config.mode === "manual" ? _.get(item, component.props.path) : item[component.path];
+  let value = typeof rawValue === 'object' ? JSON.stringify(rawValue) : rawValue;
+  const valueEl = value === 'null' ? <EmptyCell /> : <Text>{value}</Text>;
+
   if (config.mode === "manual") {
     const compProps = component.props;
-    const rawValue = _.get(item, compProps.path);
-    let value = typeof rawValue === 'object' ? JSON.stringify(rawValue) : rawValue;
     const cellStyle = {
       ...baseCellStyle,
       ..._.get(compProps, "style", {})
@@ -478,7 +489,7 @@ const RenderCell = observer((props: any) => {
       return (
         <TableColumn {...compProps} style={cellStyle}>
           <TouchableOpacity onPress={compProps.onPress}>
-            <Text>{value}</Text>
+            {valueEl}
           </TouchableOpacity>
         </TableColumn>
       );
@@ -488,7 +499,7 @@ const RenderCell = observer((props: any) => {
       } as ViewStyle;
       return (
         <TableColumn style={cellStyle}>
-          <Text>{value}</Text>
+          {valueEl}
         </TableColumn>
       );
     }
@@ -499,9 +510,6 @@ const RenderCell = observer((props: any) => {
       flexGrow: 1,
       flexBasis: config.width
     } as ViewStyle;
-    const value = typeof item[component.path] === 'object' ? JSON.stringify(item[component.path]) : item[component.path];
-    return <TableColumn style={cellStyle}>
-      <Text>{value}</Text>
-    </TableColumn>
+    return <TableColumn style={cellStyle}>{valueEl}</TableColumn>
   }
 });

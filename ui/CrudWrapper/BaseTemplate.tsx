@@ -28,7 +28,7 @@ const ActionButton = ({ onPress, text, style }: any) => {
 export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
-    return <View style={{ position: 'relative', ...style, flex: 1, }}>
+    return <View style={{ ...style, }}>
         <View style={styles.head}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {['create', 'edit'].indexOf(mode) >= 0 && !loading.list && <TouchableOpacity onPress={actions.cancel}>
@@ -136,22 +136,37 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                 </View>
             }
         </View>
-        {mode === '' ? (loading.list && list.length === 0 ? null : <Table {...props.table.root} data={list}>
-            <TableHead {...props.table.head} />
-            <TableRow
-                {...props.table.row}
-                style={{ borderBottomWidth: 1, borderBottomColor: theme.light }}
-                onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
-                    actions.edit(e);
-                }} />
-        </Table>) : <BaseForm
-                idKey={idKey}
-                props={props.form(mode).props}
-                mode={mode}
-                form={form}
-                filter={filter}
-                subCrudQueries={subCrudQueries}
-            />}
+        <View style={{ position: 'relative', flex: 1, }}>
+
+            {mode === '' ? (loading.list && list.length === 0 ? null : <Table
+                {...props.table.root}
+                style={{ flex: 1 }}
+                data={list}>
+                <TableHead {...props.table.head} />
+                <TableRow
+                    {...props.table.row}
+                    style={{ borderBottomWidth: 1, borderBottomColor: theme.light }}
+                    onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
+                        actions.edit(e);
+                    }} />
+            </Table>) : <View
+                type="ScrollView"
+                style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                }}><BaseForm
+                        idKey={idKey}
+                        props={props.form(mode).props}
+                        mode={mode}
+                        form={form}
+                        filter={filter}
+                        subCrudQueries={subCrudQueries}
+                    /></View>}
+
+        </View>
     </View>
 })
 

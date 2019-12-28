@@ -9,6 +9,7 @@ import _ from "lodash";
 import { reloadList, isColumnForeign, declareActions } from ".";
 import { Spinner, Button, Form, Field, Input } from "..";
 import { observable } from "mobx";
+import EmptyCell from "../Table/EmptyCell";
 
 const theme = {
     ...DefaultTheme,
@@ -191,8 +192,8 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
             meta.loading = false;
         }}>{meta.loading ? <Spinner /> : <Text style={{ color: '#000', fontSize: 12, }}>
             {Array.isArray(data)
-                ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : '- Empty -'
-                : '- Empty -'}
+                ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : <EmptyCell />
+                : <EmptyCell />}
         </Text>}</TouchableOpacity>
 })
 
