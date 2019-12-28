@@ -28,7 +28,7 @@ const ActionButton = ({ onPress, text, style }: any) => {
 export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
-    return <View style={{ ...style, }}>
+    return <View style={{ flexGrow: 1, ...style }}>
         <View style={styles.head}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {['create', 'edit'].indexOf(mode) >= 0 && !loading.list && <TouchableOpacity onPress={actions.cancel}>
@@ -136,8 +136,7 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                 </View>
             }
         </View>
-        <View style={{ position: 'relative', flex: 1, }}>
-
+        <View style={{ position: 'relative', flex: 1 }}>
             {mode === '' ? (loading.list && list.length === 0 ? null : <Table
                 {...props.table.root}
                 style={{ flex: 1 }}
@@ -189,7 +188,8 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
 
     return <Form {...props} data={data} style={{
         paddingLeft: 7,
-        paddingRight: 0
+        paddingRight: 0,
+        flex: 1
     }} children={fieldsWithoutID} onFieldFunction={(fc, list, setValue, path) => {
         return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />
