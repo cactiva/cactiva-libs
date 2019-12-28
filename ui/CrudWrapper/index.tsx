@@ -133,6 +133,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                                                             forms: breadForms,
                                                             title: _.get(props, 'title.children', ''),
                                                             data: params.item,
+                                                            firstTitle: _.get(props, `table.head.children.0.props.title`),
                                                             firstKey: _.get(props, `table.head.children.0.props.path`)
                                                         }
                                                     }}

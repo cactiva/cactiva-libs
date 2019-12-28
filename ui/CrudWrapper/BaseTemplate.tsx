@@ -271,13 +271,14 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
                                 forms: breadForms,
                                 data,
                                 title: _.get(rawProps, 'title.children'),
-                                firstKey: _.get(rawProps, `table.head.children.0.props.path`)
+                                firstKey: _.get(rawProps, `table.head.children.0.props.path`),
+                                firstTitle: _.get(rawProps, `table.head.children.0.props.title`),
                             }
                         }}
                         fkeys={fkeys}
                         style={{
                             paddingHorizontal: 5,
-                            paddingVertical: 10,
+                            height: 35,
                             borderRadius: 4,
                             backgroundColor: '#f1f1f1',
                             flexDirection: 'row',

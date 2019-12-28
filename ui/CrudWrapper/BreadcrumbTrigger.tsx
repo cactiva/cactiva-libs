@@ -181,14 +181,19 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                 const bcumbs = [];
                 const rmeta = rootStructure.__meta;
                 const firstKey = rmeta.firstKey;
-                const firstCell = (rmeta.data[firstKey] || '').toString().trim();
+                let firstCell = (rmeta.data[firstKey] || '');
+                if (typeof firstCell === 'object') {
+                    firstCell = firstCell[Object.keys(firstCell)[0]];
+                }
+
+
                 const rootTitle = rmeta.title;
                 bcumbs.push({
                     title: `${rootTitle}`,
                     mode: '',
                 })
                 bcumbs.push({
-                    title: `${firstKey}: ${firstCell}`,
+                    title: `${rmeta.firstTitle}: ${firstCell}`,
                     data
                 })
                 bcumbs.push(bread);
