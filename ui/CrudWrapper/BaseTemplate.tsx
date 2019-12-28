@@ -4,6 +4,8 @@ import _ from 'lodash';
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { StyleSheet, Text as NativeText, TouchableOpacity } from "react-native";
+import { isColumnForeign } from ".";
+import { Field } from "..";
 import Form from "../Form";
 import Icon from "../Icon";
 import Spinner from "../Spinner";
@@ -12,9 +14,9 @@ import TableHead from "../Table/TableHead";
 import TableRow from "../Table/TableRow";
 import Text from "../Text";
 import View from "../View";
-import { isColumnForeign } from ".";
+import BreadcrumbTrigger from "./BreadcrumbTrigger";
+import EmptyCell from "../Table/EmptyCell";
 import { toJS } from "mobx";
-import { Field } from "..";
 
 const theme = {
     ...DefaultTheme,
@@ -28,7 +30,7 @@ const ActionButton = ({ onPress, text, style }: any) => {
         </NativeText>
     </TouchableOpacity>;
 }
-export default observer(({ idKey, fkeys, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
+export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
     return <View style={{ flexGrow: 1, ...style }}>
@@ -155,7 +157,12 @@ export default observer(({ idKey, fkeys, list, filter, paging, form, props, acti
                     }} />
             </Table>) : <BaseForm
                     idKey={idKey}
+                    breadcrumbs={breadcrumbs}
+                    breadForms={breadForms}
+                    structure={structure}
+                    paging={paging}
                     fkeys={fkeys}
+                    rawProps={props}
                     props={props.form(mode).props}
                     mode={mode}
                     form={form}
@@ -167,7 +174,7 @@ export default observer(({ idKey, fkeys, list, filter, paging, form, props, acti
     </View>
 })
 
-const BaseForm = observer(({ idKey, fkeys, props, mode, form, filter, subCrudQueries }: any) => {
+const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter, subCrudQueries }: any) => {
     let data = null;
     switch (mode) {
         case "filter": data = filter; break;
@@ -184,7 +191,10 @@ const BaseForm = observer(({ idKey, fkeys, props, mode, form, filter, subCrudQue
                 const fieldName = _.get(e, "props.path");
                 const fk = isColumnForeign(fieldName, fkeys);
                 if (fk) {
-                    breadForm[fieldName] = e;
+                    breadForm[fieldName] = {
+                        el: e,
+                        fk
+                    };
                     return false;
                 }
                 if (fieldName === idKey) return false;
@@ -213,7 +223,6 @@ const BaseForm = observer(({ idKey, fkeys, props, mode, form, filter, subCrudQue
         return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />;
 
-
     if (breadFormKeys.length > 0) {
         return <View style={{ flexGrow: 1, flexDirection: 'row', borderTopWidth: 3, borderTopColor: '#F1F1F1' }}>
             <View style={{ flexGrow: 1 }}>
@@ -230,9 +239,64 @@ const BaseForm = observer(({ idKey, fkeys, props, mode, form, filter, subCrudQue
                         paddingRight: 15,
                     }}>{formEl}</View>
             </View>
-            <View style={{ flexBasis: 200, padding: 10 }}>
+            <View style={{ flexBasis: 230, borderLeftWidth: 1, borderLeftColor: '#ccc' }}>
                 {breadFormKeys.map((key: string) => {
-                    return <Text>{key}</Text>
+                    const e = breadForm[key].el;
+                    const fk = breadForm[key].fk;
+                    const label = e.props.label || e.props.path;
+                    const list = _.castArray(data[e.props.path]);
+                    return <View key={key} style={{
+                        backgroundColor: '#fff',
+                        borderBottomColor: '#ccc',
+                        padding: 5,
+                        borderBottomWidth: 1,
+                    }}><BreadcrumbTrigger
+                        key={key}
+                        breadcrumbs={breadcrumbs}
+                        data={list}
+                        itemPerPage={paging.itemPerPage}
+                        tableName={fk.table_name}
+                        title={label}
+                        field={e.props.path}
+                        where={
+                            {
+                                name: fk.foreign_column,
+                                operator: '_eq',
+                                value: data[idKey],
+                                valueType: 'Int'
+                            }}
+                        rootStructure={{
+                            ...structure,
+                            __meta: {
+                                forms: breadForms,
+                                data,
+                                title: _.get(rawProps, 'title.children'),
+                                firstKey: _.get(rawProps, `table.head.children.0.props.path`)
+                            }
+                        }}
+                        fkeys={fkeys}
+                        style={{
+                            paddingHorizontal: 5,
+                            paddingVertical: 10,
+                            borderRadius: 4,
+                            backgroundColor: '#f1f1f1',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                flex: 1,
+                                justifyContent: 'space-between'
+                            }}>
+                                <Text style={{ fontSize: 12 }}>{label}</Text>
+                                {list.length === 0
+                                    ? <EmptyCell />
+                                    : <Text style={{ fontSize: 12 }}>{list.length} item{list.length > 1 ? 's' : ''}</Text>
+                                }
+                            </View>
+                        </BreadcrumbTrigger></View>;
                 })}
             </View>
         </View>

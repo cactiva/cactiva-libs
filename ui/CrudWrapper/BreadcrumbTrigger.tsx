@@ -17,10 +17,10 @@ const theme = {
 };
 
 const idKey = 'id';
-const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStructure, breadcrumbs, where, tableName }: any) => {
+const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage, data, rootStructure, breadcrumbs, where, tableName }: any) => {
     const meta = useObservable({ loading: false });
     return <TouchableOpacity
-        style={{
+        style={style ? style : {
             flex: 1,
             borderRadius: 4,
             padding: 3,
@@ -131,7 +131,6 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                                                 rootStructure={{
                                                     ...rootStructure,
                                                     ...bread.structure,
-                                                    title: `${rootTitle} (${firstKey}: ${firstCell})`
                                                 }}
                                                 fkeys={bread.fkeys} />;
                                         }
@@ -147,7 +146,7 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                         })
                     }
                 },
-                form: rootStructure.forms[field] || ((mode: any) => {
+                form: rootStructure.__meta.forms[field] || ((mode: any) => {
                     return <Form>
                         {cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
                             return <Field key={rk} label={_.startCase(r.name)} path={r.name}>
@@ -178,12 +177,19 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                         </Button>]
                 }
             };
-            if (breadcrumbs.path.length === 0) {
+            if (breadcrumbs.path.length <= 1) {
                 const bcumbs = [];
+                const rmeta = rootStructure.__meta;
+                const firstKey = rmeta.firstKey;
+                const firstCell = (rmeta.data[firstKey] || '').toString().trim();
+                const rootTitle = rmeta.title;
                 bcumbs.push({
-                    title: rootStructure.title,
+                    title: `${rootTitle}`,
                     mode: '',
-                    structure: rootStructure
+                })
+                bcumbs.push({
+                    title: `${firstKey}: ${firstCell}`,
+                    data
                 })
                 bcumbs.push(bread);
                 breadcrumbs.path = bcumbs;
@@ -191,11 +197,16 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                 breadcrumbs.path.push(bread);
             }
             meta.loading = false;
-        }}>{meta.loading ? <Spinner /> : <Text style={{ color: '#000', fontSize: 12, }}>
-            {Array.isArray(data)
-                ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : <EmptyCell />
-                : <EmptyCell />}
-        </Text>}</TouchableOpacity>
+        }}>
+
+        {meta.loading
+            ? <Spinner />
+            : children ? children : <Text style={{ color: '#000', fontSize: 12, }}>
+                {Array.isArray(data)
+                    ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : <EmptyCell />
+                    : <EmptyCell />}
+            </Text>}
+    </TouchableOpacity>
 })
 
 export default BreadcrumbTrigger;

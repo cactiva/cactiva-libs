@@ -35,6 +35,8 @@ export default ({ breadcrumbs, itemPerPage }: any) => {
                     onPress={() => {
                         if (idx === 0) {
                             breadcrumbs.path = [];
+                        } else if (idx === 1) {
+                            breadcrumbs.path = breadcrumbs.path.slice(0, idx + 1);
                         } else if (idx !== lastIdx) {
                             breadcrumbs.path = breadcrumbs.path.slice(0, idx + 1);
                             const bread = breadcrumbs.path[breadcrumbs.path.length - 1];

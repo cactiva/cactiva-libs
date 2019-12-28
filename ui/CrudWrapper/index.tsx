@@ -113,9 +113,6 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                                         ...r, props: {
                                             ...r.props,
                                             children: (c, params) => {
-                                                const firstKey = _.get(props, `table.head.children.0.props.path`);
-                                                const firstCell = (params.item[firstKey] || '').toString().trim();
-                                                const rootTitle = _.get(props, 'title.children', '');
                                                 return <BreadcrumbTrigger
                                                     breadcrumbs={meta.breadcrumbs}
                                                     data={c}
@@ -132,8 +129,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                                                         }}
                                                     rootStructure={{
                                                         ...structure,
-                                                        forms: breadForms,
-                                                        title: `${rootTitle} (${firstKey}: ${firstCell})`
+                                                        __meta: {
+                                                            forms: breadForms,
+                                                            title: _.get(props, 'title.children', ''),
+                                                            data: params.item,
+                                                            firstKey: _.get(props, `table.head.children.0.props.path`)
+                                                        }
                                                     }}
                                                     fkeys={meta.fkeys} />;
                                             }
@@ -167,7 +168,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     })
 
     useAsyncEffect(async () => {
-        if (meta.breadcrumbs.path.length === 0) {
+        if (meta.breadcrumbs.path.length <= 1) {
+            meta.mode = '';
             await reloadList({
                 structure,
                 paging,
@@ -177,6 +179,9 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 loading: meta.loading,
                 meta
             });
+        } else if (meta.breadcrumbs.path.length === 2) {
+            meta.mode = 'edit';
+            data.form = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1].data;
         }
     }, [structure, meta.breadcrumbs.path]);
 
@@ -185,13 +190,15 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         <Spinner />
     </View>;
 
-    if (meta.breadcrumbs.path.length > 0) {
+    if (meta.breadcrumbs.path.length > 2) {
         const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
         return <View style={{ flexGrow: 1 }}>
             <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
             <Template
                 fkeys={bread.fkeys}
                 structure={bread.structure}
+                breadcrumbs={meta.breadcrumbs}
+                breadForms={breadForms}
                 auth={structure.auth}
                 list={bread.data.list}
                 form={bread.data.form}
@@ -203,17 +210,38 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 actions={bread.actions}
             />
         </View>;
+    } else if (meta.breadcrumbs.path.length === 2) {
+        return <View style={{ flexGrow: 1 }}>
+            <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
+            <Template {...data}
+                fkeys={meta.fkeys}
+                structure={structure}
+                breadcrumbs={meta.breadcrumbs}
+                breadForms={breadForms}
+                paging={paging}
+                style={style}
+                props={props}
+                idKey={idKey}
+                mode={meta.mode}
+                loading={meta.loading}
+                subCrudQueries={meta.subCrudQueries}
+                actions={declareActions({
+                    data, meta, paging, structure, idKey, itemPerPage, auth, onChange, breadcrumbs: meta.breadcrumbs
+                })} />
+        </View>;
     }
 
     return <Template {...data}
+        fkeys={meta.fkeys}
+        structure={structure}
+        breadcrumbs={meta.breadcrumbs}
+        breadForms={breadForms}
         paging={paging}
         style={style}
         props={props}
         idKey={idKey}
         mode={meta.mode}
-        fkeys={meta.fkeys}
         loading={meta.loading}
-        structure={structure}
         subCrudQueries={meta.subCrudQueries}
         actions={declareActions({
             data, meta, paging, structure, idKey, itemPerPage, auth, onChange, breadcrumbs: meta.breadcrumbs
