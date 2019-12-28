@@ -187,9 +187,10 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
     if (meta.breadcrumbs.path.length > 0) {
         const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
-        return <View>
+        return <View style={{ flexGrow: 1 }}>
             <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
             <Template
+                fkeys={bread.fkeys}
                 structure={bread.structure}
                 auth={structure.auth}
                 list={bread.data.list}
@@ -210,11 +211,12 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         props={props}
         idKey={idKey}
         mode={meta.mode}
+        fkeys={meta.fkeys}
         loading={meta.loading}
         structure={structure}
         subCrudQueries={meta.subCrudQueries}
         actions={declareActions({
-            data, meta, paging, structure, idKey, itemPerPage, auth, onChange
+            data, meta, paging, structure, idKey, itemPerPage, auth, onChange, breadcrumbs: meta.breadcrumbs
         })} />;
 });
 
@@ -331,12 +333,26 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
     }
 };
 
-export const declareActions = (props: { data, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm?: any }) => {
-    const { data, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm } = props;
+const modifyBread = (breadcrumbs: any, callback: any) => {
+    if (breadcrumbs.path.length > 0) {
+        const bread = breadcrumbs.path[breadcrumbs.path.length - 1];
+        if (!bread.originalTitle) {
+            bread.originalTitle = bread.title;
+        }
+        callback(bread);
+    }
+}
+
+export const declareActions = (props: { data, breadcrumbs, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm?: any }) => {
+    const { data, breadcrumbs, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm } = props;
     return {
         edit: (input) => {
             meta.mode = 'edit';
             data.form = input;
+
+            modifyBread(breadcrumbs, (bread) => {
+                bread.title = `${bread.originalTitle} (Edit)`;
+            })
 
             if (baseForm) {
                 for (let i in baseForm) {
@@ -347,6 +363,9 @@ export const declareActions = (props: { data, meta, paging, structure, idKey, it
         create: () => {
             meta.mode = 'create';
             data.form = {};
+            modifyBread(breadcrumbs, (bread) => {
+                bread.title = `${bread.originalTitle} (Create)`;
+            })
             if (baseForm) {
                 for (let i in baseForm) {
                     data.form[i] = baseForm[i];
@@ -485,6 +504,9 @@ export const declareActions = (props: { data, meta, paging, structure, idKey, it
         cancel: async () => {
             meta.mode = '';
             data.form = {};
+            modifyBread(breadcrumbs, (bread) => {
+                bread.title = `${bread.originalTitle}`;
+            })
         }
     }
 }

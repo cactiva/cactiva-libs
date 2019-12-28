@@ -12,6 +12,9 @@ import TableHead from "../Table/TableHead";
 import TableRow from "../Table/TableRow";
 import Text from "../Text";
 import View from "../View";
+import { isColumnForeign } from ".";
+import { toJS } from "mobx";
+import { Field } from "..";
 
 const theme = {
     ...DefaultTheme,
@@ -25,7 +28,7 @@ const ActionButton = ({ onPress, text, style }: any) => {
         </NativeText>
     </TouchableOpacity>;
 }
-export default observer(({ idKey, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
+export default observer(({ idKey, fkeys, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
     return <View style={{ flexGrow: 1, ...style }}>
@@ -33,12 +36,14 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {['create', 'edit'].indexOf(mode) >= 0 && !loading.list && <TouchableOpacity onPress={actions.cancel}>
                     <Icon
-                        source={"AntDesign"}
-                        name={"arrowleft"}
+                        source={"Entypo"}
+                        name={"chevron-thin-left"}
                         color={theme.primary}
-                        size={24}
+                        size={20}
                         style={{
-                            margin: 5
+                            paddingHorizontal: 5,
+                            marginTop: 2,
+                            marginRight: 5
                         }}
                     ></Icon></TouchableOpacity>}
 
@@ -148,28 +153,21 @@ export default observer(({ idKey, list, filter, paging, form, props, actions, mo
                     onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
                         actions.edit(e);
                     }} />
-            </Table>) : <View
-                type="ScrollView"
-                style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                }}><BaseForm
-                        idKey={idKey}
-                        props={props.form(mode).props}
-                        mode={mode}
-                        form={form}
-                        filter={filter}
-                        subCrudQueries={subCrudQueries}
-                    /></View>}
+            </Table>) : <BaseForm
+                    idKey={idKey}
+                    fkeys={fkeys}
+                    props={props.form(mode).props}
+                    mode={mode}
+                    form={form}
+                    filter={filter}
+                    subCrudQueries={subCrudQueries}
+                />}
 
         </View>
     </View>
 })
 
-const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }: any) => {
+const BaseForm = observer(({ idKey, fkeys, props, mode, form, filter, subCrudQueries }: any) => {
     let data = null;
     switch (mode) {
         case "filter": data = filter; break;
@@ -178,21 +176,81 @@ const BaseForm = observer(({ idKey, props, mode, form, filter, subCrudQueries }:
             data = form;
             break;
     }
+    const breadForm = {};
 
-    const fieldsWithoutID = _.castArray(props.children).filter(e => {
-        if (_.get(e, "props.path") === idKey) return false;
-        return !!e;
-    }).map(e => {
-        return e;
-    })
-
-    return <Form {...props} data={data} style={{
+    const filterFields = (children) => {
+        return _.castArray(children).map(e => {
+            if (e.type === Field) {
+                const fieldName = _.get(e, "props.path");
+                const fk = isColumnForeign(fieldName, fkeys);
+                if (fk) {
+                    breadForm[fieldName] = e;
+                    return false;
+                }
+                if (fieldName === idKey) return false;
+            } else {
+                const echild = _.get(e, 'props.children')
+                if (echild) {
+                    return {
+                        ...e,
+                        props: {
+                            ...e.props,
+                            children: filterFields(echild).filter(e => !!e)
+                        }
+                    }
+                }
+            }
+            return e;
+        }).filter(e => !!e)
+    }
+    const filteredFields = filterFields(props.children);
+    const breadFormKeys = Object.keys(breadForm);
+    const formEl = <Form {...props} data={data} style={{
         paddingLeft: 7,
         paddingRight: 0,
         flex: 1
-    }} children={fieldsWithoutID} onFieldFunction={(fc, list, setValue, path) => {
+    }} children={filteredFields} onFieldFunction={(fc, list, setValue, path) => {
         return fc({ list: list, queries: subCrudQueries, setValue, path });
-    }} />
+    }} />;
+
+
+    if (breadFormKeys.length > 0) {
+        return <View style={{ flexGrow: 1, flexDirection: 'row', borderTopWidth: 3, borderTopColor: '#F1F1F1' }}>
+            <View style={{ flexGrow: 1 }}>
+                <View
+                    type="ScrollView"
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        paddingVertical: 5,
+                        paddingLeft: 10,
+                        paddingRight: 15,
+                    }}>{formEl}</View>
+            </View>
+            <View style={{ flexBasis: 200, padding: 10 }}>
+                {breadFormKeys.map((key: string) => {
+                    return <Text>{key}</Text>
+                })}
+            </View>
+        </View>
+    }
+
+    return <View
+        type="ScrollView"
+        style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingVertical: 5,
+            paddingLeft: 10,
+            paddingRight: 15, borderTopWidth: 3, borderTopColor: '#F1F1F1'
+        }}>{formEl}</View>;
+
 })
 
 

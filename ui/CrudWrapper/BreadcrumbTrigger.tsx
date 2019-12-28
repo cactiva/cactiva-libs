@@ -91,6 +91,7 @@ const BreadcrumbTrigger = observer(({ title, field, itemPerPage, data, rootStruc
                 idKey: bread.idKey,
                 itemPerPage,
                 data: bread.data,
+                breadcrumbs,
                 meta: bread,
                 baseForm: {
                     [where.name]: where.value
