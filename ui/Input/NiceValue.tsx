@@ -29,11 +29,9 @@ const NiceValue = observer(({ value, style }: any) => {
                                     border: '1px solid #ddd',
                                     padding: 6, paddingTop: 2, paddingBottom: 2
                                 }}>
-                                    <Text style={{ fontSize: 12 }}>
-                                        {typeof value[key] === 'object' ? <NiceValue
-                                            style={{ marginLeft: -5, marginRight: -5 }}
-                                            value={value[key]} /> : value[key]}
-                                    </Text>
+                                    {typeof value[key] === 'object' ? <NiceValue
+                                        style={{ marginLeft: -4, marginRight: -4 }}
+                                        value={value[key]} /> : <Text style={{ fontSize: 12 }}>value[key]</Text>}
                                 </td>
                             </tr>
                         })}
