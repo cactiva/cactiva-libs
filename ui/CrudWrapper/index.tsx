@@ -23,6 +23,19 @@ import BreadcrumbTrigger from './BreadcrumbTrigger';
 
 export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange }: any) => {
     const structure = _.get(data, 'structure', null);
+
+    if (structure) {
+        let hasId = false;
+        structure.fields.forEach(e => {
+            if (e.name === idKey) {
+                hasId = true;
+            }
+        })
+        if (!hasId) {
+            structure.fields.push({ name: idKey });
+        }
+    }
+
     const paging = _.get(data, 'paging', {
         total: 1,
         current: 1,
