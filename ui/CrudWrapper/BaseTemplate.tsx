@@ -51,7 +51,6 @@ export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, lis
                         }}
                     ></Icon></TouchableOpacity>}
 
-                {loading.list && <Spinner style={{ marginRight: 5 }} />}
                 <Text {...props.title} style={{ ...textStyle, fontSize: 16, fontWeight: 'bold' }}>
                     {loading.list && 'Loading '}
                     {_.startCase(mode)}
@@ -59,6 +58,7 @@ export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, lis
                     {_.get(props, 'title.children', null)}
                     {' '}
                 </Text>
+                {loading.list && <Spinner style={{ marginRight: 5 }} />}
             </View>
             {loading.form ? <Spinner style={{ margin: 10 }} /> :
                 <View {...props.actions} style={styles.actions} >
