@@ -233,7 +233,9 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
     const formEl = <Form {...props} data={data} style={{
         paddingLeft: 7,
         paddingRight: 0,
-        flex: 1
+        height: '100%',
+        paddingBottom: 500,
+        flexGrow: 1
     }} children={filteredFields} onFieldFunction={(fc, list, setValue, path) => {
         return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />;
