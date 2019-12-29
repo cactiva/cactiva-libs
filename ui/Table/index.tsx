@@ -13,6 +13,7 @@ import { DefaultTheme } from "@src/libs/theme";
 import Theme from "@src/theme.json";
 import { uuid } from "@src/libs/utils";
 import EmptyCell from "./EmptyCell";
+import NiceValue from "../Input/NiceValue";
 const theme = {
   ...DefaultTheme,
   ...Theme.colors
@@ -467,31 +468,8 @@ const RenderCell = observer((props: any) => {
   const { item, component, config } = props;
 
   let rawValue = config.mode === "manual" ? _.get(item, component.props.path) : item[component.path];
-  let valueEl = null;
-  if (typeof rawValue === 'object') {
-    if (rawValue === null) {
-      valueEl = <EmptyCell />
-    } else {
-      const keys = Object.keys(rawValue);
-      valueEl = keys.length === 1
-        ? <Text>{rawValue[keys[0]]}</Text>
-        : <table>
-          {keys.map((key: string) => {
-            return <tr key={key} style={{ verticalAlign: 'top' }}>
-              <td><Text style={{ fontSize: 12 }}>
-                {key}
-              </Text></td>
-              <td><Text style={{ fontSize: 12 }}>:</Text></td>
-              <td><Text style={{ fontSize: 12 }}>
-                {rawValue[key]}
-              </Text></td>
-            </tr>
-          })}
-        </table>
-    }
-  } else {
-    valueEl = <Text>{rawValue}</Text>
-  }
+  let valueEl = <NiceValue value={rawValue} />;
+
 
   if (config.mode === "manual") {
     const compProps = component.props;

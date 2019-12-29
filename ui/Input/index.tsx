@@ -5,6 +5,7 @@ import React, { useRef } from "react";
 import { TextInput, TextInputProps } from "react-native";
 import { DefaultTheme } from "../../theme";
 import Text from "../Text";
+import NiceValue from "./NiceValue";
 
 export type InputType =
   | "text"
@@ -65,7 +66,7 @@ export default observer((props: InputProps) => {
   };
 
   if (!!value && typeof value === "object") {
-    return <Text>{JSON.stringify(value)}</Text>;
+    return <NiceValue value={value} />;
   }
 
   switch (type) {
