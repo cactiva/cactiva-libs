@@ -182,7 +182,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             });
         } else if (meta.breadcrumbs.path.length === 2) {
             meta.mode = 'edit';
-            data.form = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1].data;
+            data.form = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1].rootStructure.__meta.data;
         }
     }, [structure, meta.breadcrumbs.path]);
 

@@ -1,8 +1,8 @@
 import { DefaultTheme } from "@src/libs/theme";
 import Theme from "@src/theme.json";
 import _ from 'lodash';
-import { observer } from "mobx-react-lite";
-import React from "react";
+import { observer, useObservable } from "mobx-react-lite";
+import React, { useEffect } from "react";
 import { StyleSheet, Text as NativeText, TouchableOpacity } from "react-native";
 import { isColumnForeign } from ".";
 import { Field } from "..";
@@ -17,6 +17,8 @@ import View from "../View";
 import BreadcrumbTrigger from "./BreadcrumbTrigger";
 import EmptyCell from "../Table/EmptyCell";
 import { toJS } from "mobx";
+import Select from "../Select";
+import SelectableForm from "./SelectableForm";
 
 const theme = {
     ...DefaultTheme,
@@ -189,15 +191,28 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
         return _.castArray(children).map(e => {
             if (e.type === Field) {
                 const fieldName = _.get(e, "props.path");
-                const fk = isColumnForeign(fieldName, fkeys);
-                if (fk) {
-                    breadForm[fieldName] = {
-                        el: e,
-                        fk
-                    };
+                if (fieldName === idKey) {
                     return false;
                 }
-                if (fieldName === idKey) return false;
+                else if (fkeys[fieldName] && fkeys[fieldName].table_schema) {
+                    return {
+                        ...e,
+                        props: {
+                            ...e.props,
+                            label: e.props.label.indexOf('Id ') === 0 ? e.props.label.substr(3) : e.props.label,
+                            children: <SelectableForm field={fieldName} fk={fkeys[fieldName]} />
+                        }
+                    };
+                } else {
+                    const fk = isColumnForeign(fieldName, fkeys);
+                    if (fk) {
+                        breadForm[fieldName] = {
+                            el: e,
+                            fk
+                        };
+                        return false;
+                    }
+                }
             } else {
                 const echild = _.get(e, 'props.children')
                 if (echild) {
@@ -317,7 +332,6 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
         }}>{formEl}</View>;
 
 })
-
 
 const getTextColor = function (bgColor: string, lightColor: string, darkColor: string) {
     var color = bgColor.charAt(0) === "#" ? bgColor.substring(1, 7) : bgColor;

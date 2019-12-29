@@ -73,6 +73,7 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                 structure: cstruct,
             });
 
+            // load list with fkeys
             await reloadList({
                 structure: bread.structure,
                 paging: bread.data.paging,
