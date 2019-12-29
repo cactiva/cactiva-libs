@@ -195,7 +195,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             });
         } else if (meta.breadcrumbs.path.length === 2) {
             const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
-            if (bread) {
+            if (bread && bread.rootStructure) {
                 meta.mode = 'edit';
                 data.form = bread.rootStructure.__meta.data;
             } else {

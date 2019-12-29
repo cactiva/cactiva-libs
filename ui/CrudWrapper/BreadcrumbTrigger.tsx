@@ -112,9 +112,6 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                                 return <TableColumn path={r.name}>
                                     {
                                         (c, params) => {
-                                            const firstKey = _.get(bread.props, `table.head.children.0.props.path`);
-                                            const firstCell = (params.item[firstKey] || '').toString().trim();
-                                            const rootTitle = _.get(bread.props, 'title.children', '');
                                             return <BreadcrumbTrigger
                                                 breadcrumbs={breadcrumbs}
                                                 data={c}
@@ -178,15 +175,14 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                         </Button>]
                 }
             };
-            if (breadcrumbs.path.length <= 1) {
+            if (breadcrumbs.path.length <= 1 && rootStructure) {
                 const bcumbs = [];
                 const rmeta = rootStructure.__meta;
                 const firstKey = rmeta.firstKey;
-                let firstCell = (rmeta.data[firstKey] || '');
+                let firstCell = _.get(rmeta.data, firstKey);
                 if (typeof firstCell === 'object') {
                     firstCell = firstCell[Object.keys(firstCell)[0]];
                 }
-
 
                 const rootTitle = rmeta.title;
                 bcumbs.push({
