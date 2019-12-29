@@ -498,9 +498,7 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                         meta
                     });
                     meta.loading.form = false;
-                    if (breadcrumbs.path.length === 0) {
-                        meta.mode = '';
-                    }
+                    meta.mode = '';
                     data.form[idKey] = res[idKey];
                     if (onChange) {
                         onChange({
@@ -525,17 +523,20 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     meta.loading.form = true;
                     await queryAll(q.query, { variables: q.variables, auth });
                     await executeSubCrudActions(meta, data.form[idKey]);
-                    if (breadcrumbs.path.length === 0) {
-                        await reloadList({
-                            structure,
-                            paging,
-                            idKey,
-                            itemPerPage,
-                            data,
-                            loading: meta.loading,
-                            meta
-                        });
-                        meta.mode = '';
+                    await reloadList({
+                        structure,
+                        paging,
+                        idKey,
+                        itemPerPage,
+                        data,
+                        loading: meta.loading,
+                        meta
+                    });
+                    meta.mode = '';
+
+
+                    if (breadcrumbs.path.length === 2) {
+                        breadcrumbs.path.pop();
                     }
                     meta.loading.form = false;
                     if (onChange) {
