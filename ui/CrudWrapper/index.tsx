@@ -181,8 +181,13 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 meta
             });
         } else if (meta.breadcrumbs.path.length === 2) {
-            meta.mode = 'edit';
-            data.form = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1].rootStructure.__meta.data;
+            const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
+            if (bread) {
+                meta.mode = 'edit';
+                data.form = bread.rootStructure.__meta.data;
+            } else {
+                console.log(toJS(meta.breadcrumbs));
+            }
         }
     }, [structure, meta.breadcrumbs.path]);
 

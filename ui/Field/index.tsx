@@ -17,6 +17,7 @@ import { RadioProps } from "../Radio";
 import RadioGroup, { RadioGroupProps } from "../RadioGroup";
 import Select, { SelectProps } from "../Select";
 import DateTime from "../DateTime";
+import SelectableForm from "../CrudWrapper/SelectableForm";
 
 interface StylesFieldProps {
   root?: any;
@@ -153,6 +154,7 @@ export default observer((props: FieldProps) => {
       };
       break;
     case Select:
+    case SelectableForm:
       childProps = {
         style: childStyle,
         value: value,
