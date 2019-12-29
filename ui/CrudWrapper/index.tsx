@@ -197,9 +197,9 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
             if (bread && bread.rootStructure) {
                 meta.mode = 'edit';
-                data.form = bread.rootStructure.__meta.data;
+                data.form = bread.rootStructure.__meta.data[0];
             } else {
-                console.log(toJS(meta.breadcrumbs));
+                console.log(toJS(bread));
             }
         }
     }, [structure, meta.breadcrumbs.path]);
@@ -498,7 +498,9 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                         meta
                     });
                     meta.loading.form = false;
-                    meta.mode = '';
+                    if (breadcrumbs.path.length === 0) {
+                        meta.mode = '';
+                    }
                     data.form[idKey] = res[idKey];
                     if (onChange) {
                         onChange({
@@ -523,17 +525,19 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     meta.loading.form = true;
                     await queryAll(q.query, { variables: q.variables, auth });
                     await executeSubCrudActions(meta, data.form[idKey]);
-                    await reloadList({
-                        structure,
-                        paging,
-                        idKey,
-                        itemPerPage,
-                        data,
-                        loading: meta.loading,
-                        meta
-                    });
+                    if (breadcrumbs.path.length === 0) {
+                        await reloadList({
+                            structure,
+                            paging,
+                            idKey,
+                            itemPerPage,
+                            data,
+                            loading: meta.loading,
+                            meta
+                        });
+                        meta.mode = '';
+                    }
                     meta.loading.form = false;
-                    meta.mode = '';
                     if (onChange) {
                         onChange({
                             action: 'update',
