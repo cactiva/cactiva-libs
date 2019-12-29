@@ -21,7 +21,7 @@ const NiceValue = observer(({ value, style }: any) => {
                                     border: '1px solid #ddd',
                                     padding: 6, paddingTop: 2, paddingBottom: 2
                                 }}>
-                                    <Text style={{ fontSize: 12 }}>
+                                    <Text style={{ fontSize: 13 }}>
                                         {_.startCase(key)}
                                     </Text>
                                 </td>
@@ -31,7 +31,7 @@ const NiceValue = observer(({ value, style }: any) => {
                                 }}>
                                     {typeof value[key] === 'object' ? <NiceValue
                                         style={{ marginLeft: -4, marginRight: -4 }}
-                                        value={value[key]} /> : <Text style={{ fontSize: 12 }}>value[key]</Text>}
+                                        value={value[key]} /> : <Text style={{ fontSize: 13 }}>{value[key]}</Text>}
                                 </td>
                             </tr>
                         })}
