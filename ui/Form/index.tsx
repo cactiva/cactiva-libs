@@ -7,6 +7,7 @@ import { ThemeProps } from "../../theme";
 import { uuid } from "../../utils";
 import Field from "../Field";
 import View from "../View";
+import { toJS } from "mobx";
 
 export interface FormProps extends ScrollViewProps {
   data?: any;
@@ -42,18 +43,27 @@ export default observer((props: FormProps) => {
   }, [meta.initError, meta.validate]);
 
   useEffect(() => {
-    if (children) {
-      if (Array.isArray(children)) {
-        children.map(el => {
-          if (el.props && el.props.isRequired && el.props.path)
-            meta.validate[el.props.path] = false;
+    validateCheck(children);
+  }, []);
+
+  const validateCheck = child => {
+    if (child) {
+      if (Array.isArray(child)) {
+        child.map(el => {
+          if (el.props && Array.isArray(el.props.children)) {
+            validateCheck(el.props.children);
+          } else {
+            if (el.props && el.props.isRequired && el.props.path)
+              meta.validate[el.props.path] = false;
+          }
         });
       } else {
-        if (children.props && children.props.isRequired && children.props.path)
-          meta.validate[children.props.path] = false;
+        if (child.props && child.props.isRequired && child.props.path)
+          meta.validate[child.props.path] = false;
       }
     }
-  }, []);
+  };
+
   return (
     <View
       type={"ScrollView"}

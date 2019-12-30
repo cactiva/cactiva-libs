@@ -8,20 +8,19 @@ import { Animated, Easing } from "react-native";
 const theme = require("../theme.json");
 
 export const AppContainer = () => {
-
   const componentRoutes = {};
   Object.keys(components).forEach((key: string) => {
-    if (key.indexOf('/') < 0) {
+    if (key.indexOf("/") < 0) {
       componentRoutes[key] = {
         screen: components[key],
         params: {},
         path: key
       }
     }
-  })
+  });
 
   const App = createBrowserApp(
-    createStackNavigator(componentRoutes, {
+    createStackNavigator(components, {
       headerMode: "none",
       initialRouteName: initialRouteName,
       transitionConfig: () => ({
