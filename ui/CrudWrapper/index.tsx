@@ -197,7 +197,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             const bread = meta.breadcrumbs.path[meta.breadcrumbs.path.length - 1];
             if (bread && bread.rootStructure) {
                 meta.mode = 'edit';
-                data.form = bread.rootStructure.__meta.data[0];
+                data.form = bread.rootStructure.__meta.data;
             } else {
                 console.log(toJS(bread));
             }
@@ -394,17 +394,33 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
     const { data, breadcrumbs, meta, paging, structure, idKey, itemPerPage, auth, onChange, baseForm } = props;
     return {
         edit: (input) => {
-            meta.mode = 'edit';
-            data.form = input;
-
-            modifyBread(breadcrumbs, (bread) => {
-                bread.title = `${bread.originalTitle} (Edit)`;
-            })
-
+            const baseInput = _.cloneDeep(input);
             if (baseForm) {
                 for (let i in baseForm) {
-                    data.form[i] = baseForm[i];
+                    baseInput[i] = baseForm[i];
                 }
+            }
+            if (breadcrumbs.path.length > 2) {
+                const bread = _.clone(breadcrumbs.path[breadcrumbs.path.length - 1]);
+                let title = '';
+                Object.keys(baseInput).map((key) => {
+                    if (key.indexOf('id') !== 0 && typeof baseInput[key] !== 'object') {
+                        title = `${key}: ${baseInput[key]}`
+                    }
+                })
+                console.log(toJS(baseInput), title);
+                breadcrumbs.path.push({
+                    ...bread,
+                    title: title || 'Edit',
+                    mode: 'edit',
+                    data: {
+                        ...bread.data,
+                        form: baseInput
+                    }
+                });
+            } else {
+                meta.mode = 'edit';
+                data.form = baseInput;
             }
         },
         create: () => {

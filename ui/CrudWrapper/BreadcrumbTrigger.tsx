@@ -191,7 +191,8 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                 })
                 bcumbs.push({
                     title: `${rmeta.firstTitle}: ${firstCell}`,
-                    data
+                    mode: 'edit',
+                    rootStructure
                 })
                 bcumbs.push(bread);
                 breadcrumbs.path = bcumbs;
