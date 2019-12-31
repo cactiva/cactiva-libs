@@ -408,7 +408,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                         title = `${key}: ${baseInput[key]}`
                     }
                 })
-                console.log(toJS(baseInput), title);
                 breadcrumbs.path.push({
                     ...bread,
                     title: title || 'Edit',
@@ -504,18 +503,20 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     meta.loading.form = true;
                     const res = await queryAll(q.query, { variables: q.variables, auth });
                     await executeSubCrudActions(meta, res[idKey]);
-                    await reloadList({
-                        structure,
-                        paging,
-                        idKey,
-                        itemPerPage,
-                        data,
-                        loading: meta.loading,
-                        meta
-                    });
+                    // await reloadList({
+                    //     structure,
+                    //     paging,
+                    //     idKey,
+                    //     itemPerPage,
+                    //     data,
+                    //     loading: meta.loading,
+                    //     meta
+                    // });
+                    meta.mode = 'edit';
                     meta.loading.form = false;
-                    meta.mode = '';
                     data.form[idKey] = res[idKey];
+                    console.log(toJS(data.form));
+                    
                     if (onChange) {
                         onChange({
                             action: 'insert',
@@ -549,8 +550,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                         meta
                     });
                     meta.mode = '';
-
-
                     if (breadcrumbs.path.length === 2) {
                         breadcrumbs.path.pop();
                     }
@@ -566,8 +565,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     meta.mode = '';
                     break;
             }
-
-            data.form = {};
         },
         cancel: async () => {
             meta.mode = '';

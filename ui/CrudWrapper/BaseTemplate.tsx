@@ -240,7 +240,7 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
         return fc({ list: list, queries: subCrudQueries, setValue, path });
     }} />;
 
-    if (breadFormKeys.length > 0) {
+    if (breadFormKeys.length > 0 && data[idKey]) {
         return <View style={{ flexGrow: 1, flexDirection: 'row', borderTopWidth: 3, borderTopColor: '#F1F1F1' }}>
             <View style={{ flexGrow: 1 }}>
                 <View
