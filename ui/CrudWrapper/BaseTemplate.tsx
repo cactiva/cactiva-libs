@@ -261,7 +261,7 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
                     const e = breadForm[key].el;
                     const fk = breadForm[key].fk;
                     const label = e.props.label || e.props.path;
-                    const list = _.castArray(data[e.props.path]);
+                    const list = _.castArray(data[e.props.path]).filter(e => !!e);
                     return <View key={key} style={{
                         backgroundColor: '#fff',
                         borderBottomColor: '#ccc',

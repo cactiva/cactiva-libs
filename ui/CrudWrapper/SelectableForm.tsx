@@ -24,30 +24,32 @@ export default observer(({ fk, field, value, onSelect, onFocus, valuePath, label
         }
 
         const table = tables[fk.foreign_table_name];
-        meta.data = table.data;
-        const res = await queryAll(`query {
+        if (table) {
+            meta.data = table.data;
+            const res = await queryAll(`query {
             ${fk.foreign_table_name} {
                 ${table.columns
-                .filter(e => {
-                    if (e.column_name === 'id') return true;
-                    return e.column_name.indexOf('id') !== 0
-                })
-                .map(e => e.column_name)
-                .join('\n')}
+                    .filter(e => {
+                        if (e.column_name === 'id') return true;
+                        return e.column_name.indexOf('id') !== 0
+                    })
+                    .map(e => e.column_name)
+                    .join('\n')}
             }
         }`, { auth: true });
 
-        if (Array.isArray(res)) {
-            meta.data = res.map(e => {
-                const keys = Object.keys(e);
-                return {
-                    ...e,
-                    value: e.id,
-                    label: e[keys[1]]
-                }
-            })
+            if (Array.isArray(res)) {
+                meta.data = res.map(e => {
+                    const keys = Object.keys(e);
+                    return {
+                        ...e,
+                        value: e.id,
+                        label: e[keys[1]]
+                    }
+                })
 
-            table.data = toJS(meta.data);
+                table.data = toJS(meta.data);
+            }
         }
     }, []);
     return <Select
