@@ -32,7 +32,7 @@ const ActionButton = ({ onPress, text, style }: any) => {
         </NativeText>
     </TouchableOpacity>;
 }
-export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, list, filter, paging, form, props, actions, mode, loading, style, subCrudQueries }: any) => {
+export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, list, filter, paging, form, props, actions, mode, loading, style }: any) => {
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
     return <View style={{ flexGrow: 1, ...style }}>
@@ -169,14 +169,13 @@ export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, lis
                     mode={mode}
                     form={form}
                     filter={filter}
-                    subCrudQueries={subCrudQueries}
                 />}
 
         </View>
     </View>
 })
 
-const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter, subCrudQueries }: any) => {
+const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter }: any) => {
     let data = null;
     switch (mode) {
         case "filter": data = filter; break;
@@ -236,9 +235,7 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
         height: '100%',
         paddingBottom: 500,
         flexGrow: 1
-    }} children={filteredFields} onFieldFunction={(fc, list, setValue, path) => {
-        return fc({ list: list, queries: subCrudQueries, setValue, path });
-    }} />;
+    }} children={filteredFields} />;
 
     if (breadFormKeys.length > 0 && data[idKey]) {
         return <View style={{ flexGrow: 1, flexDirection: 'row', borderTopWidth: 3, borderTopColor: '#F1F1F1' }}>

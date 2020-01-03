@@ -30,7 +30,6 @@ export { default as TableColumn } from "./Table/TableColumn";
 export { default as TableHead } from "./Table/TableHead";
 export { default as TableRow } from "./Table/TableRow";
 export { default as CrudWrapper } from "./CrudWrapper";
-export { default as SubCrudWrapper } from "./SubCrudWrapper";
 export { default as TabView } from "./TabView";
 export { default as DateTime } from "./DateTime";
  

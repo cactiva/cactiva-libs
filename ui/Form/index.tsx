@@ -14,11 +14,10 @@ export interface FormProps extends ScrollViewProps {
   children?: any;
   theme?: ThemeProps;
   onSubmit?: (data?: any) => void;
-  onFieldFunction?: (data?: any) => void;
 }
 
 export default observer((props: FormProps) => {
-  const { children, data, setValue, onSubmit, onFieldFunction } = props;
+  const { children, data, setValue, onSubmit } = props;
   const dim = useDimensions().window;
   const meta = useObservable({
     initError: false,
@@ -73,7 +72,6 @@ export default observer((props: FormProps) => {
               child={el}
               key={uuid()}
               meta={meta}
-              onFieldFunction={onFieldFunction}
               onSubmit={onSubmit}
             />
           );
@@ -85,7 +83,6 @@ export default observer((props: FormProps) => {
             child={children}
             key={uuid()}
             meta={meta}
-            onFieldFunction={onFieldFunction}
             onSubmit={onSubmit}
           />
         )}
@@ -94,7 +91,7 @@ export default observer((props: FormProps) => {
 });
 
 const RenderChild = observer((props: any) => {
-  const { data, child, setValue, meta, onSubmit, onFieldFunction } = props;
+  const { data, child, setValue, meta, onSubmit } = props;
   if (!child || !child.type || !child.props) {
     return child;
   }
@@ -123,18 +120,7 @@ const RenderChild = observer((props: any) => {
 
 
   if (typeof child.props.children === "function") {
-    let fc = null;
-
-    if (onFieldFunction) {
-      fc = onFieldFunction(
-        child.props.children,
-        _.get(data, child.props.path, []),
-        defaultSetValue,
-        child.props.path
-      );
-    } else {
-      fc = child.props.children(_.get(data, child.props.path, []));
-    }
+    const fc = child.props.children(_.get(data, child.props.path, []));
 
     return React.cloneElement(child, {
       ...child.props,

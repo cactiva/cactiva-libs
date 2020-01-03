@@ -267,46 +267,6 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         })} />;
 });
 
-const executeSubCrudActions = async (meta: any, id: any) => {
-    await Promise.all(_.values(meta.subCrudQueries).map(async m => {
-        const insert = _.values(m.insert).map(s => {
-            const q = generateInsertString(s.structure.table, {
-                ...s.data,
-                [s.foreignKey]: id
-            })
-            return queryAll(q.query, { variables: q.variables, auth: s.structure.auth });
-        });
-        const update = _.values(m.update).map(s => {
-            const q = generateUpdateString(s.structure.table, s.foreignKey ? {
-                ...s.data,
-                [s.foreignKey]: id
-            } : s.data, {
-                where: [{
-                    name: s.idKey,
-                    operator: '_eq',
-                    value: s.data[s.idKey],
-                    valueType: 'IntVal'
-                }]
-            })
-            return queryAll(q.query, { variables: q.variables, auth: s.structure.auth });
-        });
-        const del = _.values(m.delete).map(s => {
-            const q = generateDeleteString(s.structure.table, {
-                where: [{
-                    name: s.idKey,
-                    operator: '_eq',
-                    value: s.data[s.idKey],
-                    valueType: 'IntVal'
-                }]
-            })
-            return queryAll(q.query, { auth: s.structure.auth });
-        });
-        return Promise.all([...insert, ...update, ...del]);
-    }));
-
-    meta.subCrudQueries = {};
-}
-
 export const isColumnForeign = (col: string, fkeys) => {
     const fcol = fkeys ? Object.keys(fkeys) : [];
     const res = fcol.filter(f => {
@@ -502,7 +462,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     q = generateInsertString(structure, toJS(data.form));
                     meta.loading.form = true;
                     const res = await queryAll(q.query, { variables: q.variables, auth });
-                    await executeSubCrudActions(meta, res[idKey]);
                     // await reloadList({
                     //     structure,
                     //     paging,
@@ -539,7 +498,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
 
                     meta.loading.form = true;
                     await queryAll(q.query, { variables: q.variables, auth });
-                    await executeSubCrudActions(meta, data.form[idKey]);
                     await reloadList({
                         structure,
                         paging,
