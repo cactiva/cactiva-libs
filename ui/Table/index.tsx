@@ -385,7 +385,7 @@ const DefaultHeaderCell = observer((props: any) => {
               color={
                 config.sortField === cell.path && config.sortMode === "asc"
                   ? "#44424b"
-                  : "#9c9eaf"
+                  : "#fafafa"
               }
               style={{
                 height: 5,
@@ -398,7 +398,7 @@ const DefaultHeaderCell = observer((props: any) => {
               color={
                 config.sortField === cell.path && config.sortMode === "desc"
                   ? "#44424b"
-                  : "#9c9eaf"
+                  : "#fafafa"
               }
               style={{
                 height: 5

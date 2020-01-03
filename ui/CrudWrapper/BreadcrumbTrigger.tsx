@@ -15,7 +15,7 @@ const theme = {
     ...DefaultTheme,
     ...Theme.colors
 };
-
+const filterTableColumn = r => (r.name !== idKey && r.name.indexOf('id') !== 0 && r.name.indexOf('_') !== 0);
 const idKey = 'id';
 const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage, data, rootStructure, breadcrumbs, where, tableName }: any) => {
     const meta = useObservable({ loading: false });
@@ -106,7 +106,7 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                         onSort: () => { },
                     },
                     row: {
-                        children: cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
+                        children: cstruct.fields.filter(filterTableColumn).map((r, rk) => {
                             const fk = isColumnForeign(r.name, bread.fkeys)
                             if (fk) {
                                 return <TableColumn path={r.name}>
@@ -139,7 +139,7 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                         })
                     },
                     head: {
-                        children: cstruct.fields.filter(r => (r.name !== idKey)).map((r, rk) => {
+                        children: cstruct.fields.filter(filterTableColumn).map((r, rk) => {
                             return <TableColumn key={rk} path={r.name} title={_.startCase(r.name)} />
                         })
                     }
@@ -203,7 +203,7 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
         }}>
 
         {meta.loading
-            ? <Spinner />
+            ? <Spinner size={13} />
             : children ? children : <Text style={{ color: '#000', fontSize: 12, }}>
                 {Array.isArray(data)
                     ? data.length > 0 ? `${data.length} item${data.length > 1 ? 's' : ''}` : <EmptyCell />
