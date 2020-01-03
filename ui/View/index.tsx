@@ -12,13 +12,11 @@ import {
   View,
   ViewProps
 } from "react-native";
-import { SafeAreaViewProps } from "react-navigation";
 import _ from "lodash";
 
 interface CustomViewProps
   extends ViewProps,
   ScrollViewProps,
-  SafeAreaViewProps,
   KeyboardAvoidingViewProps {
   type?:
   | "View"
@@ -28,6 +26,7 @@ interface CustomViewProps
   | "KeyboardAvoidingView";
   source?: any;
   shadow?: boolean;
+  children?: any;
 }
 
 export default (props: CustomViewProps) => {

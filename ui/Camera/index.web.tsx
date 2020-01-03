@@ -1,13 +1,14 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Image, TouchableOpacity, View } from "react-native";
-import Icon from "../Icon";
 import { observer, useObservable } from "mobx-react-lite";
-import { CameraProps } from ".";
-import { DefaultTheme, ThemeProps } from "../../theme";
-import { useDimensions } from "react-native-hooks";
-import Webcam from "react-webcam";
+import React, { useEffect, useState, Suspense } from "react";
 import { createPortal } from "react-dom";
+import { Image, TouchableOpacity, View } from "react-native";
+import { useDimensions } from "react-native-hooks";
+import { CameraProps } from ".";
+import { DefaultTheme } from "../../theme";
+import Icon from "../Icon";
 
+
+const Webcam: any = React.lazy(() => import("react-webcam"));
 export default observer((props: CameraProps) => {
   const theme = {
     ...DefaultTheme,
@@ -117,12 +118,13 @@ const ModalCamera = ({ videoConstraints, webcamRef, capture }: any) => {
         background: "white"
       }}
     >
-      <Webcam
+
+      <Suspense fallback={<div>Loading... </div>}><Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
-      />
+      /></Suspense>
     </div>,
     rootPortal
   );

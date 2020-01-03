@@ -1,14 +1,13 @@
 import ErrorBoundary from "@src/libs/ErrorBoundary";
+import { Platform } from "@unimodules/core";
 import { observer } from "mobx-react-lite";
-import React from "react";
-// import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
-// import { GoogleLayer } from 'react-leaflet-google-v2';
-import { GoogleMap, Marker as MarkerComponent, withGoogleMap, withScriptjs } from "react-google-maps";
+import React, { useEffect, useState, Suspense } from "react";
 import { Text, View } from "react-native";
 import { MapViewProps } from "./index";
-import { Platform } from "@unimodules/core";
 
+const MarkerComponent = React.lazy(() => import('./web/Marker'));
 export const Marker = MarkerComponent;
+const GoogleMap: any = React.lazy(() => import('./web/GoogleMap'));
 const MapViewInner = observer((props: MapViewProps) => {
   const { location, style, zoom } = props;
 
@@ -17,22 +16,41 @@ const MapViewInner = observer((props: MapViewProps) => {
     center = { lat: location.latitude, lng: location.longitude };
   }
   return (
-    <GoogleMap
-      defaultZoom={zoom || 15}
-      defaultCenter={center}
-      defaultOptions={{
-        zoomControl: false,
-        disableDefaultUI: true,
-        fullscreenControl: false
-      }}
-    >
-      <Marker position={center} />
-    </GoogleMap>
+    <Suspense fallback={<div>Loading... </div>}>
+      <GoogleMap
+        defaultZoom={zoom || 15}
+        defaultCenter={center}
+        defaultOptions={{
+          zoomControl: false,
+          disableDefaultUI: true,
+          fullscreenControl: false
+        }}
+      >
+        <Marker position={center} />
+      </GoogleMap>
+    </Suspense>
   );
 });
 
+let withScriptjs, withGoogleMap = null;
 export default (props: MapViewProps) => {
   if (Platform.OS !== "web") return <Text>Wrong OS</Text>;
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (withGoogleMap === null) {
+      import("react-google-maps").then((res) => {
+        withScriptjs = res.withScriptjs;
+        withGoogleMap = res.withGoogleMap;
+        setReady(true);
+      })
+    }
+  })
+
+  if (!ready) {
+    return null;
+  }
+
   const MapView = withScriptjs(withGoogleMap(MapViewInner));
 
   const mapStyle = {

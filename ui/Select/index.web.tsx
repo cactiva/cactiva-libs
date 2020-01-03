@@ -1,12 +1,11 @@
 import Theme from "@src/theme.json";
 import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
-import React, { useEffect } from "react";
-import Select from 'react-select';
+import React, { useEffect, Suspense } from "react";
 import { DefaultTheme } from "../../theme";
 import { SelectProps } from "./index";
-import { toJS } from "mobx";
 
+const Select = React.lazy(() => import("react-select"));
 const parsePath = (item, path) => {
   if (typeof item === 'object') {
     if (typeof path === 'function') {
@@ -54,12 +53,14 @@ export default observer((props: SelectProps) => {
   })
 
   return (
-    <Select 
-      value={meta.items[idx]}
-      onChange={(e) => {
-        props.onSelect(e.value)
-      }}
-      styles={customStyles} options={meta.items} />
+    <Suspense fallback={<div>Loading... </div>}>
+      <Select
+        value={meta.items[idx]}
+        onChange={(e) => {
+          props.onSelect(e.value)
+        }}
+        styles={customStyles} options={meta.items} />
+    </Suspense>
   );
 });
 

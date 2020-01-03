@@ -1,5 +1,6 @@
-import { format as formatFNS, parseISO } from "date-fns";
-import * as locales from "date-fns/locale";
+import formatFNS from "date-fns/format";
+import parseISO from "date-fns/parseISO";
+import { id, enUS } from "date-fns/locale";
 import Theme from "@src/theme.json";
 
 export const dateParse = (value: any) => {
@@ -13,7 +14,7 @@ export const dateFormat = (value: any, format?: string) => {
   const inputFormat = format ? format : "dd MMM yyyy - HH:mm";
   if (typeof value === "string") {
     return formatFNS(parseISO(value), inputFormat, {
-      locale: locales[locale]
+      locale: locale === "en" ? enUS : id
     });
   }
 

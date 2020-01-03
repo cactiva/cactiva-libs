@@ -1,15 +1,17 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { observer } from "mobx-react-lite";
-import Modal from "modal-react-native-web";
 import { ModalProps } from ".";
 
+const Modal = React.lazy(() => import("modal-react-native-web"));
 export default observer((props: ModalProps) => {
   return (
-    <Modal
-      ariaHideApp={false}
-      animationType="slide"
-      transparent={true}
-      {...props}
-    />
+    <Suspense fallback={<div>Loading... </div>}>
+      <Modal
+        ariaHideApp={false}
+        animationType="slide"
+        transparent={true}
+        {...props}
+      />
+    </Suspense>
   );
 });

@@ -84,8 +84,8 @@ const Menu = observer((props: any) => {
         flexGrow: 1,
         ...(!active
           ? {
-              maxWidth: scale(50)
-            }
+            maxWidth: scale(50)
+          }
           : {})
       }}
       onPress={onPress}

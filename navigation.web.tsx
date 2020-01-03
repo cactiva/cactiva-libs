@@ -1,87 +1,59 @@
-import { createBrowserApp } from "@react-navigation/web";
-import { createStackNavigator } from "react-navigation-stack";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDimensions } from "react-native-hooks";
-import React from "react";
-import components, { initialRouteName } from "@src/components";
-import { Animated, Easing } from "react-native";
+import { router } from "react-navigation-hooks";
 
 const theme = require("../theme.json");
 
-export const AppContainer = () => {
 
-  const componentRoutes = {};
-  Object.keys(components).forEach((key: string) => {
-    // if (key.indexOf('/') < 0) {
-      componentRoutes[key] = {
-        screen: components[key],
-        params: {},
-        path: key
+const pages = {
+  components: {},
+  routes: {},
+  initial: ''
+}
+const Container = () => {
+  const [ready, setReady] = useState(false);
+  const routeResult = router.useRoutes(pages.routes);
+  let App = () => {
+    if (!ready) {
+      return <div></div>
+    }
+    return routeResult || <div>Not Found</div>;
+  };
+  useEffect(() => {
+    import("@src/components").then(res => {
+      pages.components = res.default;
+      pages.initial = res.initialRouteName;
+      pages.routes = {};
+
+      for (let i in pages.components) {
+        const Component = pages.components[i];
+        pages.routes["/" + i] = (navigation) => <Component navigation={navigation} />;
       }
-    // }
+
+      const Component = pages.components[pages.initial];
+      pages.routes["/"] = (navigation) => <Component navigation={navigation} />;
+      setReady(true);
+    })
   })
 
-  const App = createBrowserApp(
-    createStackNavigator(componentRoutes, {
-      headerMode: "none",
-      initialRouteName: initialRouteName,
-      transitionConfig: () => ({
-        transitionSpec: {
-          duration: 0,
-          timing: Animated.timing,
-          easing: Easing.out(Easing.poly(4))
-        },
-        screenInterpolator: sceneProps => {
-          const { layout, position, scene } = sceneProps;
-          const { index } = scene;
-          const width = layout.initWidth;
-          const translateX = position.interpolate({
-            inputRange: [index - 1, index, index + 1],
-            outputRange: [width, 0, 0]
-          });
-          if (index <= 1) {
-            return {};
-          }
+  if (theme.device === "mobile") {
+    const dim = useDimensions().window;
+    if (dim.width > 460)
+      return (
+        <div className="mobile-root">
+          <App />
+        </div>
+      );
+  }
 
-          return { transform: [{ translateX }] };
-        }
-      })
-    })
+  return (
+    <div className="web-root">
+      <App />
+    </div>
   );
+}
 
-  return () => {
-    if (theme.device === "mobile") {
-      const dim = useDimensions().window;
-      if (dim.width > 460)
-        return (
-          <div className="mobile-root">
-            <App />
-          </div>
-        );
-    }
 
-    return (
-      <div className="web-root">
-        <App />
-      </div>
-    );
-  };
+export const AppContainer = () => {
+  return () => <Container />;
 };
-
-// function importAllRoute(r, except) {
-//   const routes = {};
-//   r.keys().map(name => {
-//     const finalName = name.substr(2, name.length - 6);
-//     let skip = false;
-//     except.map(ex => {
-//       if (finalName.indexOf(ex) > -1) skip = true;
-//     });
-//     if (skip) return;
-//     routes[finalName] = {
-//       screen: r(name).default,
-//       path: finalName
-//     };
-//   });
-//   return routes;
-// }
-// export const routes = (except: string[] = ["libs", "assets"]) =>
-//   importAllRoute(require.context("../", true, /\.(tsx)$/), except);
