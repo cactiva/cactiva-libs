@@ -75,33 +75,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
     children.map((e) => {
         if (e.type === Table) {
-            props.table.root = {
-                ...e.props,
-                onSort: (r, mode) => {
-                    if (!isColumnForeign(r, meta.fkeys)) {
-                        if (mode) {
-                            structure.orderBy = [{
-                                name: r,
-                                value: mode,
-                                valueType: 'StringValue'
-                            }]
-                        } else {
-                            structure.orderBy = []
-                        }
-                        reloadList({
-                            structure,
-                            paging,
-                            idKey,
-                            itemPerPage,
-                            data,
-                            loading: meta.loading,
-                            meta
-                        });
-                        return true;
-                    }
-                    return false;
-                }
-            };
+            props.table.root = { ...e.props };
             if (structure && structure.orderBy.length > 0) {
                 props.table.root.config = {
                     sortMode: _.get(structure, 'orderBy.0.value'),
@@ -170,7 +144,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             })
         } else if (e.type === Text) {
             props.title = { ...e.props };
-        } else if (e.type === View || e.type === ViewNative) {
+        } else if (e.props && (e.type === View || e.type === ViewNative)) {
             if (!e.props.type) {
                 props.actions = { ...e.props };
             } else {
@@ -188,7 +162,6 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 structure,
                 paging,
                 idKey,
-                itemPerPage,
                 data,
                 loading: meta.loading,
                 meta
@@ -288,8 +261,8 @@ export const isColumnForeign = (col: string, fkeys) => {
     return false;
 }
 
-export const reloadList = async (params: { structure, loading, paging, idKey, itemPerPage, data, meta }) => {
-    let { structure, loading, paging, idKey, itemPerPage, data, meta } = params;
+export const reloadList = async (params: { structure, loading, paging, idKey, data, meta }) => {
+    let { structure, loading, paging, idKey, data, meta } = params;
     if (structure) {
         loading.list = true;
         const currentPage = _.get(paging, 'current', 1)
@@ -301,8 +274,8 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
         const query = generateQueryString({
             ...structure, orderBy, options: {
                 ...structure.options,
-                limit: itemPerPage,
-                offset: (currentPage - 1) * itemPerPage
+                limit: paging.itemPerPage,
+                offset: (currentPage - 1) * paging.itemPerPage
             }
         });
         const res = await queryAll(query, { auth: data.auth });
@@ -313,7 +286,7 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
                 data.paging.count = count;
                 if (!data.paging.current)
                     data.paging.current = 1;
-                data.paging.total = Math.ceil(count / itemPerPage);
+                data.paging.total = Math.ceil(count / paging.itemPerPage);
             } else {
                 data.list = e || [];
             }
@@ -401,7 +374,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     structure,
                     paging,
                     idKey,
-                    itemPerPage,
                     data,
                     loading: meta.loading,
                     meta
@@ -415,7 +387,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     structure,
                     paging,
                     idKey,
-                    itemPerPage,
                     data,
                     loading: meta.loading,
                     meta
@@ -442,7 +413,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                 structure,
                 paging,
                 idKey,
-                itemPerPage,
                 data,
                 loading: meta.loading,
                 meta
@@ -475,7 +445,7 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     meta.loading.form = false;
                     data.form[idKey] = res[idKey];
                     console.log(toJS(data.form));
-                    
+
                     if (onChange) {
                         onChange({
                             action: 'insert',
@@ -502,7 +472,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                         structure,
                         paging,
                         idKey,
-                        itemPerPage,
                         data,
                         loading: meta.loading,
                         meta

@@ -2,23 +2,22 @@ import { DefaultTheme } from "@src/libs/theme";
 import Theme from "@src/theme.json";
 import _ from 'lodash';
 import { observer, useObservable } from "mobx-react-lite";
-import React, { useEffect } from "react";
-import { StyleSheet, Text as NativeText, TouchableOpacity } from "react-native";
-import { isColumnForeign } from ".";
-import { Field } from "..";
+import React from "react";
+import { StyleSheet, Text as NativeText, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import { isColumnForeign, reloadList } from ".";
+import { Field, Modal } from "..";
 import Form from "../Form";
 import Icon from "../Icon";
 import Spinner from "../Spinner";
 import Table from "../Table";
+import EmptyCell from "../Table/EmptyCell";
 import TableHead from "../Table/TableHead";
 import TableRow from "../Table/TableRow";
 import Text from "../Text";
 import View from "../View";
 import BreadcrumbTrigger from "./BreadcrumbTrigger";
-import EmptyCell from "../Table/EmptyCell";
-import { toJS } from "mobx";
-import Select from "../Select";
 import SelectableForm from "./SelectableForm";
+import { toJS } from "mobx";
 
 const theme = {
     ...DefaultTheme,
@@ -32,7 +31,25 @@ const ActionButton = ({ onPress, text, style }: any) => {
         </NativeText>
     </TouchableOpacity>;
 }
-export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, list, filter, paging, form, props, actions, mode, loading, style }: any) => {
+export default observer(({
+    idKey,
+    breadcrumbs,
+    breadForms,
+    structure,
+    fkeys,
+    list,
+    filter,
+    paging,
+    form,
+    props,
+    actions,
+    mode,
+    loading,
+    style
+}: any) => {
+    const meta = useObservable({
+        filterModal: false
+    });
     const actionsChildren = _.castArray(props.actions.children);
     const textStyle = _.get(props, 'title.props.style', {});
     return <View style={{ flexGrow: 1, ...style }}>
@@ -108,6 +125,27 @@ export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, lis
                             </TouchableOpacity>
                         </>
                         }
+                        <View style={styles.actionSeparator} />
+                        <TouchableOpacity style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginLeft: 5,
+                        }} onPress={() => {
+                            meta.filterModal = true;
+                            filter.selected = null;
+                        }}>
+                            <Icon
+                                source={"Ionicons"}
+                                name={"ios-search"}
+                                color={theme.dark}
+                                size={18}
+                                style={{
+                                    margin: 5,
+                                    marginRight: 0,
+                                }}
+                            ></Icon>
+                            <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>Filter</Text>
+                        </TouchableOpacity>
                     </View>
                     }
                     {
@@ -145,19 +183,113 @@ export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, lis
                 </View>
             }
         </View>
+
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={meta.filterModal}
+            onRequestClose={() => {
+                meta.filterModal = false;
+            }}
+        >
+            <View style={{ flex: 1 }}>
+                <TouchableWithoutFeedback onPress={() => {
+                    meta.filterModal = false;
+                }}><View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0,0,0,.2)"
+                }} /></TouchableWithoutFeedback>
+                <View style={styles.modal}>
+                    <View style={styles.modalTitle}>
+                        <View style={styles.modalAction}>
+                            <Text style={styles.modalTitleText}>Filter</Text>
+                        </View>
+                        <View style={styles.modalAction}>
+                            <TouchableOpacity onPress={() => {
+                                meta.filterModal = false;
+                            }} style={[styles.buttonSmall, {
+                                backgroundColor: theme.light,
+                            }]}>
+                                <Text style={[styles.buttonText, { color: theme.dark }]}>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => {
+                                meta.filterModal = false;
+                            }} style={[styles.buttonSmall]}>
+                                <Text style={[styles.buttonText]}>
+                                    Done
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={styles.modalBody}>
+                        <BaseForm
+                            idKey={idKey}
+                            breadcrumbs={breadcrumbs}
+                            breadForms={breadForms}
+                            structure={structure}
+                            paging={paging}
+                            fkeys={fkeys}
+                            rawProps={props}
+                            props={props.form(mode).props}
+                            mode={'filter'}
+                            form={form}
+                            filter={filter}
+                        /></View>
+                </View>
+            </View>
+        </Modal>
         <View style={{ position: 'relative', flex: 1 }}>
-            {mode === '' ? (loading.list && list.length === 0 ? null : <Table
-                {...props.table.root}
-                style={{ flex: 1 }}
-                data={list}>
-                <TableHead {...props.table.head} />
-                <TableRow
-                    {...props.table.row}
-                    style={{ borderBottomWidth: 1, borderBottomColor: theme.light }}
-                    onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
-                        actions.edit(e);
-                    }} />
-            </Table>) : <BaseForm
+            {mode === '' ? (loading.list && list.length === 0 ? null : (
+                <Table
+                    {...props.table.root}
+                    style={{ flex: 1 }}
+                    data={list}
+                    onSort={(r, mode) => {
+                        if (!isColumnForeign(r, fkeys)) {
+                            if (mode) {
+                                structure.orderBy = [{
+                                    name: r,
+                                    value: mode,
+                                    valueType: 'StringValue'
+                                }]
+                            } else {
+                                structure.orderBy = []
+                            }
+                            reloadList({
+                                structure,
+                                paging,
+                                idKey,
+                                data: {
+                                    list,
+                                    paging,
+                                    filter,
+                                    form,
+                                },
+                                loading: loading,
+                                meta: {
+                                    fkeys
+                                }
+                            });
+                            return true;
+                        }
+                        return false;
+                    }}>
+                    <TableHead {...props.table.head} />
+                    <TableRow
+                        {...props.table.row}
+                        style={{ borderBottomWidth: 1, borderBottomColor: theme.light }}
+                        onPress={props.table.row.onPress !== undefined ? props.table.row.onPress : (e) => {
+                            actions.edit(e);
+                        }} />
+                </Table>)
+            ) : <BaseForm
                     idKey={idKey}
                     breadcrumbs={breadcrumbs}
                     breadForms={breadForms}
@@ -175,10 +307,22 @@ export default observer(({ idKey, breadcrumbs, breadForms, structure, fkeys, lis
     </View>
 })
 
+
 const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter }: any) => {
     let data = null;
+    let cfcol = null;
     switch (mode) {
-        case "filter": data = filter; break;
+        case "filter":
+            if (!filter.selected) {
+                if (!filter.form) {
+                    filter.form = {}
+                }
+                data = filter.form;
+            } else {
+                cfcol = filter.selected.column;
+                data = filter.selected.form;
+            }
+            break;
         case "create":
         case "edit":
             data = form;
@@ -186,10 +330,14 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
     }
     const breadForm = {};
 
-    const filterFields = (children) => {
+    const processFields = (children) => {
         return _.castArray(children).map(e => {
-            if (e.type === Field) {
+            if (e && e.type === Field) {
                 const fieldName = _.get(e, "props.path");
+                if (cfcol) {
+                    return cfcol === fieldName;
+                }
+
                 if (fieldName === idKey) {
                     return false;
                 }
@@ -219,7 +367,7 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
                         ...e,
                         props: {
                             ...e.props,
-                            children: filterFields(echild).filter(e => !!e)
+                            children: processFields(echild).filter(e => !!e)
                         }
                     }
                 }
@@ -227,7 +375,7 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
             return e;
         }).filter(e => !!e)
     }
-    const filteredFields = filterFields(props.children);
+    const processedFields = processFields(props.children);
     const breadFormKeys = Object.keys(breadForm);
     const formEl = <Form {...props} data={data} style={{
         paddingLeft: 7,
@@ -235,9 +383,9 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
         height: '100%',
         paddingBottom: 500,
         flexGrow: 1
-    }} children={filteredFields} />;
+    }} children={processedFields} />;
 
-    if (breadFormKeys.length > 0 && data[idKey]) {
+    if (mode !== 'filter' && breadFormKeys.length > 0 && data && data[idKey]) {
         return <View style={{ flexGrow: 1, flexDirection: 'row', borderTopWidth: 3, borderTopColor: '#F1F1F1' }}>
             <View style={{ flexGrow: 1 }}>
                 <View
@@ -360,6 +508,13 @@ const styles = StyleSheet.create({
         color: textColor,
         fontFamily: _.get(Theme, "fontFamily", undefined),
     },
+    buttonSmall: {
+        backgroundColor: Theme.colors.primary,
+        padding: 5,
+        paddingHorizontal: 10,
+        marginLeft: 5,
+        borderRadius: 3,
+    },
     actionSeparator: {
         borderRightWidth: 1,
         borderColor: theme.dark,
@@ -367,5 +522,40 @@ const styles = StyleSheet.create({
         margin: 5,
         marginVertical: 8,
         alignSelf: 'stretch'
-    }
+    },
+
+    modal: {
+        backgroundColor: 'white',
+        borderWidth: 2,
+        borderColor: theme.light,
+        flex: 1,
+        flexDirection: 'column',
+        width: 700,
+        alignSelf: 'center',
+        margin: 50,
+        borderRadius: 8
+    },
+
+    modalBody: {
+        flex: 1
+    },
+
+    modalTitle: {
+        paddingHorizontal: 5,
+        paddingVertical: 5,
+        marginVertical: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    modalTitleText: {
+        fontSize: 18,
+        marginLeft: 3,
+        color: theme.dark,
+        fontFamily: _.get(Theme, "fontFamily", undefined),
+    },
+    modalAction: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
 })
