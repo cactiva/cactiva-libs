@@ -75,33 +75,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
 
     children.map((e) => {
         if (e.type === Table) {
-            props.table.root = {
-                ...e.props,
-                onSort: (r, mode) => {
-                    if (!isColumnForeign(r, meta.fkeys)) {
-                        if (mode) {
-                            structure.orderBy = [{
-                                name: r,
-                                value: mode,
-                                valueType: 'StringValue'
-                            }]
-                        } else {
-                            structure.orderBy = []
-                        }
-                        reloadList({
-                            structure,
-                            paging,
-                            idKey,
-                            itemPerPage,
-                            data,
-                            loading: meta.loading,
-                            meta
-                        });
-                        return true;
-                    }
-                    return false;
-                }
-            };
+            props.table.root = { ...e.props };
             if (structure && structure.orderBy.length > 0) {
                 props.table.root.config = {
                     sortMode: _.get(structure, 'orderBy.0.value'),
@@ -170,7 +144,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             })
         } else if (e.type === Text) {
             props.title = { ...e.props };
-        } else if (e.type === View || e.type === ViewNative) {
+        } else if (e.props && (e.type === View || e.type === ViewNative)) {
             if (!e.props.type) {
                 props.actions = { ...e.props };
             } else {
@@ -188,7 +162,6 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 structure,
                 paging,
                 idKey,
-                itemPerPage,
                 data,
                 loading: meta.loading,
                 meta
@@ -219,10 +192,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 breadcrumbs={meta.breadcrumbs}
                 breadForms={breadForms}
                 auth={structure.auth}
-                list={bread.data.list}
-                form={bread.data.form}
+                data={bread.data}
                 props={toJS(bread.props)}
-                paging={bread.data.paging}
                 loading={bread.loading}
                 idKey={idKey}
                 mode={bread.mode}
@@ -232,7 +203,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     } else if (meta.breadcrumbs.path.length === 2) {
         return <View style={{ flexGrow: 1 }}>
             <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
-            <Template {...data}
+            <Template
+                data={data}
                 fkeys={meta.fkeys}
                 structure={structure}
                 breadcrumbs={meta.breadcrumbs}
@@ -250,7 +222,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         </View>;
     }
 
-    return <Template {...data}
+    return <Template
+        data={data}
         fkeys={meta.fkeys}
         structure={structure}
         breadcrumbs={meta.breadcrumbs}
@@ -288,8 +261,8 @@ export const isColumnForeign = (col: string, fkeys) => {
     return false;
 }
 
-export const reloadList = async (params: { structure, loading, paging, idKey, itemPerPage, data, meta }) => {
-    let { structure, loading, paging, idKey, itemPerPage, data, meta } = params;
+export const reloadList = async (params: { structure, loading, paging, idKey, data, meta }) => {
+    let { structure, loading, paging, idKey, data, meta } = params;
     if (structure) {
         loading.list = true;
         const currentPage = _.get(paging, 'current', 1)
@@ -298,13 +271,51 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
             value: 'desc',
             valueType: 'StringValue'
         }];
+
+        let where = [];
+        if (structure.where) {
+            where = _.cloneDeep(structure.where);
+        }
+
+        if (data && data.filter && data.filter.form) {
+            for (let i in data.filter.form) {
+                let value = data.filter.form[i];
+                let operator = "";
+                let vtype = "";
+                switch (typeof value) {
+                    case "number":
+                        vtype = "IntValue";
+                        operator = "_eq";
+                        break;
+                    case "string":
+                        vtype = "StringValue";
+                        operator = "_ilike";
+                        value = `%${value}%`;
+                        break;
+                }
+
+                if (vtype) {
+                    where.push({
+                        name: i,
+                        operator,
+                        value,
+                        valueType: vtype
+                    })
+                }
+            }
+        }
+
         const query = generateQueryString({
-            ...structure, orderBy, options: {
+            ...structure,
+            where,
+            orderBy,
+            options: {
                 ...structure.options,
-                limit: itemPerPage,
-                offset: (currentPage - 1) * itemPerPage
+                limit: paging.itemPerPage,
+                offset: (currentPage - 1) * paging.itemPerPage
             }
         });
+
         const res = await queryAll(query, { auth: data.auth });
 
         _.map(res, (e) => {
@@ -313,7 +324,7 @@ export const reloadList = async (params: { structure, loading, paging, idKey, it
                 data.paging.count = count;
                 if (!data.paging.current)
                     data.paging.current = 1;
-                data.paging.total = Math.ceil(count / itemPerPage);
+                data.paging.total = Math.ceil(count / paging.itemPerPage);
             } else {
                 data.list = e || [];
             }
@@ -401,7 +412,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     structure,
                     paging,
                     idKey,
-                    itemPerPage,
                     data,
                     loading: meta.loading,
                     meta
@@ -415,7 +425,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     structure,
                     paging,
                     idKey,
-                    itemPerPage,
                     data,
                     loading: meta.loading,
                     meta
@@ -442,7 +451,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                 structure,
                 paging,
                 idKey,
-                itemPerPage,
                 data,
                 loading: meta.loading,
                 meta
@@ -475,7 +483,7 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                     meta.loading.form = false;
                     data.form[idKey] = res[idKey];
                     console.log(toJS(data.form));
-                    
+
                     if (onChange) {
                         onChange({
                             action: 'insert',
@@ -502,7 +510,6 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                         structure,
                         paging,
                         idKey,
-                        itemPerPage,
                         data,
                         loading: meta.loading,
                         meta

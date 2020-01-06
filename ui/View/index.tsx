@@ -45,7 +45,7 @@ export default (props: CustomViewProps) => {
   };
 
   let style = null;
-  if (typeof props.style === "number") {
+  if (typeof props.style === "number" || Array.isArray(props.style)) {
     style = props.style;
   } else {
     style = {
