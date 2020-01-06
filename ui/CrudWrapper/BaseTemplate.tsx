@@ -17,7 +17,6 @@ import Text from "../Text";
 import View from "../View";
 import BreadcrumbTrigger from "./BreadcrumbTrigger";
 import SelectableForm from "./SelectableForm";
-import { toJS } from "mobx";
 
 const theme = {
     ...DefaultTheme,
@@ -37,16 +36,18 @@ export default observer(({
     breadForms,
     structure,
     fkeys,
-    list,
-    filter,
-    paging,
-    form,
+    data,
     props,
     actions,
     mode,
     loading,
     style
 }: any) => {
+    const {
+        list,
+        filter,
+        paging,
+        form } = data;
     const meta = useObservable({
         filterModal: false
     });
@@ -218,8 +219,40 @@ export default observer(({
                                     Cancel
                                 </Text>
                             </TouchableOpacity>
+
                             <TouchableOpacity onPress={() => {
                                 meta.filterModal = false;
+                                filter.form = {};
+                                reloadList({
+                                    structure,
+                                    paging,
+                                    idKey,
+                                    data,
+                                    loading,
+                                    meta: {
+                                        fkeys
+                                    }
+                                });
+                            }} style={[styles.buttonSmall, {
+                                backgroundColor: theme.secondary
+                            }]}>
+                                <Text style={[styles.buttonText]}>
+                                    Reset
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => {
+                                meta.filterModal = false;
+
+                                reloadList({
+                                    structure,
+                                    paging,
+                                    idKey,
+                                    data,
+                                    loading,
+                                    meta: {
+                                        fkeys
+                                    }
+                                });
                             }} style={[styles.buttonSmall]}>
                                 <Text style={[styles.buttonText]}>
                                     Done
@@ -266,12 +299,7 @@ export default observer(({
                                 structure,
                                 paging,
                                 idKey,
-                                data: {
-                                    list,
-                                    paging,
-                                    filter,
-                                    form,
-                                },
+                                data,
                                 loading: loading,
                                 meta: {
                                     fkeys
@@ -310,18 +338,12 @@ export default observer(({
 
 const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter }: any) => {
     let data = null;
-    let cfcol = null;
     switch (mode) {
         case "filter":
-            if (!filter.selected) {
-                if (!filter.form) {
-                    filter.form = {}
-                }
-                data = filter.form;
-            } else {
-                cfcol = filter.selected.column;
-                data = filter.selected.form;
+            if (!filter.form) {
+                filter.form = {}
             }
+            data = filter.form;
             break;
         case "create":
         case "edit":
@@ -334,8 +356,8 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
         return _.castArray(children).map(e => {
             if (e && e.type === Field) {
                 const fieldName = _.get(e, "props.path");
-                if (cfcol) {
-                    return cfcol === fieldName;
+                if (filter.selected) {
+                    return filter.selected === fieldName;
                 }
 
                 if (fieldName === idKey) {

@@ -378,8 +378,8 @@ function DateTime(
     valueAsDate && fullFormat
       ? format(valueAsDate, fullFormat, formatOptions)
       : typeof value === "string"
-      ? value
-      : "";
+        ? value
+        : "";
 
   //
   // Input Props
@@ -420,14 +420,14 @@ function DateTime(
     <>
       <input {...finalInputProps} />
       {isOpen && (
-        <Popover targetRef={inputRef}>
+        <Popover targetRef={inputRef} style={{ zIndex: 9999 }}>
           <CalendarContainer {...calendarProps} />
         </Popover>
       )}
     </>
   ) : (
-    <CalendarContainer {...calendarProps} />
-  );
+      <CalendarContainer {...calendarProps} />
+    );
 }
 
 export default DateTime;

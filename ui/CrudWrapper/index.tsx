@@ -192,10 +192,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 breadcrumbs={meta.breadcrumbs}
                 breadForms={breadForms}
                 auth={structure.auth}
-                list={bread.data.list}
-                form={bread.data.form}
+                data={bread.data}
                 props={toJS(bread.props)}
-                paging={bread.data.paging}
                 loading={bread.loading}
                 idKey={idKey}
                 mode={bread.mode}
@@ -205,7 +203,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     } else if (meta.breadcrumbs.path.length === 2) {
         return <View style={{ flexGrow: 1 }}>
             <Breadcrumb breadcrumbs={meta.breadcrumbs} itemPerPage={itemPerPage} />
-            <Template {...data}
+            <Template
+                data={data}
                 fkeys={meta.fkeys}
                 structure={structure}
                 breadcrumbs={meta.breadcrumbs}
@@ -223,7 +222,8 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
         </View>;
     }
 
-    return <Template {...data}
+    return <Template
+        data={data}
         fkeys={meta.fkeys}
         structure={structure}
         breadcrumbs={meta.breadcrumbs}
@@ -271,13 +271,51 @@ export const reloadList = async (params: { structure, loading, paging, idKey, da
             value: 'desc',
             valueType: 'StringValue'
         }];
+
+        let where = [];
+        if (structure.where) {
+            where = _.cloneDeep(structure.where);
+        }
+
+        if (data && data.filter && data.filter.form) {
+            for (let i in data.filter.form) {
+                let value = data.filter.form[i];
+                let operator = "";
+                let vtype = "";
+                switch (typeof value) {
+                    case "number":
+                        vtype = "IntValue";
+                        operator = "_eq";
+                        break;
+                    case "string":
+                        vtype = "StringValue";
+                        operator = "_ilike";
+                        value = `%${value}%`;
+                        break;
+                }
+
+                if (vtype) {
+                    where.push({
+                        name: i,
+                        operator,
+                        value,
+                        valueType: vtype
+                    })
+                }
+            }
+        }
+
         const query = generateQueryString({
-            ...structure, orderBy, options: {
+            ...structure,
+            where,
+            orderBy,
+            options: {
                 ...structure.options,
                 limit: paging.itemPerPage,
                 offset: (currentPage - 1) * paging.itemPerPage
             }
         });
+
         const res = await queryAll(query, { auth: data.auth });
 
         _.map(res, (e) => {
