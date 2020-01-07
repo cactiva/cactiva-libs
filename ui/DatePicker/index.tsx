@@ -204,10 +204,11 @@ const DatePickerModal = observer((props: any) => {
           });
           if (action !== DatePickerAndroid.dismissedAction) {
             onChangePicker(new Date(year, month, day));
-            onBlur && onBlur();
           }
+          onBlur && onBlur();
         } catch ({ code, message }) {
           console.warn("Cannot open date picker", message);
+          onBlur && onBlur();
         }
       };
       loadPicker();

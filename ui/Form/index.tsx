@@ -30,17 +30,17 @@ export default observer((props: FormProps) => {
     ...(_.get(props, "style", {}) as any)
   };
 
-  useEffect(() => {
-    if (meta.initError) {
-      let valid = true;
-      Object.keys(meta.validate).map(e => {
-        if (!meta.validate[e]) valid = false;
-      });
-      if (meta.initError && valid && onSubmit) {
-        onSubmit(data);
-      }
-    }
-  }, [meta.initError, meta.validate]);
+  // useEffect(() => {
+  //   if (meta.initError) {
+  //     let valid = true;
+  //     Object.keys(meta.validate).map(e => {
+  //       if (!meta.validate[e]) valid = false;
+  //     });
+  //     if (meta.initError && valid && onSubmit) {
+  //       onSubmit(data);
+  //     }
+  //   }
+  // }, [meta.initError, meta.validate]);
 
   useEffect(() => {
     validateCheck(children);
@@ -50,73 +50,98 @@ export default observer((props: FormProps) => {
     if (child) {
       if (Array.isArray(child)) {
         child.map(el => {
-          if (el.props && Array.isArray(el.props.children)) {
+          if (Array.isArray(el)) {
+            validateCheck(el);
+          } else if (el.props && Array.isArray(el.props.children)) {
             validateCheck(el.props.children);
           } else {
             if (el.props && el.props.isRequired && el.props.path)
-              meta.validate[el.props.path] = false;
+              meta.validate[el.props.path] = !!data[el.props.path];
           }
         });
       } else {
         if (child.props && child.props.isRequired && child.props.path)
-          meta.validate[child.props.path] = false;
+          meta.validate[child.props.path] = !!data[child.props.path];
       }
     }
   };
 
   return (
     <View
-      type={"ScrollView"}
+      type={"KeyboardAvoidingView"}
       style={{
         flexGrow: 1,
-        ...style
+        flexShrink: 1
       }}
-      keyboardShouldPersistTaps={"handled"}
-      keyboardDismissMode={"on-drag"}
     >
-      {children && Array.isArray(children) ? (
-        children.map((el: any) => {
-          return (
+      <View
+        type={"ScrollView"}
+        keyboardShouldPersistTaps={"handled"}
+        keyboardDismissMode={"on-drag"}
+        style={{
+          flexGrow: 1,
+          flexShrink: 1
+        }}
+      >
+        <View style={style}>
+          {children && Array.isArray(children) ? (
+            children.map((el: any) => {
+              return (
+                <RenderChild
+                  data={data}
+                  setValue={setValue}
+                  child={el}
+                  key={uuid()}
+                  meta={meta}
+                  onFieldFunction={onFieldFunction}
+                  onSubmit={onSubmit}
+                />
+              );
+            })
+          ) : (
             <RenderChild
               data={data}
               setValue={setValue}
-              child={el}
+              child={children}
               key={uuid()}
               meta={meta}
               onFieldFunction={onFieldFunction}
               onSubmit={onSubmit}
             />
-          );
-        })
-      ) : (
-        <RenderChild
-          data={data}
-          setValue={setValue}
-          child={children}
-          key={uuid()}
-          meta={meta}
-          onFieldFunction={onFieldFunction}
-          onSubmit={onSubmit}
-        />
-      )}
+          )}
+        </View>
+      </View>
     </View>
   );
 });
 
 const RenderChild = observer((props: any) => {
   const { data, child, setValue, meta, onSubmit, onFieldFunction } = props;
+  if (Array.isArray(child)) {
+    return child.map(el => (
+      <RenderChild
+        data={data}
+        setValue={setValue}
+        child={el}
+        key={uuid()}
+        meta={meta}
+        onSubmit={onSubmit}
+      />
+    ));
+  }
   if (!child || !child.type || !child.props) {
     return child;
   }
   const onPress = e => {
-    meta.initError = true;
+    // meta.initError = true;
     let valid = true;
     Object.keys(meta.validate).map(e => {
       if (!meta.validate[e]) valid = false;
     });
-    if (meta.initError && valid && onSubmit) {
+    if (valid && onSubmit) {
       onSubmit(data);
     }
+    console.log(toJS(meta.validate));
   };
 
   const defaultSetValue = (value: any, path: any) => {

@@ -115,7 +115,9 @@ export const getLocation = () => {
       return Location.getCurrentPositionAsync({}).then(location => {
         return {
           longitude: location.coords.longitude,
-          latitude: location.coords.latitude
+          latitude: location.coords.latitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0922
         };
       });
     } else {
