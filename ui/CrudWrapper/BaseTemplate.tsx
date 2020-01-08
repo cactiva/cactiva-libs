@@ -366,7 +366,7 @@ const BaseForm = observer(({ idKey, auth, breadcrumbs, breadForms, structure, pa
         return _.castArray(children).map(e => {
             if (e && e.type === Field) {
                 const fieldName = _.get(e, "props.path");
-                if (filter.selected) {
+                if (filter && filter.selected) {
                     if (filter.selected !== fieldName) {
                         return undefined;
                     }
