@@ -2,7 +2,6 @@ import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
 import { ScrollViewProps } from "react-native";
-import { useDimensions } from "react-native-hooks";
 import { ThemeProps } from "../../theme";
 import { uuid } from "../../utils";
 import Field from "../Field";
@@ -18,7 +17,6 @@ export interface FormProps extends ScrollViewProps {
 
 export default observer((props: FormProps) => {
   const { children, data, setValue, onSubmit } = props;
-  const dim = useDimensions().window;
   const meta = useObservable({
     initError: false,
     validate: {}

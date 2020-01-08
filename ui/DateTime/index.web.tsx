@@ -4,6 +4,7 @@ import Theme from "@src/theme.json";
 import _ from 'lodash';
 import React, { Suspense } from 'react';
 import "./web/datetime.css";
+import Text from "../Text";
 const theme = {
     ...DefaultTheme,
     ...Theme.colors
@@ -11,7 +12,7 @@ const theme = {
 
 let DateTime = React.lazy(() => import("./web"));
 export default (props: any) => {
-    return <Suspense fallback={<div>Loading... </div>}>
+    return <Suspense fallback={<Text>Loading... </Text>}>
         <DateTime {...props} value={dateParse(props.value)}
             className="datetime"
             dateFormat="dd MMM yyyy -"

@@ -78,7 +78,6 @@ const BreadcrumbTrigger = observer(({ style, title, children, field, itemPerPage
                 structure: bread.structure,
                 paging: bread.data.paging,
                 idKey: bread.idKey,
-                itemPerPage,
                 data: bread.data,
                 loading: bread.loading,
                 meta: bread

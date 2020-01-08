@@ -4,25 +4,26 @@ import { observable, toJS } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
 import React from 'react';
 import useAsyncEffect from 'use-async-effect';
-import { Select } from '..';
+import { Select } from '../..';
+import { columnDefs } from "../index";
 
-const tables = observable({});
-
-export default observer(({ fk, field, value, onSelect, onFocus, valuePath, labelPath }: any) => {
+export default observer(({ columns, fk, label, field, auth, value, onSelect, onFocus, valuePath, labelPath }: any) => {
     const meta = useObservable({
-        data: []
+        data: [],
+        modal: false,
     });
+
     useAsyncEffect(async () => {
-        if (!tables[fk.foreign_table_name]) {
+        if (!columnDefs[fk.foreign_table_name]) {
             const res = await api({ url: `/api/db/columns?table=${fk.foreign_table_name}` }) as any[];
             if (res) {
-                tables[fk.foreign_table_name] = {
+                columnDefs[fk.foreign_table_name] = {
                     columns: res,
                     data: []
                 };
             }
         }
-        const table = tables[fk.foreign_table_name];
+        const table = columnDefs[fk.foreign_table_name];
         if (table) {
             meta.data = table.data;
             if (table.data.length === 0) {
@@ -36,27 +37,34 @@ export default observer(({ fk, field, value, onSelect, onFocus, valuePath, label
                         .map(e => e.column_name)
                         .join('\n')}
             }
-        }`, { auth: true });
-
+        }`, { auth });
                 if (Array.isArray(res)) {
                     meta.data = res.map(e => {
-                        const keys = Object.keys(e);
+                        let key = null;
+
+                        if (columns.length > 0) {
+                            key = columns[0];
+                        } else {
+                            const keys = Object.keys(e);
+                            key = keys[1];
+                        }
+
                         return {
                             ...e,
                             value: e.id,
-                            label: e[keys[1]]
+                            label: e[key]
                         }
                     })
-
                     table.data = toJS(meta.data);
                 }
             }
         }
     }, []);
+
     return <Select
         items={meta.data}
         value={value}
-        onSelect={onSelect}
+        onSelect={(value) => onSelect(value !== "object" ? value : value.value || value.label)}
         onFocus={onFocus}
         valuePath={valuePath}
         labelPath={labelPath} />;

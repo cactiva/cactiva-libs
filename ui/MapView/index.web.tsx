@@ -16,7 +16,7 @@ const MapViewInner = observer((props: MapViewProps) => {
     center = { lat: location.latitude, lng: location.longitude };
   }
   return (
-    <Suspense fallback={<div>Loading... </div>}>
+    <Suspense fallback={<Text>Loading... </Text>}>
       <GoogleMap
         defaultZoom={zoom || 15}
         defaultCenter={center}

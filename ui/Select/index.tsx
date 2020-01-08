@@ -1,20 +1,19 @@
 import Theme from "@src/theme.json";
+import _ from "lodash";
 import { observer, useObservable } from "mobx-react-lite";
 import React, { useEffect } from "react";
-import { TouchableOpacity, Platform } from "react-native";
+import { Platform } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { fuzzyMatch, textStyle, uuid } from "../../utils";
+import Button from "../Button";
+import FlatList from "../FlatList";
 import Header from "../Header";
 import Icon from "../Icon";
 import Input from "../Input";
-import View from "../View";
-import Text from "../Text";
 import Modal from "../Modal";
-import FlatList from "../FlatList";
-import _ from "lodash";
+import Text from "../Text";
+import View from "../View";
 import { processData } from "./index.web";
-import Button from "../Button";
-import { toJS } from "mobx";
 
 export interface SelectItemProps {
   label: any;

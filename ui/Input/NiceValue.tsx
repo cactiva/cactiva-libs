@@ -10,13 +10,15 @@ const NiceValue = observer(({ value, style }: any) => {
         if (value === null) {
             valueEl = <EmptyCell />
         } else {
-            const keys = Object.keys(value);
+            const keys = Object.keys(value).filter((e) => {
+                if (e.indexOf('id') === 0) return false;
+                return true;
+            });
             valueEl = keys.length === 1
                 ? <Text>{value[keys[0]]}</Text>
                 : <table cellPadding={0} cellSpacing={0} style={{ borderCollapse: 'collapse', ...style }}>
                     <tbody>
                         {keys.map((key: string) => {
-                            if (key.indexOf('id') === 0) return null;
                             return <tr key={key} style={{ verticalAlign: 'top' }}>
                                 <td style={{
                                     border: '1px solid #ddd',

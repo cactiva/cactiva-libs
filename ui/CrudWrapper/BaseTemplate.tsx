@@ -16,7 +16,7 @@ import TableRow from "../Table/TableRow";
 import Text from "../Text";
 import View from "../View";
 import BreadcrumbTrigger from "./BreadcrumbTrigger";
-import SelectableForm from "./SelectableForm";
+import SelectableForm from "./Selectable/SelectableForm";
 
 const theme = {
     ...DefaultTheme,
@@ -41,6 +41,7 @@ export default observer(({
     actions,
     mode,
     loading,
+    filter: filterOptions,
     style
 }: any) => {
     const {
@@ -80,7 +81,7 @@ export default observer(({
             </View>
             {loading.form ? <Spinner style={{ margin: 10 }} /> :
                 <View {...props.actions} style={styles.actions} >
-                    {mode === '' && paging.count > 0 && <View style={{
+                    {mode === '' && <View style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                         paddingHorizontal: 10,
@@ -126,27 +127,30 @@ export default observer(({
                             </TouchableOpacity>
                         </>
                         }
-                        <View style={styles.actionSeparator} />
-                        <TouchableOpacity style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginLeft: 5,
-                        }} onPress={() => {
-                            meta.filterModal = true;
-                            filter.selected = null;
-                        }}>
-                            <Icon
-                                source={"Ionicons"}
-                                name={"ios-search"}
-                                color={theme.dark}
-                                size={18}
-                                style={{
-                                    margin: 5,
-                                    marginRight: 0,
-                                }}
-                            ></Icon>
-                            <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>Filter</Text>
-                        </TouchableOpacity>
+                        {filterOptions !== false &&
+                            <><View style={styles.actionSeparator} />
+                                <TouchableOpacity style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginLeft: 5,
+                                }} onPress={() => {
+                                    meta.filterModal = true;
+                                    filter.selected = null;
+                                }}>
+                                    <Icon
+                                        source={"Ionicons"}
+                                        name={"ios-search"}
+                                        color={theme.dark}
+                                        size={18}
+                                        style={{
+                                            margin: 5,
+                                            marginRight: 0,
+                                        }}
+                                    ></Icon>
+                                    <Text style={{ color: theme.dark, marginHorizontal: 5, fontSize: 12 }}>Filter</Text>
+                                </TouchableOpacity>
+                            </>
+                        }
                     </View>
                     }
                     {
@@ -186,7 +190,7 @@ export default observer(({
         </View>
 
         <Modal
-            animationType="fade"
+            animationType="none"
             transparent={true}
             visible={meta.filterModal}
             onRequestClose={() => {
@@ -272,6 +276,7 @@ export default observer(({
                             rawProps={props}
                             props={props.form(mode).props}
                             mode={'filter'}
+                            auth={data.auth}
                             form={form}
                             filter={filter}
                         /></View>
@@ -285,28 +290,31 @@ export default observer(({
                     style={{ flex: 1 }}
                     data={list}
                     onSort={(r, mode) => {
-                        if (!isColumnForeign(r, fkeys)) {
-                            if (mode) {
-                                structure.orderBy = [{
-                                    name: r,
-                                    value: mode,
-                                    valueType: 'StringValue'
-                                }]
-                            } else {
-                                structure.orderBy = []
-                            }
-                            reloadList({
-                                structure,
-                                paging,
-                                idKey,
-                                data,
-                                loading: loading,
-                                meta: {
-                                    fkeys
-                                }
-                            });
-                            return true;
-                        }
+                        // if (!isColumnForeign(r, fkeys)) {
+                        //     if (mode) {
+                        //         structure.orderBy = [{
+                        //             name: r,
+                        //             value: mode,
+                        //             valueType: 'StringValue'
+                        //         }]
+                        //     } else {
+                        //         structure.orderBy = []
+                        //     }
+                        //     reloadList({
+                        //         structure,
+                        //         paging,
+                        //         idKey,
+                        //         data,
+                        //         loading: loading,
+                        //         meta: {
+                        //             fkeys
+                        //         }
+                        //     });
+                        //     return true;
+                        // }
+
+                        meta.filterModal = true;
+                        filter.selected = r;
                         return false;
                     }}>
                     <TableHead {...props.table.head} />
@@ -326,24 +334,26 @@ export default observer(({
                     fkeys={fkeys}
                     rawProps={props}
                     props={props.form(mode).props}
+                    auth={data.auth}
                     mode={mode}
                     form={form}
                     filter={filter}
                 />}
-
         </View>
     </View>
 })
 
 
-const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter }: any) => {
+const BaseForm = observer(({ idKey, auth, breadcrumbs, breadForms, structure, paging, fkeys, props, rawProps, mode, form, filter }: any) => {
     let data = null;
     switch (mode) {
         case "filter":
-            if (!filter.form) {
-                filter.form = {}
+            if (!!filter) {
+                if (!filter.form) {
+                    filter.form = {}
+                }
+                data = filter.form;
             }
-            data = filter.form;
             break;
         case "create":
         case "edit":
@@ -357,19 +367,28 @@ const BaseForm = observer(({ idKey, breadcrumbs, breadForms, structure, paging, 
             if (e && e.type === Field) {
                 const fieldName = _.get(e, "props.path");
                 if (filter.selected) {
-                    return filter.selected === fieldName;
+                    if (filter.selected !== fieldName) {
+                        return undefined;
+                    }
                 }
 
                 if (fieldName === idKey) {
                     return false;
                 }
                 else if (fkeys[fieldName] && fkeys[fieldName].table_schema) {
+                    const label = e.props.label.indexOf('Id ') === 0 ? e.props.label.substr(3) : e.props.label;
                     return {
                         ...e,
                         props: {
                             ...e.props,
-                            label: e.props.label.indexOf('Id ') === 0 ? e.props.label.substr(3) : e.props.label,
-                            children: <SelectableForm field={fieldName} fk={fkeys[fieldName]} />
+                            label,
+                            children: <SelectableForm
+                                label={label}
+                                relations={e.props.relations}
+                                field={fieldName}
+                                mode={mode}
+                                auth={auth}
+                                fk={fkeys[fieldName]} />
                         }
                     };
                 } else {

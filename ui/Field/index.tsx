@@ -17,7 +17,7 @@ import { RadioProps } from "../Radio";
 import RadioGroup, { RadioGroupProps } from "../RadioGroup";
 import Select, { SelectProps } from "../Select";
 import DateTime from "../DateTime";
-import SelectableForm from "../CrudWrapper/SelectableForm";
+import SelectableForm from "../CrudWrapper/Selectable/SelectableForm";
 
 interface StylesFieldProps {
   root?: any;
@@ -58,6 +58,15 @@ export interface FieldProps {
   isValid?: (status: boolean) => void;
   isFocus?: Boolean;
   validate?: (value: any) => void;
+  relations?: {
+    columns: (RelProps | string)[]
+  };
+}
+
+interface RelProps {
+  field: string,
+  label: string,
+  columns: (RelProps | string)[]
 }
 
 export default observer((props: FieldProps) => {
@@ -154,7 +163,6 @@ export default observer((props: FieldProps) => {
       };
       break;
     case Select:
-    case SelectableForm:
       childProps = {
         style: childStyle,
         value: value,
@@ -163,6 +171,16 @@ export default observer((props: FieldProps) => {
           onChangeValue(
             typeof value !== "object" ? value : value.value || value.label
           ),
+        onFocus: (e: any) => (meta.focus = e)
+      };
+      break;
+    case SelectableForm:
+      childProps = {
+        style: childStyle,
+        value: value,
+        placeholder: placeholder,
+        onSelect: value =>
+          onChangeValue(value),
         onFocus: (e: any) => (meta.focus = e)
       };
       break;

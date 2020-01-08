@@ -5,7 +5,7 @@ import { generateQueryString } from '@src/libs/utils/genQueryString';
 import { generateUpdateString } from '@src/libs/utils/genUpdateString';
 import { queryAll } from '@src/libs/utils/gql';
 import _ from 'lodash';
-import { toJS } from 'mobx';
+import { toJS, observable } from 'mobx';
 import { observer, useObservable } from 'mobx-react-lite';
 import React from 'react';
 import { View as ViewNative } from 'react-native';
@@ -19,23 +19,10 @@ import View from '../View';
 import BaseTemplate from './BaseTemplate';
 import Breadcrumb from './Breadcrumb';
 import BreadcrumbTrigger from './BreadcrumbTrigger';
+export const columnDefs = observable({});
 
-
-export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange }: any) => {
+export default observer(({ data, children, template, idKey = "id", itemPerPage = 25, style, onChange, filter }: any) => {
     const structure = _.get(data, 'structure', null);
-
-    if (structure) {
-        let hasId = false;
-        structure.fields.forEach(e => {
-            if (e.name === idKey) {
-                hasId = true;
-            }
-        })
-        if (!hasId) {
-            structure.fields.push({ name: idKey });
-        }
-    }
-
     const paging = _.get(data, 'paging', {
         total: 1,
         current: 1,
@@ -198,6 +185,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
                 idKey={idKey}
                 mode={bread.mode}
                 actions={bread.actions}
+                filter={filter}
             />
         </View>;
     } else if (meta.breadcrumbs.path.length === 2) {
@@ -206,6 +194,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
             <Template
                 data={data}
                 fkeys={meta.fkeys}
+                filter={filter}
                 structure={structure}
                 breadcrumbs={meta.breadcrumbs}
                 breadForms={breadForms}
@@ -225,6 +214,7 @@ export default observer(({ data, children, template, idKey = "id", itemPerPage =
     return <Template
         data={data}
         fkeys={meta.fkeys}
+        filter={filter}
         structure={structure}
         breadcrumbs={meta.breadcrumbs}
         breadForms={breadForms}
@@ -265,12 +255,45 @@ export const reloadList = async (params: { structure, loading, paging, idKey, da
     let { structure, loading, paging, idKey, data, meta } = params;
     if (structure) {
         loading.list = true;
+
+        if (meta.fkeys === null) {
+            const res = await api({ url: `/api/db/structure?table=${structure.name}` }) as any[];
+            if (res) {
+                const tempfkeys = {};
+                res.forEach(e => {
+                    if (e.table_name === structure.name) {
+                        tempfkeys[e.column_name] = e;
+                    } else {
+                        if (!tempfkeys[e.table_name]) {
+                            tempfkeys[e.table_name] = {};
+                        }
+                        tempfkeys[e.table_name][e.column_name] = e;
+                    }
+                })
+                meta.fkeys = tempfkeys;
+            }
+        }
+
+        if (meta.fkeys[idKey]) {
+            if (structure) {
+                let hasId = false;
+                structure.fields.forEach(e => {
+                    if (e.name === idKey) {
+                        hasId = true;
+                    }
+                })
+                if (!hasId) {
+                    structure.fields.push({ name: idKey });
+                }
+            }
+        }
+
         const currentPage = _.get(paging, 'current', 1)
-        const orderBy = structure.orderBy.length > 0 ? structure.orderBy : [{
+        const orderBy = structure.orderBy.length > 0 ? structure.orderBy : meta.fkeys[idKey] ? [{
             name: idKey,
             value: 'desc',
             valueType: 'StringValue'
-        }];
+        }] : [];
 
         let where = [];
         if (structure.where) {
@@ -283,6 +306,14 @@ export const reloadList = async (params: { structure, loading, paging, idKey, da
                 let operator = "";
                 let vtype = "";
                 switch (typeof value) {
+                    case "object":
+                        if (Array.isArray(toJS(value))) {
+                            vtype = "ArrayValue";
+                            operator = "_in";
+                        } else {
+                            vtype = "ObjectValue";
+                            operator = "_eq";
+                        }
                     case "number":
                         vtype = "IntValue";
                         operator = "_eq";
@@ -329,25 +360,19 @@ export const reloadList = async (params: { structure, loading, paging, idKey, da
                 data.list = e || [];
             }
         });
-        loading.list = false;
 
-        if (meta.fkeys === null) {
-            const res = await api({ url: `/api/db/structure?table=${structure.name}` }) as any[];
+
+
+        if (!columnDefs[structure.name]) {
+            const res = await api({ url: `/api/db/columns?table=${structure.name}` }) as any[];
             if (res) {
-                const tempfkeys = {};
-                res.forEach(e => {
-                    if (e.table_name === structure.name) {
-                        tempfkeys[e.column_name] = e;
-                    } else {
-                        if (!tempfkeys[e.table_name]) {
-                            tempfkeys[e.table_name] = {};
-                        }
-                        tempfkeys[e.table_name][e.column_name] = e;
-                    }
-                })
-                meta.fkeys = tempfkeys;
+                columnDefs[structure.name] = {
+                    columns: res,
+                    data: []
+                };
             }
         }
+        loading.list = false;
     }
 };
 
@@ -375,7 +400,7 @@ export const declareActions = (props: { data, breadcrumbs, meta, paging, structu
                 const bread = _.clone(breadcrumbs.path[breadcrumbs.path.length - 1]);
                 let title = '';
                 Object.keys(baseInput).map((key) => {
-                    if (key.indexOf('id') !== 0 && typeof baseInput[key] !== 'object') {
+                    if (key.indexOf(idKey) !== 0 && typeof baseInput[key] !== 'object') {
                         title = `${key}: ${baseInput[key]}`
                     }
                 })

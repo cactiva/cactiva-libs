@@ -44,7 +44,6 @@ export default ({ breadcrumbs, itemPerPage }: any) => {
                                 structure: bread.structure,
                                 paging: bread.data.paging,
                                 idKey: bread.idKey,
-                                itemPerPage,
                                 data: bread.data,
                                 loading: bread.loading,
                                 meta: bread

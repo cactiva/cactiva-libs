@@ -55,6 +55,8 @@ export const genWhere = (where: ITableWhere[], level = 0): string => {
             return;
         } else if (w.valueType === 'StringValue') {
             value = JSON.stringify(w.value);
+        } else if (w.valueType === 'ArrayValue') {
+            value = JSON.stringify(w.value);
         }
         result.push(`${w.name}:{${w.operator}: ${value}}`)
     })

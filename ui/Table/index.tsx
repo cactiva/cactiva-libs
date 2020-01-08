@@ -202,21 +202,15 @@ export default observer((props: ITableProps) => {
           keyExtractor={(item, index) => {
             if (!!item && !item[keyPath]) {
               try {
-                const firstItem = item[Object.keys(item)[0]];
-                if (firstItem) {
-                  if (typeof firstItem !== "string") {
-                    return JSON.stringify(firstItem);
-                  }
-                  return firstItem;
-                }
-              } catch (e) {
+                return JSON.stringify(item);
+                } catch (e) {
                 return index;
               }
             } else {
               return uuid();
             }
 
-            if (typeof item[keyPath] !== 'string') {
+            if (typeof item[keyPath] !== 'string' && item[keyPath]) {
               return item[keyPath].toString();
             }
             return item[keyPath];
@@ -430,6 +424,7 @@ const RenderItem = observer((props: any) => {
   const rowProps = toJS(_.get(meta, "rowProps", {}));
   const rowStyle = {
     flexDirection: "row",
+    minHeight: 25,
     ..._.get(rowProps, "style", {})
   };
   let onPress;
