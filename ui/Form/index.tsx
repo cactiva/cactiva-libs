@@ -22,25 +22,11 @@ export default observer((props: FormProps) => {
   const { children, data, setValue, onSubmit, onFieldFunction } = props;
   const dim = useDimensions().window;
   const meta = useObservable({
-    initError: false,
     validate: {}
   });
   const style = {
-    // zIndex: Platform.OS === "web" ? 9 : 1,
     ...(_.get(props, "style", {}) as any)
   };
-
-  // useEffect(() => {
-  //   if (meta.initError) {
-  //     let valid = true;
-  //     Object.keys(meta.validate).map(e => {
-  //       if (!meta.validate[e]) valid = false;
-  //     });
-  //     if (meta.initError && valid && onSubmit) {
-  //       onSubmit(data);
-  //     }
-  //   }
-  // }, [meta.initError, meta.validate]);
 
   useEffect(() => {
     validateCheck(children);
@@ -133,7 +119,6 @@ const RenderChild = observer((props: any) => {
     return child;
   }
   const onPress = e => {
-    // meta.initError = true;
     let valid = true;
     Object.keys(meta.validate).map(e => {
       if (!meta.validate[e]) valid = false;
@@ -141,7 +126,6 @@ const RenderChild = observer((props: any) => {
     if (valid && onSubmit) {
       onSubmit(data);
     }
-    console.log(toJS(meta.validate));
   };
 
   const defaultSetValue = (value: any, path: any) => {
@@ -153,7 +137,6 @@ const RenderChild = observer((props: any) => {
         console.error("Failed to set value: Form data props is undefined");
       }
     }
-    if (meta.initError) meta.initError = false;
   };
 
   if (typeof child.props.children === "function") {
