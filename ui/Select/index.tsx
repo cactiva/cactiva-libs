@@ -192,7 +192,7 @@ const RenderItem = observer((props: any) => {
           if (meta.filter.length > 0)
             return fuzzyMatch(
               meta.filter.toLowerCase(),
-              item.text.toLowerCase()
+              item.label.toLowerCase()
             );
           return true;
         })}

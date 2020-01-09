@@ -22,7 +22,8 @@ export default observer((props: FormProps) => {
   const { children, data, setValue, onSubmit, onFieldFunction } = props;
   const dim = useDimensions().window;
   const meta = useObservable({
-    validate: {}
+    validate: {},
+    initError: 0
   });
   const style = {
     ...(_.get(props, "style", {}) as any)
@@ -120,10 +121,15 @@ const RenderChild = observer((props: any) => {
   }
   const onPress = e => {
     let valid = true;
+    let i = 0;
     Object.keys(meta.validate).map(e => {
-      if (!meta.validate[e]) valid = false;
+      if (!meta.validate[e]) {
+        valid = false;
+        ++i;
+      }
     });
-    if (valid && onSubmit) {
+    meta.initError = i;
+    if (i === 0 && valid && onSubmit) {
       onSubmit(data);
     }
   };

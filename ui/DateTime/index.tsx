@@ -10,15 +10,16 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  ViewStyle
+  ViewStyle,
+  TimePickerAndroid
 } from "react-native";
 import { DefaultTheme, ThemeProps } from "../../theme";
 import { dateToString } from "../../utils";
 import Icon from "../Icon";
 import Input from "../Input";
+import { dateFormat, dateParse } from "@src/libs/utils/date";
 
 export interface DateTimeProps {
-  mode?: "date" | "time";
   onChange?: (value: any) => void;
   maxDate?: Date;
   minDate?: Date;
@@ -28,10 +29,11 @@ export interface DateTimeProps {
   onBlur?: () => void;
   showPicker?: boolean;
   style?: ViewStyle;
+  dateOnly?: Boolean;
 }
 
 export default observer((props: DateTimeProps) => {
-  const { value, style, mode, onChange, showPicker } = props;
+  const { value, style, onChange, showPicker, dateOnly } = props;
   const meta = useObservable({
     isShown: false,
     value: new Date(),
@@ -84,7 +86,9 @@ export default observer((props: DateTimeProps) => {
     meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
     meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);
     meta.dateString.yyyy = `${meta.value.getFullYear()}`;
-    onChange && onChange(dateToString(date));
+    meta.dateString.HH = ("0" + meta.value.getHours()).slice(-2);
+    meta.dateString.MM = ("0" + meta.value.getMinutes()).slice(-2);
+    onChange && onChange(date);
   };
   useEffect(() => {
     if (value) {
@@ -94,8 +98,10 @@ export default observer((props: DateTimeProps) => {
       meta.dateString.dd = ("0" + meta.value.getDate()).slice(-2);
       meta.dateString.mm = ("0" + (meta.value.getMonth() + 1)).slice(-2);
       meta.dateString.yyyy = `${meta.value.getFullYear()}`;
+      meta.dateString.HH = ("0" + meta.value.getHours()).slice(-2);
+      meta.dateString.MM = ("0" + meta.value.getMinutes()).slice(-2);
     }
-  }, []);
+  }, [value]);
   useEffect(() => {
     if (showPicker !== undefined) meta.isShown = showPicker;
   }, [showPicker]);
@@ -169,37 +175,41 @@ export default observer((props: DateTimeProps) => {
             onChangeText={v => onChangeDateString(v, "yyyy")}
             returnKeyType="next"
           />
-          <Input
-            placeholder="HH"
-            style={{
-              width: 30,
-              marginLeft: 5
-            }}
-            type="number"
-            value={meta.dateString.dd}
-            onChangeText={v => onChangeDateString(v, "HH")}
-            returnKeyType="next"
-          />
-          <Text
-            style={{
-              paddingRight: 10,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            :
-          </Text>
-          <Input
-            placeholder="MM"
-            style={{
-              width: 30
-            }}
-            type="number"
-            value={meta.dateString.mm}
-            onChangeText={v => onChangeDateString(v, "MM")}
-            returnKeyType="next"
-          />
+          {dateOnly !== true && (
+            <>
+              <Input
+                placeholder="HH"
+                style={{
+                  width: 30,
+                  marginLeft: 5
+                }}
+                type="number"
+                value={meta.dateString.HH}
+                onChangeText={v => onChangeDateString(v, "HH")}
+                returnKeyType="next"
+              />
+              <Text
+                style={{
+                  paddingRight: 10,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
+              >
+                :
+              </Text>
+              <Input
+                placeholder="MM"
+                style={{
+                  width: 30
+                }}
+                type="number"
+                value={meta.dateString.MM}
+                onChangeText={v => onChangeDateString(v, "MM")}
+                returnKeyType="next"
+              />
+            </>
+          )}
         </View>
         <TouchableOpacity
           style={{
@@ -232,10 +242,26 @@ export default observer((props: DateTimeProps) => {
 });
 
 const DatePickerModal = observer((props: any) => {
-  const { meta, mode, onChangePicker, minDate, maxDate, onBlur } = props;
+  const { meta, dateOnly, onChangePicker, minDate, maxDate, onBlur } = props;
   if (Platform.OS === "android") {
     if (meta.isShown) {
-      const loadPicker = async () => {
+      const timePicker = async (year, month, day) => {
+        try {
+          const { action, hour, minute }: any = await TimePickerAndroid.open({
+            hour: meta.value.getHours(),
+            minute: meta.value.getMinutes(),
+            is24Hour: true // Will display '2 PM'
+          });
+          if (action !== TimePickerAndroid.dismissedAction) {
+            onChangePicker(new Date(year, month, day, hour, minute));
+          }
+          onBlur && onBlur();
+        } catch ({ code, message }) {
+          console.warn("Cannot open time picker", message);
+          onBlur && onBlur();
+        }
+      };
+      const datePicker = async () => {
         try {
           const {
             action,
@@ -244,12 +270,14 @@ const DatePickerModal = observer((props: any) => {
             day
           }: any = await DatePickerAndroid.open({
             date: meta.value,
-            mode: mode || "calendar",
+            mode: "calendar",
             minDate: minDate && minDate,
             maxDate: maxDate && maxDate
           });
           if (action !== DatePickerAndroid.dismissedAction) {
-            onChangePicker(new Date(year, month, day));
+            if (dateOnly) {
+              onChangePicker(new Date(year, month, day, 0, 0));
+            } else timePicker(year, month, day);
           }
           onBlur && onBlur();
         } catch ({ code, message }) {
@@ -257,7 +285,7 @@ const DatePickerModal = observer((props: any) => {
           onBlur && onBlur();
         }
       };
-      loadPicker();
+      datePicker();
       meta.isShown = false;
       return null;
     }
@@ -283,6 +311,13 @@ const DatePickerModal = observer((props: any) => {
             zIndex: 9
           }}
         >
+          <DatePickerIOS
+            date={meta.value}
+            onDateChange={onChangePicker}
+            mode={"date"}
+            minimumDate={minDate && minDate}
+            maximumDate={maxDate && maxDate}
+          />
           <DatePickerIOS
             date={meta.value}
             onDateChange={onChangePicker}
